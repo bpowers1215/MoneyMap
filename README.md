@@ -59,3 +59,6 @@ MongoDB Drive for Rust - http://blog.mongodb.org/post/56426792420/introducing-th
 ###Front-End
 React - https://facebook.github.io/react/
 Redux - http://redux.js.org/docs/basics/UsageWithReact.html
+
+##License
+The Apache License Version 2.0
