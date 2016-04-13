@@ -45,20 +45,20 @@ _More effectively manage your money._
 
 ##Stack
 ###Development Environment
-Vagrant - https://www.vagrantup.com/
++ Vagrant - https://www.vagrantup.com/
 
 ###Deployment/Server Management
-Docker - https://www.docker.com/
++ Docker - https://www.docker.com/
 
 ###Web API / Storage
-Rust-Lang - https://www.rust-lang.org/
-Nickel - http://nickel.rs/
-MongoDB - https://www.mongodb.com/
-MongoDB Drive for Rust - http://blog.mongodb.org/post/56426792420/introducing-the-mongodb-driver-for-the-rust
++ Rust-Lang - https://www.rust-lang.org/
++ Nickel - http://nickel.rs/
++ MongoDB - https://www.mongodb.com/
++ MongoDB Drive for Rust - http://blog.mongodb.org/post/56426792420/introducing-the-mongodb-driver-for-the-rust
 
 ###Front-End
-React - https://facebook.github.io/react/
-Redux - http://redux.js.org/docs/basics/UsageWithReact.html
++ React - https://facebook.github.io/react/
++ Redux - http://redux.js.org/docs/basics/UsageWithReact.html
 
 ##License
 The Apache License Version 2.0
