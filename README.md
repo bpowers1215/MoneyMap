@@ -63,13 +63,13 @@ _More effectively manage your money._
 #Build images for Docker containers
 ./bin/build
 
-#Start application
+#Start Application
 ./bin/start
 
-#Restart application
+#Restart Application (API)
 ./bin/restart
 
-#Stop application (and remove containers)
+#Stop Application (and remove containers)
 ./bin/stop
 ```
 + Access API on port 8080
