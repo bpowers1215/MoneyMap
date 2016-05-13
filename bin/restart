@@ -1,0 +1,5 @@
+#!/bin/bash
+#Restart API container for money-map application
+
+echo "Restarting API container..."
+docker restart money-map-api

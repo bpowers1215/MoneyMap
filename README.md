@@ -44,9 +44,6 @@ _More effectively manage your money._
    Add additional useful reports to money map management.
 
 ##Stack
-###Development Environment
-+ Vagrant - https://www.vagrantup.com/
-
 ###Deployment/Server Management
 + Docker - https://www.docker.com/
 
@@ -59,6 +56,24 @@ _More effectively manage your money._
 ###Front-End
 + React - https://facebook.github.io/react/
 + Redux - http://redux.js.org/docs/basics/UsageWithReact.html
+
+##Getting Started
+###Starting application
+```
+#Build images for Docker containers
+./bin/build
+
+#Start application
+./bin/start
+
+#Restart application
+./bin/restart
+
+#Stop application (and remove containers)
+./bin/stop
+```
++ Access API on port 8080
++ Access DB on port 28017
 
 ##License
 The Apache License Version 2.0

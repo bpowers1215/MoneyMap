@@ -1,0 +1,8 @@
+#!/bin/bash
+#Stop docker containers for money-map application
+
+echo "Stopping docker containers..."
+docker stop money-map-api money-map-db
+
+echo "Removing docker containers..."
+docker rm money-map-api money-map-db
