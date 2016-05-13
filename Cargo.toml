@@ -1,0 +1,16 @@
+[package]
+name = "money-map"
+version = "0.0.1"
+authors = ["Brandon Powers <bpowers1215@gmail.com>"]
+
+[dependencies]
+nickel = "*"
+mongodb = "*"
+bson = "*"
+rustc-serialize = "*"
+jwt = "*"
+hyper = "=0.6"
+rust-crypto = "*"
+chrono = "*"
+log = "0.3"
+log4rs = "0.3.3"
