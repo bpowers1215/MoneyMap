@@ -5,4 +5,4 @@ echo "Starting MongoDB container..."
 docker run -d -p 28017:27017 -v $(pwd)/mongo/data/db:/data/db --name money-map-db money-map-db
 
 echo "Starting API container..."
-docker run -d -p 8080:6767 -v $(pwd):/source --name money-map-api --link money-map-db:money-map-db1 money-map-api
+docker run -p 8080:6767 -v $(pwd):/source --name money-map-api --link money-map-db:money-map-db1 money-map-api
