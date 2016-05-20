@@ -72,7 +72,7 @@ _More effectively manage your money._
 #Stop Application (and remove containers)
 ./bin/stop
 ```
-+ Access API on port 8080
++ Access API: http://localhost:8080
 + Access DB on port 28017
 
 ##License
