@@ -38,7 +38,7 @@ use money_map::common::database::DB as DB;
 
 fn main() {
     let db = DB::new();
-    
+
     log4rs::init_file("log.toml", Default::default()).unwrap();
     info!("starting up");
 
@@ -54,7 +54,7 @@ fn main() {
     router.get("/getDB", middleware! { |request, mut response|
         info!("Get DB");
         response.set(MediaType::Json);
-        format!("{{\"status\":\"success\", \"msg\":\"Database Name: {}\"}}", db.db_name())
+        format!("{{\"status\":\"success\", \"msg\":\"Database Name: {}\"}}", db.get_coll_name())
     });
 
     //server.utilize(authenticator);

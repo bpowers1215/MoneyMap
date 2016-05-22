@@ -11,6 +11,7 @@ extern crate mongodb;
 use self::mongodb::{Client, ThreadedClient};
 use self::mongodb::db::ThreadedDatabase;
 use self::mongodb::error::Result as MongoResult;
+use super::mm_result::{MMResult, MMError, MMErrorKind};
 
 //Define Constants
 const MONGO_DB_PORT: u16 = 27017;
@@ -26,7 +27,7 @@ pub struct DB{
     db_name: &'static str,
     db_user: &'static str,
     db_pass: &'static str,
-    db: Option<mongodb::db::Database>
+    database: Option<mongodb::db::Database>
 }
 
 impl DB{
@@ -42,9 +43,12 @@ impl DB{
             db_name: MONGO_DB_NAME,
             db_user: MONGO_DB_USER,
             db_pass: MONGO_DB_PW,
-            db: None
+            database: None
         };
-        db.get_db_connection();
+        db.database = match db.establish_db_connection(){
+            Ok(database) => Some(database),
+            Err(_) => None
+        };
         db
     }
 
@@ -85,18 +89,51 @@ impl DB{
     /// # Arguments
     ///
     /// * `self` - self DB struct
-    fn get_db_connection(&mut self){
+    ///
+    /// # Returns
+    /// `MMResult<self::mongodb::db::Database>` - Mongo DB
+    fn establish_db_connection(&mut self) -> MMResult<mongodb::db::Database>{
         // Connect to the mongo db instance
-        let client = Client::connect(&self.db_host, self.db_port)
-            .ok().expect("Error establishing database connection.");
+        let client = match Client::connect(&self.db_host, self.db_port){
+            Ok(db_client) => db_client,
+            Err(_) => return Err(MMError::new("Error establishing database connection.".to_string(), MMErrorKind::Database))
+        };
 
         // Get database
         let db = client.db(&self.db_name);
 
         // Authenticate
-        db.auth(&self.db_user, &self.db_pass)
-            .ok().expect("Failed to authorize user 'todo'.");
+        match db.auth(&self.db_user, &self.db_pass){
+            Ok(_) => Ok(db),
+            Err(_) => Err(MMError::new("Failed to authorize database user.".to_string(), MMErrorKind::Database))
+        }
+    }
 
-        self.db = Some(db);
+    ///Get the database.  If a connection to the database does not exist, establish one
+    fn get_database(self) -> Option<self::mongodb::db::Database>{
+        /*match self.database{
+            Some(database) => database,
+            None => {
+                let database = self.establish_db_connection();
+                self.database = database;
+                match database{
+                    Some(db) => db,
+                    None =>
+                }
+            }
+        }*/
+        self.database
+    }
+
+    pub fn get_coll_name(&self) -> String{
+        match &self.database{
+            &Some(ref database) => {
+                let coll = database.collection("users");
+                coll.name()
+            },
+            &None => {
+                "no db connection".to_string()
+            }
+        }
     }
 }
