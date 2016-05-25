@@ -37,24 +37,30 @@ use rustc_serialize::base64::{FromBase64};
 use money_map::common::database::DB as DB;
 
 fn main() {
-    let db = DB::new();
-
+    //Setup logging
     log4rs::init_file("log.toml", Default::default()).unwrap();
-    info!("starting up");
+    info!("Initializing API");
+
+    //Get database
+    let db = DB::new();
 
     let mut server = Nickel::new();
     let mut router = Nickel::router();
 
     router.get("/", middleware! { |request, mut response|
-        info!("Welcome");
+        info!("API Endpoint: /");
         response.set(MediaType::Json);
         format!("{{\"status\":\"success\", \"msg\":\"Welcome to Money Map!\"}}")
     });
 
     router.get("/getDB", middleware! { |request, mut response|
-        info!("Get DB");
+        info!("API Endpoint: /getDB");
         response.set(MediaType::Json);
-        format!("{{\"status\":\"success\", \"msg\":\"Database Name: {}\"}}", db.get_coll_name())
+        match db.get_coll_name(){
+            Ok(coll_name) => format!("{{\"status\":\"success\", \"msg\":\"Database Name: {}\"}}", coll_name),
+            Err(e) => format!("{{\"status\":\"error\", \"msg\":\"{}\"}}", e)
+        }
+
     });
 
     //server.utilize(authenticator);
