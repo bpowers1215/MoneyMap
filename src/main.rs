@@ -56,9 +56,11 @@ fn main() {
     router.get("/getDB", middleware! { |request, mut response|
         info!("API Endpoint: /getDB");
         response.set(MediaType::Json);
-        match db.get_coll_name(){
-            Ok(coll_name) => format!("{{\"status\":\"success\", \"msg\":\"Database Name: {}\"}}", coll_name),
-            Err(e) => format!("{{\"status\":\"error\", \"msg\":\"{}\"}}", e)
+        match db.get_count(){
+            Ok(count) => format!("{{\"status\":\"success\", \"msg\":\"Database Name: {}\"}}", count),
+            Err(e) => {
+                format!("{{\"status\":\"error\", \"msg\":\"{}\"}}", e)
+            }
         }
 
     });
