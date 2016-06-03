@@ -128,7 +128,6 @@ impl DB{
     ///Authenticate DB user
     ///
     /// # Arguments
-    ///
     /// * `self` - self DB struct
     ///
     /// # Returns
@@ -151,8 +150,22 @@ impl DB{
 
     }
 
-    pub fn get_count(&self) -> MMResult<i64>{
+    /// Get a database client
+    ///
+    /// # Arguments
+    /// * `self` - self DB struct
+    ///
+    /// # Returns
+    /// `Option<mongodb::db::Database>` Cloned database client
+    fn get_database(&self) -> Option<mongodb::db::Database>{
         match self.database{
+            Some(ref database) => Some(database.clone()),
+            None => None
+        }
+    }
+
+    pub fn get_count(&self) -> MMResult<i64>{
+        match self.get_database(){
             Some(ref database) => {
                 let coll = database.collection("users");
                 match coll.count(None, None){
