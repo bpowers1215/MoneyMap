@@ -35,11 +35,16 @@ use rustc_serialize::base64;
 use rustc_serialize::base64::{FromBase64};
 
 use money_map::common::database::DB as DB;
+use money_map::common::config::Config as Config;
 
 fn main() {
     //Setup logging
-    log4rs::init_file("log.toml", Default::default()).unwrap();
+    log4rs::init_file("config/log.toml", Default::default()).unwrap();
     info!("Initializing API");
+
+    //Load Configuration
+    let configuration = Config::new();
+    debug!("Database Config: {:?}", configuration.database);
 
     //Get database
     let db = DB::new();
