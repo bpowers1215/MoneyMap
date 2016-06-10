@@ -44,10 +44,15 @@ fn main() {
 
     //Load Configuration
     let configuration = Config::new();
-    debug!("Database Config: {:?}", configuration.database);
 
     //Get database
-    let db = DB::new();
+    let db = match DB::new(configuration){
+        Ok(db) => db,
+        Err(e) => {
+            //Cannot create database connection
+            panic!("{}", e);
+        }
+    };
 
     let mut server = Nickel::new();
     let mut router = Nickel::router();

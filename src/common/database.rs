@@ -12,24 +12,19 @@ use self::mongodb::{Client, ThreadedClient};
 use self::mongodb::db::ThreadedDatabase;
 use self::mongodb::error::Result as MongoResult;
 use super::mm_result::{MMResult, MMError, MMErrorKind};
+use super::config::Config;
 
-//Connection Settings
-const MONGO_DB_PORT: u16 = 27017;
-static MONGO_DB_HOST: &'static str = "money-map-db";
-static MONGO_DB_NAME: &'static str = "moneyMap";
-static MONGO_DB_USER: &'static str = "money_map_client";
-static MONGO_DB_PW: &'static str = "ds(9sj@^DFe>D;3kc";
 //Constants
 //Errors
 static ERROR_DB_MISS: &'static str = "Error: No database connection";
 
 /// Represent a Database Connection
 pub struct DB{
-    db_host: &'static str,
+    db_host: String,
     db_port: u16,
-    db_name: &'static str,
-    db_user: &'static str,
-    db_pass: &'static str,
+    db_name: String,
+    db_user: String,
+    db_pass: String,
     database: Option<mongodb::db::Database>
 }
 
@@ -38,14 +33,49 @@ impl DB{
     /// Create A DB struct and establish a connection to the database
     ///
     /// # Returns
-    /// `DB` - DB struct
-    pub fn new() -> DB{
+    /// `MMResult<DB>` - DB struct
+    pub fn new(config: Config) -> MMResult<DB>{
+        let db_host = match config.database.host{
+            Some(v) => v,
+            None => {
+                warn!("Database configuration missing: host");
+                return Err(MMError::new("Database configuration missing: host".to_string(), MMErrorKind::Database));
+            }
+        };
+        let db_port = match config.database.port{
+            Some(v) => v,
+            None => {
+                warn!("Database configuration missing: port");
+                return Err(MMError::new("Database configuration missing: port".to_string(), MMErrorKind::Database));
+            }
+        };
+        let db_name = match config.database.name{
+            Some(v) => v,
+            None => {
+                warn!("Database configuration missing: name");
+                return Err(MMError::new("Database configuration missing: name".to_string(), MMErrorKind::Database));
+            }
+        };
+        let db_user = match config.database.username{
+            Some(v) => v,
+            None => {
+                warn!("Database configuration missing: username");
+                return Err(MMError::new("Database configuration missing: username".to_string(), MMErrorKind::Database));
+            }
+        };
+        let db_pass = match config.database.password{
+            Some(v) => v,
+            None => {
+                warn!("Database configuration missing: password");
+                return Err(MMError::new("Database configuration missing: password".to_string(), MMErrorKind::Database));
+            }
+        };
         let mut db = DB {
-            db_host: MONGO_DB_HOST,
-            db_port: MONGO_DB_PORT,
-            db_name: MONGO_DB_NAME,
-            db_user: MONGO_DB_USER,
-            db_pass: MONGO_DB_PW,
+            db_host: db_host,
+            db_port: db_port as u16,
+            db_name: db_name,
+            db_user: db_user,
+            db_pass: db_pass,
             database: None
         };
         db.database = match db.initialize_db_connection(){
@@ -58,15 +88,15 @@ impl DB{
             },
             _ => {}
         }
-        db
+        Ok(db)
     }
 
     /// Get db_host
     ///
     /// # Returns
-    /// `&'static str` - Database Host
-    pub fn db_host(&self) -> &'static str{
-        &self.db_host
+    /// `String` - Database Host
+    pub fn db_host(self) -> String{
+        self.db_host
     }
 
     /// Get db_port
@@ -80,17 +110,17 @@ impl DB{
     /// Get db_name
     ///
     /// # Returns
-    /// `&'static str` - Database name
-    pub fn db_name(&self) -> &'static str{
-        &self.db_name
+    /// `String` - Database name
+    pub fn db_name(self) -> String{
+        self.db_name
     }
 
     /// Get db_user
     ///
     /// # Returns
-    /// `&'static str` - Database user name
-    pub fn db_user(&self) -> &'static str{
-        &self.db_user
+    /// `String` - Database user name
+    pub fn db_user(self) -> String{
+        self.db_user
     }
 
     ///Establish a database connection and store the connection in the DB struct
@@ -136,7 +166,7 @@ impl DB{
         match &self.database{
             &Some(ref db) => {
                 // Authenticate
-                match db.auth(self.db_user, self.db_pass){
+                match db.auth(&self.db_user, &self.db_pass){
                     Ok(_) => Ok(()),
                     Err(_) => {
                         Err(MMError::new("Failed to authorize database user.".to_string(), MMErrorKind::Database))
