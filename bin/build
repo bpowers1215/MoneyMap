@@ -4,8 +4,8 @@
 
 #build money-map-api image
 echo "Building API Docker image..."
-docker build -t money-map-api .
+docker build -t money-map/api .
 
 #build money map DB image
 echo "Building MongoDB Docker image..."
-docker build -t money-map-db ./mongo
+docker build -t money-map/db ./mongo
