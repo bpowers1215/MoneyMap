@@ -1,4 +1,5 @@
 pub mod common;
+pub mod resources;
 
 //Logging
 #[macro_use]
