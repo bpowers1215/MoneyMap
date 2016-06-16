@@ -1,8 +1,21 @@
 #!/bin/bash
 #Run docker containers for money-map application
 
+echo "Create Data Container..."
+DATA_CONTAINER="money-map-data"
+RUNNING=$(docker inspect $DATA_CONTAINER 2> /dev/null)
+
+#Check if data container already exists
+if [ $? -eq 1 ]; then
+    docker create --name $DATA_CONTAINER -v $(pwd)/mongo/data/db mongo:latest /bin/true
+    echo "Data container created."
+else
+    echo "Data container already exists. Move along..."
+fi
+#
+
 echo "Starting MongoDB container..."
-docker run -d -p 28017:27017 -v $(pwd)/mongo/data/db:/data/db --name money-map-db money-map/db
+docker run -d -p 28017:27017 --volumes-from $DATA_CONTAINER --name money-map-db money-map/db
 
 echo "Starting API container..."
 docker run -p 8080:6767 -v $(pwd):/source --name money-map-api --link money-map-db:money-map-db1 money-map/api
