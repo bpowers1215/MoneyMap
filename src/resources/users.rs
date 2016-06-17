@@ -1,23 +1,32 @@
-// src/resources/users.rs
+// src/models/users.rs
 
 /// Users
 
-//Import Crates
-extern crate mongodb;
-
 //Import Modules
-use self::mongodb::{Client, ThreadedClient};
-use self::mongodb::db::ThreadedDatabase;
-use self::mongodb::error::Result as MongoResult;
-use ::common::config::Config;
+use ::mongodb::{Client, ThreadedClient};
+use ::mongodb::db::ThreadedDatabase;
+use ::mongodb::error::Result as MongoResult;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::database::DB;
+
+// Nickel
+//use nickel::{JsonBody, Request, Response};
+use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, MediaType};
 
 /// Represent a User - visible data
 pub struct PubUser{
     first_name: String,
     last_name: String,
     email: String
+}
+
+#[derive(RustcDecodable, RustcEncodable)]
+struct NewUser {
+    first_name: Option<String>,
+    last_name: Option<String>,
+    email: Option<String>,
+    password: Option<String>,
+    confirm_password: Option<String>
 }
 
 impl PubUser{

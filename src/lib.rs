@@ -1,7 +1,11 @@
 pub mod common;
-pub mod resources;
+pub mod models;
+pub mod controllers;
 
-//Logging
+extern crate mongodb;
+extern crate rustc_serialize;
+
 #[macro_use]
 extern crate log;
 extern crate log4rs;
+extern crate nickel;

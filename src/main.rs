@@ -37,7 +37,7 @@ use rustc_serialize::base64::{FromBase64};
 use money_map::common::database::DB as DB;
 use money_map::common::config::Config as Config;
 
-use money_map::resources as Resources;
+use money_map::controllers as Controllers;
 
 fn main() {
     //Setup logging
@@ -66,7 +66,7 @@ fn main() {
     });
 
     router.get("/getDB", middleware! { |request, mut response|
-        info!("API Endpoint: POST /users");
+        info!("API Endpoint: GET /getDB");
         response.set(MediaType::Json);
         match db.get_count(){
             Ok(count) => format!("{{\"status\":\"success\", \"msg\":\"Database Name: {}\"}}", count),
@@ -77,11 +77,18 @@ fn main() {
     });
 
     router.get("/users", middleware! { |request, mut response|
-        info!("API Endpoint: GET /getDB");
+        info!("API Endpoint: GET /users");
         response.set(MediaType::Json);
-        let user = Resources::users::PubUser::new("John".to_string(), "Smith".to_string(), "test@test.com".to_string());
-        format!("{{\"status\":\"success\", \"Name\":\"{}\"}}", user.get_name())
+        //let user = Controllers::users::PubUser::new("John".to_string(), "Smith".to_string(), "test@test.com".to_string());
+        format!("{{\"status\":\"success\"}}", )
     });
+
+    router.post("/users", middleware! { |request, mut response|
+        info!("API Endpoint: POST /users");
+        response.set(MediaType::Json);
+        Controllers::users::create_user(request)
+    });
+    //router.post("/users", Resources::users::page);
 
     //server.utilize(authenticator);
     server.utilize(router);
