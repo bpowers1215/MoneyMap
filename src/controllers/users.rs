@@ -18,6 +18,7 @@ use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, 
 /// Create New User
 ///
 /// # Arguments
+/// req - nickel::Request
 ///
 /// # Returns
 /// `String` - JSON String response
