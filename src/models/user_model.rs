@@ -1,4 +1,4 @@
-// src/resources/user.rs
+// src/resources/user_model.rs
 
 /// User Model
 
@@ -17,45 +17,32 @@ use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, 
 
 /// User
 #[derive(RustcDecodable, RustcEncodable)]
-pub struct User {
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub email: Option<String>
-}
-
-/// Edit User
-#[derive(RustcDecodable, RustcEncodable)]
-pub struct EditUser {
+pub struct UserModel {
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub email: Option<String>,
-    pub password: Option<String>,
-    pub confirm_password: Option<String>
+    pub password: Option<String>
 }
 
-// User Methods
-impl User{
+// User Model Methods
+impl UserModel{
 
-}
-
-// EditUser Methods
-impl EditUser{
-    
-    /// Save User
+    /// Create User
     ///
     /// # Returns
-    /// 'MMResult<User>' - the saved user
-    pub fn save(self) -> MMResult<User>{
+    /// 'MMResult<UserModel>' - the saved user
+    pub fn create(self) -> MMResult<UserModel>{
         //validate user
-        
+
         //save user to database
-        
+
         //remove sensitive data and return new User struct
-        Ok(User{
+        Ok(UserModel{
             first_name: self.first_name,
             last_name: self.last_name,
-            email: self.email
+            email: self.email,
+            password: None
         })
-    }
+    }//end save
 
 }

@@ -37,7 +37,7 @@ use rustc_serialize::base64::{FromBase64};
 use money_map::common::database::DB as DB;
 use money_map::common::config::Config as Config;
 
-use money_map::controllers as Controllers;
+use money_map::controllers::users_controller::UsersController;
 
 fn main() {
     //Setup logging
@@ -86,7 +86,7 @@ fn main() {
     router.post("/users", middleware! { |request, mut response|
         info!("API Endpoint: POST /users");
         response.set(MediaType::Json);
-        Controllers::users::create_user(request)
+        UsersController::create(request)
     });
     //router.post("/users", Resources::users::page);
 
