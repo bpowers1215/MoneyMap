@@ -37,6 +37,10 @@ use rustc_serialize::base64::{FromBase64};
 use money_map::common::database::DB as DB;
 use money_map::common::config::Config as Config;
 
+use money_map::dao::dao_controller::{DAOController};
+use money_map::dao::user_dao::UserDAO;
+use money_map::dao::money_map_dao::MoneyMapDAO;
+
 use money_map::controllers::users_controller::UsersController;
 
 fn main() {
@@ -56,6 +60,27 @@ fn main() {
         }
     };
 
+    let daoController = DAOController::new(db);
+
+    //START DAO TEST
+    let userDAO = match daoController.get_user_dao(){
+        Ok(dao) => dao,
+        Err(e) => {
+            //Cannot create database connection
+            panic!("{}", e);
+        }
+    };
+    userDAO.test();
+    let mmDAO = match daoController.get_money_map_dao(){
+        Ok(dao) => dao,
+        Err(e) => {
+            //Cannot create database connection
+            panic!("{}", e);
+        }
+    };
+    mmDAO.test();
+    //END DAO TEST
+
     let mut server = Nickel::new();
     let mut router = Nickel::router();
 
@@ -68,12 +93,12 @@ fn main() {
     router.get("/getDB", middleware! { |request, mut response|
         info!("API Endpoint: GET /getDB");
         response.set(MediaType::Json);
-        match db.get_count(){
+        /*match db.get_count(){
             Ok(count) => format!("{{\"status\":\"success\", \"msg\":\"Database Name: {}\"}}", count),
             Err(e) => {
                 format!("{{\"status\":\"error\", \"msg\":\"{}\"}}", e)
             }
-        }
+        }*/
     });
 
     router.get("/users", middleware! { |request, mut response|

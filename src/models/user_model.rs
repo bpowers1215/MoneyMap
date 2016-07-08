@@ -1,4 +1,4 @@
-// src/resources/user_model.rs
+// src/models/user_model.rs
 
 /// User Model
 
@@ -29,19 +29,20 @@ impl UserModel{
 
     /// Create User
     ///
+    /// # Arguments
+    /// self
+    ///
     /// # Returns
     /// 'MMResult<UserModel>' - the saved user
     pub fn create(self) -> MMResult<UserModel>{
         //validate user
-
-        //save user to database
 
         //remove sensitive data and return new User struct
         Ok(UserModel{
             first_name: self.first_name,
             last_name: self.last_name,
             email: self.email,
-            password: None
+            password: self.password
         })
     }//end save
 

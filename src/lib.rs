@@ -1,4 +1,5 @@
 pub mod common;
+pub mod dao;
 pub mod models;
 pub mod controllers;
 

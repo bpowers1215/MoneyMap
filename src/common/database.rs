@@ -1,7 +1,7 @@
 // src/common/database.rs
 
 /// Database Structure
-/// Maintain database connections and transactions
+/// Maintain database connection
 
 //Import Crates
 extern crate bson;
@@ -187,7 +187,7 @@ impl DB{
     ///
     /// # Returns
     /// `Option<mongodb::db::Database>` Cloned database client
-    fn get_database(&self) -> Option<mongodb::db::Database>{
+    pub fn get_database(&self) -> Option<mongodb::db::Database>{
         match self.database{
             Some(ref database) => Some(database.clone()),
             None => None
