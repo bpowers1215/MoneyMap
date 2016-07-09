@@ -51,7 +51,7 @@ fn main() {
     //Load Configuration
     let configuration = Config::new();
 
-    //Get database
+    //Initialize Database Connection
     let db = match DB::new(configuration){
         Ok(db) => db,
         Err(e) => {
@@ -60,26 +60,11 @@ fn main() {
         }
     };
 
-    let daoController = DAOController::new(db);
+    //Initialize DAO Controller
+    let dao_controller = DAOController::new(db);
 
-    //START DAO TEST
-    let userDAO = match daoController.get_user_dao(){
-        Ok(dao) => dao,
-        Err(e) => {
-            //Cannot create database connection
-            panic!("{}", e);
-        }
-    };
-    userDAO.test();
-    let mmDAO = match daoController.get_money_map_dao(){
-        Ok(dao) => dao,
-        Err(e) => {
-            //Cannot create database connection
-            panic!("{}", e);
-        }
-    };
-    mmDAO.test();
-    //END DAO TEST
+    //Initialize Controllers
+    let users_controller = UsersController::new(dao_controller);
 
     let mut server = Nickel::new();
     let mut router = Nickel::router();
@@ -105,13 +90,13 @@ fn main() {
         info!("API Endpoint: GET /users");
         response.set(MediaType::Json);
         //let user = Controllers::users::PubUser::new("John".to_string(), "Smith".to_string(), "test@test.com".to_string());
-        format!("{{\"status\":\"success\"}}", )
+        format!("{{\"status\":\"success\"}}")
     });
 
     router.post("/users", middleware! { |request, mut response|
         info!("API Endpoint: POST /users");
         response.set(MediaType::Json);
-        UsersController::create(request)
+        users_controller.create(request)
     });
     //router.post("/users", Resources::users::page);
 

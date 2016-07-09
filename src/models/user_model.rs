@@ -18,32 +18,70 @@ use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, 
 /// User
 #[derive(RustcDecodable, RustcEncodable)]
 pub struct UserModel {
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub email: Option<String>,
-    pub password: Option<String>
+    first_name: Option<String>,
+    last_name: Option<String>,
+    email: Option<String>,
+    password: Option<String>
 }
 
 // User Model Methods
 impl UserModel{
 
-    /// Create User
+    /// Validate User
     ///
     /// # Arguments
     /// self
     ///
     /// # Returns
     /// 'MMResult<UserModel>' - the saved user
-    pub fn create(self) -> MMResult<UserModel>{
+    pub fn validate(&self) -> MMResult<()>{
         //validate user
 
-        //remove sensitive data and return new User struct
-        Ok(UserModel{
-            first_name: self.first_name,
-            last_name: self.last_name,
-            email: self.email,
-            password: self.password
-        })
+        Ok(())
     }//end save
+
+    /// Get First Name
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<String>' - first name
+    pub fn get_first_name(&self) -> Option<String>{
+        self.first_name.clone()
+    }
+
+    /// Get Last Name
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<String>' - last name
+    pub fn get_last_name(&self) -> Option<String>{
+        self.last_name.clone()
+    }
+
+    /// Get Email
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<String>' - email
+    pub fn get_email(&self) -> Option<String>{
+        self.email.clone()
+    }
+
+    /// Get Password
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<String>' - password
+    pub fn get_password(&self) -> Option<String>{
+        self.password.clone()
+    }
 
 }

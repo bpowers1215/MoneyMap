@@ -5,7 +5,8 @@
 //Import Modules
 use ::rustc_serialize::json;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
-use ::common::database::DB;
+use ::dao::dao_controller::DAOController;
+use ::dao::user_dao::UserDAO;
 
 //Models
 use ::models::user_model::{UserModel};
@@ -14,9 +15,18 @@ use ::models::user_model::{UserModel};
 //use nickel::{JsonBody, Request, Response};
 use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, MediaType};
 
-pub struct UsersController;
+pub struct UsersController{
+    dao_controller: DAOController
+}
 
 impl UsersController{
+
+    pub fn new(dao_controller: DAOController) -> UsersController{
+        UsersController{
+            dao_controller: dao_controller
+        }
+    }
+
     /// Create New User
     ///
     /// # Arguments
@@ -24,21 +34,24 @@ impl UsersController{
     ///
     /// # Returns
     /// `String` - JSON String response
-    pub fn create(req: &mut Request) -> String{
-        info!("Create New User");
-        let new_user = req.json_as::<UserModel>().unwrap();
+    pub fn create(&self, req: &mut Request) -> String{
+        match self.dao_controller.get_user_dao(){
+            Ok(dao) => {
+                info!("Create New User");
 
-        //Save User
-        let user = new_user.create();
+                let user = req.json_as::<UserModel>().unwrap();
 
-        //Return Saved User
-        match user{
-            Ok(u) => {
-                let response = json::encode(&u).unwrap();
+                //Validate User
+                user.validate();
+
+                //Save User
+                dao.create(&user);
+
+                let response = json::encode(&user).unwrap();
                 format!(r#"{{"status":"success", "data":{{"user":{}}}}}"#, response)
             },
-            Err(_) => {
-                format!(r#"{{"status":"error", "msg":"Could not create user""#)
+            Err(e) =>{
+                format!(r#"{{"status":"error", "msg":"{}""#, e)
             }
         }
     }//end create_user
