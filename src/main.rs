@@ -37,10 +37,12 @@ use rustc_serialize::base64::{FromBase64};
 use money_map::common::database::DB as DB;
 use money_map::common::config::Config as Config;
 
-use money_map::dao::dao_controller::{DAOController};
+//DAO
+use money_map::dao::dao_manager::{DAOManager};
 use money_map::dao::user_dao::UserDAO;
 use money_map::dao::money_map_dao::MoneyMapDAO;
 
+//Controllers
 use money_map::controllers::users_controller::UsersController;
 
 fn main() {
@@ -60,11 +62,11 @@ fn main() {
         }
     };
 
-    //Initialize DAO Controller
-    let dao_controller = DAOController::new(db);
+    //Initialize DAO Manager
+    let dao_manager = DAOManager::new(db);
 
     //Initialize Controllers
-    let users_controller = UsersController::new(dao_controller);
+    let users_controller = UsersController::new(dao_manager);
 
     let mut server = Nickel::new();
     let mut router = Nickel::router();

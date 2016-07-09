@@ -1,6 +1,6 @@
-// src/dao/dao_controller.rs
+// src/dao/dao_manager.rs
 
-/// DAO Controller
+/// DAO Manager
 /// Hand out DAOs with database connections
 
 //Import Modules
@@ -17,22 +17,22 @@ pub enum DAO{
     UserDAO(UserDAO)
 }*/
 
-/// DAO Controller
-pub struct DAOController {
+/// DAO Manager
+pub struct DAOManager {
     pub db: DB
 }
 
-// DAO Controller Methods
-impl DAOController{
-    /// Create DAOController
+// DAO Manager Methods
+impl DAOManager{
+    /// Create DAOManager
     ///
     /// # Arguments
     /// db - common::database::DB
     ///
     /// # Returns
-    /// `DAOController`
-    pub fn new(db: DB) -> DAOController{
-        DAOController{
+    /// `DAOManager`
+    pub fn new(db: DB) -> DAOManager{
+        DAOManager{
             db: db
         }
     }

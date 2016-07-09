@@ -5,7 +5,7 @@
 //Import Modules
 use ::rustc_serialize::json;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
-use ::dao::dao_controller::DAOController;
+use ::dao::dao_manager::DAOManager;
 use ::dao::user_dao::UserDAO;
 
 //Models
@@ -16,14 +16,14 @@ use ::models::user_model::{UserModel};
 use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, MediaType};
 
 pub struct UsersController{
-    dao_controller: DAOController
+    dao_manager: DAOManager
 }
 
 impl UsersController{
 
-    pub fn new(dao_controller: DAOController) -> UsersController{
+    pub fn new(dao_manager: DAOManager) -> UsersController{
         UsersController{
-            dao_controller: dao_controller
+            dao_manager: dao_manager
         }
     }
 
@@ -35,7 +35,7 @@ impl UsersController{
     /// # Returns
     /// `String` - JSON String response
     pub fn create(&self, req: &mut Request) -> String{
-        match self.dao_controller.get_user_dao(){
+        match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Create New User");
 
