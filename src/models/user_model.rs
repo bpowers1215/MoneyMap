@@ -7,7 +7,7 @@ use ::rustc_serialize::json;
 use ::bson::oid::ObjectId;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::validation::validators;
-use ::common::validation::validation_result::FieldValidation;
+use ::common::validation::validation_result::{ValidationResult, FieldValidation};
 
 // Nickel
 //use nickel::{JsonBody, Request, Response};
