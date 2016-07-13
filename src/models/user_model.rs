@@ -4,8 +4,10 @@
 
 //Import Modules
 use ::rustc_serialize::json;
-use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::bson::oid::ObjectId;
+use ::common::mm_result::{MMResult, MMError, MMErrorKind};
+use ::common::validation::validators;
+use ::common::validation::validation_result::FieldValidation;
 
 // Nickel
 //use nickel::{JsonBody, Request, Response};
@@ -33,7 +35,7 @@ impl UserModel{
     /// 'MMResult<UserModel>' - the saved user
     pub fn validate(&self) -> MMResult<()>{
         //validate user
-
+        let validation_result = ValidationResult::new();
         Ok(())
     }//end save
 
