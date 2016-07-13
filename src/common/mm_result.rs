@@ -14,7 +14,8 @@ pub struct MMError{
 #[derive(Debug)]
 pub enum MMErrorKind{
     Database,
-    Api,
+    DAO,
+    Validation,
     Other
 }
 

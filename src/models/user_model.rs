@@ -4,12 +4,8 @@
 
 //Import Modules
 use ::rustc_serialize::json;
-use ::mongodb::{Client, ThreadedClient};
-use ::mongodb::db::ThreadedDatabase;
-use ::mongodb::error::Result as MongoResult;
-use ::common::config::Config;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
-use ::common::database::DB;
+use ::bson::oid::ObjectId;
 
 // Nickel
 //use nickel::{JsonBody, Request, Response};
@@ -18,6 +14,7 @@ use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, 
 /// User
 #[derive(RustcDecodable, RustcEncodable)]
 pub struct UserModel {
+    id: Option<ObjectId>,
     first_name: Option<String>,
     last_name: Option<String>,
     email: Option<String>,
@@ -39,6 +36,25 @@ impl UserModel{
 
         Ok(())
     }//end save
+
+    /// Get ID
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<ObjectId>' - id
+    pub fn get_id(&self) -> Option<ObjectId>{
+        self.id.clone()
+    }
+
+    /// Set ID
+    ///
+    /// # Arguments
+    /// &self
+    pub fn set_id(&mut self, id: ObjectId) {
+        self.id = Some(id);
+    }
 
     /// Get First Name
     ///

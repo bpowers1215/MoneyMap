@@ -4,6 +4,7 @@
 
 //Import Modules
 use ::rustc_serialize::json;
+use ::bson::Bson;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::dao::dao_manager::DAOManager;
 use ::dao::user_dao::UserDAO;
@@ -33,26 +34,37 @@ impl UsersController{
     /// req - nickel::Request
     ///
     /// # Returns
-    /// `String` - JSON String response
-    pub fn create(&self, req: &mut Request) -> String{
+    /// `MMResult<String>` - JSON String response
+    pub fn create(&self, req: &mut Request) -> MMResult<String>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Create New User");
 
-                let user = req.json_as::<UserModel>().unwrap();
+                let mut user = req.json_as::<UserModel>().unwrap();
 
                 //Validate User
                 user.validate();
 
                 //Save User
-                dao.create(&user);
-
-                let response = json::encode(&user).unwrap();
-                format!(r#"{{"status":"success", "data":{{"user":{}}}}}"#, response)
+                match dao.create(&user){
+                    Ok(result) => {
+                        //Set user ID
+                        match result.inserted_id{
+                            Some(id_wrapper) => {
+                                match id_wrapper{
+                                    Bson::ObjectId(id) => user.set_id(id),
+                                    _ => {}
+                                }
+                            },
+                            None => {}
+                        }
+                        
+                        Ok(format!(r#"{{"user":{}}}"#, json::encode(&user).unwrap()))
+                    },
+                    Err(e) => Err(e)
+                }
             },
-            Err(e) =>{
-                format!(r#"{{"status":"error", "msg":"{}""#, e)
-            }
+            Err(e) => Err(e)
         }
     }//end create_user
 

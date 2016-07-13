@@ -45,7 +45,7 @@ impl UserDAO{
     ///
     /// # Returns
     /// `MMResult<()>`
-    pub fn create(self, user: &UserModel) -> MMResult<()>{
+    pub fn create(self, user: &UserModel) -> MMResult<mongodb::coll::results::InsertOneResult>{
         let coll = self.db.collection("users");
 
         let doc = doc! {
@@ -55,12 +55,10 @@ impl UserDAO{
             "password" => (match user.get_password(){Some(val) => val, None => "".to_string()})
         };
 
-        //TODO: Handle error on insert
         // Insert document into `users` collection
-        coll.insert_one(doc.clone(), None)
-            .ok().expect("Failed to insert user.");
-
-        //TODO: Return proper Results
-        Ok(())
+        match coll.insert_one(doc.clone(), None){
+            Ok(result) => Ok(result),
+            Err(e) => Err(MMError::new("Failed to insert user".to_string(), MMErrorKind::DAO))
+        }
     }
 }

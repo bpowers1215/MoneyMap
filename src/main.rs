@@ -98,7 +98,10 @@ fn main() {
     router.post("/users", middleware! { |request, mut response|
         info!("API Endpoint: POST /users");
         response.set(MediaType::Json);
-        users_controller.create(request)
+        match users_controller.create(request){
+            Ok(response) => format!(r#"{{"status":"success", "data":{}}}"#, response),
+            Err(e) =>format!(r#"{{"status":"error", "msg":"{}"}}"#, e)
+        }
     });
     //router.post("/users", Resources::users::page);
 
