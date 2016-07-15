@@ -6,8 +6,8 @@
 use ::rustc_serialize::json;
 use ::bson::oid::ObjectId;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
-use ::common::validation::validators;
-use ::common::validation::validation_result::{ValidationResult, FieldValidation};
+use ::common::validation::validators as Validators;
+use ::common::validation::validation_result::{ValidationResult, FieldError};
 
 // Nickel
 //use nickel::{JsonBody, Request, Response};
@@ -32,11 +32,14 @@ impl UserModel{
     /// self
     ///
     /// # Returns
-    /// 'MMResult<UserModel>' - the saved user
-    pub fn validate(&self) -> MMResult<()>{
+    /// 'ValidationResult' - validation result
+    pub fn validate(&self) -> ValidationResult{
         //validate user
-        let validation_result = ValidationResult::new();
-        Ok(())
+        let mut validation_result = ValidationResult::new();
+        if Validators::required(self.first_name.clone()){
+            validation_result.add_error("first_name".to_string(), "First Name is required.".to_string());
+        }
+        validation_result
     }//end save
 
     /// Get ID

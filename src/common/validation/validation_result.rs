@@ -7,14 +7,14 @@ use std::fmt;
 ///ValidationResult
 pub struct ValidationResult{
     valid:bool,
-    results:Vec<FieldValidation>
+    errors:Vec<FieldError>
 }
 
 impl ValidationResult{
     pub fn new() -> ValidationResult{
         ValidationResult{
             valid: true,
-            results:Vec::new()
+            errors:Vec::new()
         }
     }
     pub fn get_valid(&self) -> bool{
@@ -23,19 +23,28 @@ impl ValidationResult{
     pub fn set_valid(&mut self, valid: bool){
         self.valid = valid;
     }
-    pub fn get_results(&self) -> Vec<FieldValidation>{
-        self.results.clone()
+    pub fn get_errors(&self) -> Vec<FieldError>{
+        self.errors.clone()
+    }
+    pub fn add_error(&mut self, field: String, message: String){
+        self.errors.push(FieldError::new(field, message));
     }
 }
 
-///FieldValidation
+///FieldError
 #[derive(Clone)]
-pub struct FieldValidation{
+pub struct FieldError{
     field:String,
     message:String
 }
 
-impl FieldValidation{
+impl FieldError{
+    pub fn new(field: String, message: String) -> FieldError{
+        FieldError{
+            field: field,
+            message: message
+        }
+    }
     pub fn get_field(&self) -> &String{
         &self.field
     }

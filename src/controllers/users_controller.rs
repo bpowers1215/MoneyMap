@@ -8,6 +8,7 @@ use ::bson::Bson;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::dao::dao_manager::DAOManager;
 use ::dao::user_dao::UserDAO;
+use ::common::validation::validation_result::{ValidationResult, FieldError};
 
 //Models
 use ::models::user_model::{UserModel};
@@ -43,26 +44,29 @@ impl UsersController{
                 let mut user = req.json_as::<UserModel>().unwrap();
 
                 //Validate User
-                user.validate();
-
-                //Save User
-                match dao.create(&user){
-                    Ok(result) => {
-                        //Set user ID
-                        match result.inserted_id{
-                            Some(id_wrapper) => {
-                                match id_wrapper{
-                                    Bson::ObjectId(id) => user.set_id(id),
-                                    _ => {}
-                                }
-                            },
-                            None => {}
-                        }
-                        
-                        Ok(format!(r#"{{"user":{}}}"#, json::encode(&user).unwrap()))
-                    },
-                    Err(e) => Err(e)
-                }
+                let validation = user.validate();
+                //if validation.get_valid(){
+                    //Save User
+                    match dao.create(&user){
+                        Ok(result) => {
+                            //Set user ID
+                            match result.inserted_id{
+                                Some(id_wrapper) => {
+                                    match id_wrapper{
+                                        Bson::ObjectId(id) => user.set_id(id),
+                                        _ => {}
+                                    }
+                                },
+                                None => {}
+                            }
+                            
+                            Ok(format!(r#"{{"user":{}}}"#, json::encode(&user).unwrap()))
+                        },
+                        Err(e) => Err(e)
+                    }
+                //}else{
+                    //Err(format!(r#"{{"user":{}}}"#, json::encode(&user).unwrap()))
+                //}
             },
             Err(e) => Err(e)
         }
