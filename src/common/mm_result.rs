@@ -1,5 +1,7 @@
 // src/common/mm_result.rs
-//MM Result type
+
+/// MM Result type
+/// Expands Result type for error handling in the API
 
 use std::fmt;
 
