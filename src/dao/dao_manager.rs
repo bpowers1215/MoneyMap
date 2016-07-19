@@ -18,6 +18,7 @@ pub enum DAO{
 }*/
 
 /// DAO Manager
+#[derive(Clone)]
 pub struct DAOManager {
     pub db: DB
 }

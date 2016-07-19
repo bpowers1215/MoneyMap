@@ -34,8 +34,10 @@ use rustc_serialize::json::{Json, ToJson};
 use rustc_serialize::base64;
 use rustc_serialize::base64::{FromBase64};
 
+//Common Utilities
 use money_map::common::database::DB as DB;
 use money_map::common::config::Config as Config;
+use money_map::common::api_result::ApiResult;
 
 //DAO
 use money_map::dao::dao_manager::{DAOManager};
@@ -43,6 +45,7 @@ use money_map::dao::user_dao::UserDAO;
 use money_map::dao::money_map_dao::MoneyMapDAO;
 
 //Controllers
+use money_map::controllers::test_controller::TestController;
 use money_map::controllers::users_controller::UsersController;
 
 fn main() {
@@ -66,7 +69,8 @@ fn main() {
     let dao_manager = DAOManager::new(db);
 
     //Initialize Controllers
-    let users_controller = UsersController::new(dao_manager);
+    let test_controller = TestController::new(dao_manager.clone());
+    let users_controller = UsersController::new(dao_manager.clone());
 
     let mut server = Nickel::new();
     let mut router = Nickel::router();
@@ -88,6 +92,17 @@ fn main() {
         }*/
     });
 
+    //Test Actions
+    router.post("/test/success", middleware! { |request, mut response|
+        info!("API Endpoint: POST /users");
+        response.set(MediaType::Json);
+        match test_controller.success(request){
+            ApiResult::Success{result} => format!(r#"{{"status":"success", "result":{}}}"#, result),
+            ApiResult::Error{result, request} =>format!(r#"{{"status":"error", "msg":""}}"#)
+        }
+    });
+
+    //Users Actions
     router.get("/users", middleware! { |request, mut response|
         info!("API Endpoint: GET /users");
         response.set(MediaType::Json);

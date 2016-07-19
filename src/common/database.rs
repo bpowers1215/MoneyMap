@@ -19,6 +19,7 @@ use super::config::Config;
 static ERROR_DB_MISS: &'static str = "Error: No database connection";
 
 /// Represent a Database Connection
+#[derive(Clone)]
 pub struct DB{
     db_host: String,
     db_port: u16,
