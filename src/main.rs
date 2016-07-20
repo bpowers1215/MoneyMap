@@ -37,7 +37,7 @@ use rustc_serialize::base64::{FromBase64};
 //Common Utilities
 use money_map::common::database::DB as DB;
 use money_map::common::config::Config as Config;
-use money_map::common::api_result::ApiResult;
+use money_map::common::api_result::{ApiResult, JsonEncoder};
 
 //DAO
 use money_map::dao::dao_manager::{DAOManager};
@@ -93,14 +93,19 @@ fn main() {
     });
 
     //Test Actions
-    router.post("/test/success", middleware! { |request, mut response|
-        info!("API Endpoint: POST /users");
+    router.get("/test/retrieve", middleware! { |request, mut response|
+        info!("API Endpoint: POST /test/retrieve");
         response.set(MediaType::Json);
-        match test_controller.success(request){
-            ApiResult::Success{result} => format!(r#"{{"status":"success", "result":{}}}"#, result),
-            ApiResult::Error{result, request} =>format!(r#"{{"status":"error", "msg":""}}"#)
-        }
+        let result = &test_controller.retrieve();
+        JsonEncoder::encode(result)
     });
+
+    /*router.post("/test/save", middleware! { |request, mut response|
+        info!("API Endpoint: POST /test/save");
+        response.set(MediaType::Json);
+        let result = &test_controller.save(request);
+        JsonEncoder::encode(result)
+    });*/
 
     //Users Actions
     router.get("/users", middleware! { |request, mut response|

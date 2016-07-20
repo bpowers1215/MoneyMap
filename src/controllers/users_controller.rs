@@ -2,20 +2,19 @@
 
 /// Users Controller
 
-//Import Modules
+//Import
+//External
+use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, MediaType};
 use ::rustc_serialize::json;
 use ::bson::Bson;
+//Internal
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
+use ::common::validation::validation_result::{ValidationResult, FieldError};
+use ::common::api_result::ApiResult;
 use ::dao::dao_manager::DAOManager;
 use ::dao::user_dao::UserDAO;
-use ::common::validation::validation_result::{ValidationResult, FieldError};
-
 //Models
 use ::models::user_model::{UserModel};
-
-// Nickel
-//use nickel::{JsonBody, Request, Response};
-use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, MediaType};
 
 pub struct UsersController{
     dao_manager: DAOManager
@@ -59,13 +58,13 @@ impl UsersController{
                                 },
                                 None => {}
                             }
-                            
+
                             Ok(format!(r#"{{"user":{}}}"#, json::encode(&user).unwrap()))
                         },
                         Err(e) => Err(e)
                     }
                 //}else{
-                    //Err(format!(r#"{{"user":{}}}"#, json::encode(&user).unwrap()))
+                //    Err(format!(r#"{{"user":{}}}"#, json::encode(&user).unwrap()))
                 //}
             },
             Err(e) => Err(e)

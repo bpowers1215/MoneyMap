@@ -2,18 +2,14 @@
 
 /// Test Controller
 
-//Import Modules
-use ::rustc_serialize::json;
-use ::bson::Bson;
-use ::common::mm_result::{MMResult, MMError, MMErrorKind};
+//Import
+//External
+use nickel::{JsonBody, Request, Response};
+//Utilities
 use ::dao::dao_manager::DAOManager;
-use ::dao::user_dao::UserDAO;
-use ::common::validation::validation_result::{ValidationResult, FieldError};
-use ::common::api_result::ApiResult;
-
-// Nickel
-//use nickel::{JsonBody, Request, Response};
-use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, MediaType};
+use ::common::api_result::{ApiResult};
+//Models
+use ::models::test_model::{TestModel};
 
 pub struct TestController{
     dao_manager: DAOManager
@@ -27,15 +23,37 @@ impl TestController{
         }
     }
 
-    /// Retrieve a Success Response
+    /// Retrieve a Test
     ///
     /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// `APIResult` - Result
+    pub fn retrieve(&self) -> ApiResult<TestModel>{
+        let test = TestModel{
+            field_1: Some(String::from("Field One")),
+            field_2: Some(String::from("Field Two")),
+            field_3: Some(String::from("Field Three"))
+        };
+        ApiResult::Success{result:test}
+    }//end retrieve
+
+    /// "Save" a Test
+    ///
+    /// # Arguments
+    /// &self
     /// req - nickel::Request
     ///
     /// # Returns
     /// `APIResult` - Result
-    pub fn success(&self, req: &mut Request) -> ApiResult<String>{
-        ApiResult::Success{result:"TEST".to_string()}
-    }//end create_user
+    pub fn save(&self, req: &mut Request) -> ApiResult<TestModel>{
+        let test = TestModel{
+            field_1: Some(String::from("Field One")),
+            field_2: Some(String::from("Field Two")),
+            field_3: Some(String::from("Field Three"))
+        };
+        ApiResult::Success{result:test}
+    }//end save
 
 }
