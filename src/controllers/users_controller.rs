@@ -15,7 +15,10 @@ use ::dao::dao_manager::DAOManager;
 use ::dao::user_dao::UserDAO;
 //Models
 use ::models::user_model::{UserModel};
+//Controllers
+use ::controllers::controller_manager::ControllerManager;
 
+#[derive(Clone)]
 pub struct UsersController{
     dao_manager: DAOManager
 }
@@ -35,7 +38,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `MMResult<String>` - JSON String response
-    pub fn create(&self, req: &mut Request) -> MMResult<String>{
+    pub fn create(&self, req: &mut Request<ControllerManager>) -> MMResult<String>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Create New User");

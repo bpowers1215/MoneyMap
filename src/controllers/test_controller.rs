@@ -10,7 +10,10 @@ use ::dao::dao_manager::DAOManager;
 use ::common::api_result::{ApiResult};
 //Models
 use ::models::test_model::{TestModel};
+//Controllers
+use ::controllers::controller_manager::ControllerManager;
 
+#[derive(Clone)]
 pub struct TestController{
     dao_manager: DAOManager
 }
@@ -47,7 +50,7 @@ impl TestController{
     ///
     /// # Returns
     /// `APIResult` - Result
-    pub fn save(&self, req: &mut Request) -> ApiResult<TestModel>{
+    pub fn save(&self, req: &mut Request<ControllerManager>) -> ApiResult<TestModel>{
         let test = TestModel{
             field_1: Some(String::from("Field One")),
             field_2: Some(String::from("Field Two")),

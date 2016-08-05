@@ -45,6 +45,7 @@ use money_map::dao::user_dao::UserDAO;
 use money_map::dao::money_map_dao::MoneyMapDAO;
 
 //Controllers
+use money_map::controllers::controller_manager::ControllerManager;
 use money_map::controllers::test_controller::TestController;
 use money_map::controllers::users_controller::UsersController;
 
@@ -69,10 +70,12 @@ fn main() {
     let dao_manager = DAOManager::new(db);
 
     //Initialize Controllers
-    let test_controller = TestController::new(dao_manager.clone());
-    let users_controller = UsersController::new(dao_manager.clone());
+    let controller_manager = ControllerManager{
+        test_controller: TestController::new(dao_manager.clone()),
+        users_controller: UsersController::new(dao_manager.clone())
+    };
 
-    let mut server = Nickel::new();
+    let mut server = Nickel::with_data(controller_manager);
     let mut router = Nickel::router();
 
     router.get("/", middleware! { |request, mut response|
@@ -81,31 +84,24 @@ fn main() {
         format!("{{\"status\":\"success\", \"msg\":\"Welcome to Money Map!\"}}")
     });
 
-    router.get("/getDB", middleware! { |request, mut response|
-        info!("API Endpoint: GET /getDB");
-        response.set(MediaType::Json);
-        /*match db.get_count(){
-            Ok(count) => format!("{{\"status\":\"success\", \"msg\":\"Database Name: {}\"}}", count),
-            Err(e) => {
-                format!("{{\"status\":\"error\", \"msg\":\"{}\"}}", e)
-            }
-        }*/
-    });
-
     //Test Actions
     router.get("/test/retrieve", middleware! { |request, mut response|
         info!("API Endpoint: POST /test/retrieve");
+        let cm: &ControllerManager = request.server_data();
+        let result = &cm.test_controller.retrieve();
+        
         response.set(MediaType::Json);
-        let result = &test_controller.retrieve();
         JsonEncoder::encode(result)
     });
 
-    /*router.post("/test/save", middleware! { |request, mut response|
+    router.post("/test/save", middleware! { |request, mut response|
         info!("API Endpoint: POST /test/save");
+        let cm: &ControllerManager = request.server_data();
+        let result = &cm.test_controller.save(request);
+        
         response.set(MediaType::Json);
-        let result = &test_controller.save(request);
         JsonEncoder::encode(result)
-    });*/
+    });
 
     //Users Actions
     router.get("/users", middleware! { |request, mut response|
@@ -115,14 +111,15 @@ fn main() {
         format!("{{\"status\":\"success\"}}")
     });
 
-    router.post("/users", middleware! { |request, mut response|
+    /*router.post("/users", middleware! { |request, mut response|
         info!("API Endpoint: POST /users");
+        let cm: &ControllerManager = request.server_data();
         response.set(MediaType::Json);
-        match users_controller.create(request){
+        match &cm.users_controller.create(request){
             Ok(response) => format!(r#"{{"status":"success", "data":{}}}"#, response),
             Err(e) =>format!(r#"{{"status":"error", "msg":"{}"}}"#, e)
         }
-    });
+    });*/
     //router.post("/users", Resources::users::page);
 
     //server.utilize(authenticator);
