@@ -73,7 +73,7 @@ _More effectively manage your money._
 ./bin/stop
 ```
 + Access API: http://localhost:8080
-+ Access DB on port 28017
++ Access DB: `docker exec -it money-map-db mongo moneyMap -u money_map_client -p`
 
 ##License
 The Apache License Version 2.0
