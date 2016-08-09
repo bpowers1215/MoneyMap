@@ -2,9 +2,12 @@
 
 /// Validation Result
 
+// Import Modules
 use std::fmt;
+use ::rustc_serialize::json;
 
 ///ValidationResult
+#[derive(Debug, RustcDecodable, RustcEncodable)]
 pub struct ValidationResult{
     valid:bool,
     errors:Vec<FieldError>
@@ -29,7 +32,7 @@ impl ValidationResult{
     ///
     /// # Returns
     /// 'bool' - True if valid, false otherwise
-    pub fn get_valid(&self) -> bool{
+    pub fn is_valid(&self) -> bool{
         self.valid
     }
 
@@ -61,11 +64,14 @@ impl ValidationResult{
     /// message - String The error message
     pub fn add_error(&mut self, field: String, message: String){
         self.errors.push(FieldError::new(field, message));
+        if self.valid{
+            self.valid = false;
+        }
     }
 }
 
 ///FieldError
-#[derive(Clone)]
+#[derive(Debug, Clone, RustcDecodable, RustcEncodable)]
 pub struct FieldError{
     field:String,
     message:String

@@ -42,7 +42,8 @@ impl TestController{
         ApiResult::Success{result:test}
     }//end retrieve
 
-    /// "Save" a Test
+    /// Imitate Saving a Test object
+    /// Performs validation and returns result. Does not perform an actual save to the DB
     ///
     /// # Arguments
     /// &self
@@ -51,12 +52,16 @@ impl TestController{
     /// # Returns
     /// `APIResult` - Result
     pub fn save(&self, req: &mut Request<ControllerManager>) -> ApiResult<TestModel>{
-        let test = TestModel{
-            field_1: Some(String::from("Field One")),
-            field_2: Some(String::from("Field Two")),
-            field_3: Some(String::from("Field Three"))
-        };
-        ApiResult::Success{result:test}
+        let mut test = req.json_as::<TestModel>().unwrap();
+        let validationResult = test.validate();
+
+        let result;
+        if validationResult.is_valid(){
+            result = ApiResult::Success{result:test}
+        }else{
+            result = ApiResult::Invalid{validation:validationResult, request:test}
+        }
+        result
     }//end save
 
 }
