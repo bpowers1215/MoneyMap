@@ -4,14 +4,14 @@
 
 use std::fmt;
 
-/// Require and Option field
+/// Check is a field has a value
 ///
 /// # Arguments
 /// val - Option<T> the Option field
 ///
 /// # Returns
 /// 'bool' - True if valid, false otherwise (None)
-pub fn required<T>(val: Option<T>) -> bool{
+pub fn has_value<T>(val: Option<T>) -> bool{
     match val{
         Some(_) => true,
         None => false

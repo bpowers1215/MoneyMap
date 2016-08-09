@@ -36,7 +36,7 @@ impl UserModel{
     pub fn validate(&self) -> ValidationResult{
         //validate user
         let mut validation_result = ValidationResult::new();
-        if Validators::required(self.first_name.clone()){
+        if !Validators::has_value(self.first_name.clone()){
             validation_result.add_error("first_name".to_string(), "First Name is required.".to_string());
         }
         validation_result
