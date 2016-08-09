@@ -12,8 +12,11 @@ pub enum ApiResult<T>{
     Success{
         result: T
     },
-    Error{
-        result: ValidationResult,
+    Invalid{
+        validation: ValidationResult,
+        request: T
+    },
+    Failure{
         request: T
     }
 }
@@ -25,8 +28,11 @@ impl JsonEncoder{
             &ApiResult::Success{ref result} => {
                 format!(r#"{{"status":"success", "data":{}}}"#, json::encode(&result).unwrap())
             },
-            &ApiResult::Error{ref result, ref request} => {
-                format!(r#"{{"status":"error", "msg":""}}"#)
+            &ApiResult::Invalid{ref validation, ref request} => {
+                format!(r#"{{"status":"invalid", "msg":"Request is invalid", "errors":{}, "request":{}}}"#, json::encode(&validation.get_errors()).unwrap(), json::encode(&request).unwrap())
+            },
+            &ApiResult::Failure{ref request} => {
+                format!(r#"{{"status":"failure", "msg":"Fatal error occurred"}}"#)
             }
         }
     }
