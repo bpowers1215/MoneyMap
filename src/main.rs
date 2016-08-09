@@ -120,16 +120,14 @@ fn main() {
         format!("{{\"status\":\"success\"}}")
     });
 
-    /*router.post("/users", middleware! { |request, mut response|
+    router.post("/users", middleware! { |request, mut response|
         info!("API Endpoint: POST /users");
         let cm: &ControllerManager = request.server_data();
+        let result = &cm.users_controller.create(request);
+
         response.set(MediaType::Json);
-        match &cm.users_controller.create(request){
-            Ok(response) => format!(r#"{{"status":"success", "data":{}}}"#, response),
-            Err(e) =>format!(r#"{{"status":"error", "msg":"{}"}}"#, e)
-        }
-    });*/
-    //router.post("/users", Resources::users::page);
+        JsonEncoder::encode(result)
+    });
 
     //server.utilize(authenticator);
     server.utilize(router);

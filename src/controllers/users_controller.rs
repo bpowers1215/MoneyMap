@@ -39,7 +39,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `MMResult<String>` - JSON String response
-    pub fn create(&self, req: &mut Request<ControllerManager>) -> MMResult<String>{
+    pub fn create(&self, req: &mut Request<ControllerManager>) -> ApiResult<UserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Create New User");
@@ -47,8 +47,8 @@ impl UsersController{
                 let mut user = req.json_as::<UserModel>().unwrap();
 
                 //Validate User
-                let validation = user.validate();
-                //if validation.get_valid(){
+                let validation_result = user.validate();
+                if validation_result.is_valid(){
                     //Save User
                     match dao.create(&user){
                         Ok(result) => {
@@ -63,15 +63,21 @@ impl UsersController{
                                 None => {}
                             }
 
-                            Ok(format!(r#"{{"user":{}}}"#, json::encode(&user).unwrap()))
+                            ApiResult::Success{result:user}
                         },
-                        Err(e) => Err(e)
+                        Err(e) => {
+                            error!("{}",e);
+                            ApiResult::Failure{msg:"Unable to save user"}
+                        }
                     }
-                //}else{
-                //    Err(format!(r#"{{"user":{}}}"#, json::encode(&user).unwrap()))
-                //}
+                }else{
+                    ApiResult::Invalid{validation:validation_result, request:user}
+                }
             },
-            Err(e) => Err(e)
+            Err(e) => {
+                error!("{}",e);
+                ApiResult::Failure{msg:"Unable to save user"}
+            }
         }
     }//end create_user
 
