@@ -17,7 +17,7 @@ pub enum ApiResult<T>{
         request: T
     },
     Failure{
-        request: T
+        msg: &'static str
     }
 }
 
@@ -31,8 +31,8 @@ impl JsonEncoder{
             &ApiResult::Invalid{ref validation, ref request} => {
                 format!(r#"{{"status":"invalid", "msg":"Request is invalid", "errors":{}, "request":{}}}"#, json::encode(&validation.get_errors()).unwrap(), json::encode(&request).unwrap())
             },
-            &ApiResult::Failure{ref request} => {
-                format!(r#"{{"status":"failure", "msg":"Fatal error occurred"}}"#)
+            &ApiResult::Failure{ref msg} => {
+                format!(r#"{{"status":"Fatal error", "msg":"{}"}}"#, msg.to_string())
             }
         }
     }

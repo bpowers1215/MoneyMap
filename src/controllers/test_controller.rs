@@ -64,4 +64,18 @@ impl TestController{
         result
     }//end save
 
+    /// Imitate a hard failure
+    /// Returns failure ApiResult
+    ///
+    /// # Arguments
+    /// &self
+    /// req - nickel::Request
+    ///
+    /// # Returns
+    /// `APIResult` - Result
+    pub fn failure(&self) -> ApiResult<TestModel>{
+        error!("(Test) Fatal error occurred");
+        ApiResult::Failure{msg:"Fatal error occurred"}
+    }
+
 }

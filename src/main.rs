@@ -89,7 +89,7 @@ fn main() {
         info!("API Endpoint: POST /test/retrieve");
         let cm: &ControllerManager = request.server_data();
         let result = &cm.test_controller.retrieve();
-        
+
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
     });
@@ -98,7 +98,16 @@ fn main() {
         info!("API Endpoint: POST /test/save");
         let cm: &ControllerManager = request.server_data();
         let result = &cm.test_controller.save(request);
-        
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
+
+    router.get("/test/failure", middleware! { |request, mut response|
+        info!("API Endpoint: GET /test/failure");
+        let cm: &ControllerManager = request.server_data();
+        let result = &cm.test_controller.failure();
+
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
     });
