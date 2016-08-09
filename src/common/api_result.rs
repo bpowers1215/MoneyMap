@@ -32,7 +32,7 @@ impl JsonEncoder{
                 format!(r#"{{"status":"invalid", "msg":"Request is invalid", "errors":{}, "request":{}}}"#, json::encode(&validation.get_errors()).unwrap(), json::encode(&request).unwrap())
             },
             &ApiResult::Failure{ref msg} => {
-                format!(r#"{{"status":"Fatal error", "msg":"{}"}}"#, msg.to_string())
+                format!(r#"{{"status":"error", "msg":"{}"}}"#, msg.to_string())
             }
         }
     }
