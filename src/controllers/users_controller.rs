@@ -44,34 +44,40 @@ impl UsersController{
             Ok(dao) => {
                 info!("Create New User");
 
-                let mut user = req.json_as::<UserModel>().unwrap();
-
-                //Validate User
-                let validation_result = user.validate();
-                if validation_result.is_valid(){
-                    //Save User
-                    match dao.create(&user){
-                        Ok(result) => {
-                            //Set user ID
-                            match result.inserted_id{
-                                Some(id_wrapper) => {
-                                    match id_wrapper{
-                                        Bson::ObjectId(id) => user.set_id(id),
-                                        _ => {}
+                match req.json_as::<UserModel>(){
+                    Ok(mut user) => {
+                        //Validate User
+                        let validation_result = user.validate();
+                        if validation_result.is_valid(){
+                            //Save User
+                            match dao.create(&user){
+                                Ok(result) => {
+                                    //Set user ID
+                                    match result.inserted_id{
+                                        Some(id_wrapper) => {
+                                            match id_wrapper{
+                                                Bson::ObjectId(id) => user.set_id(id),
+                                                _ => {}
+                                            }
+                                        },
+                                        None => {}
                                     }
-                                },
-                                None => {}
-                            }
 
-                            ApiResult::Success{result:user}
-                        },
-                        Err(e) => {
-                            error!("{}",e);
-                            ApiResult::Failure{msg:"Unable to save user"}
+                                    ApiResult::Success{result:user}
+                                },
+                                Err(e) => {
+                                    error!("{}",e);
+                                    ApiResult::Failure{msg:"Unable to save user"}
+                                }
+                            }
+                        }else{
+                            ApiResult::Invalid{validation:validation_result, request:user}
                         }
+                    },
+                    Err(e) => {
+                        error!("{}",e);
+                        ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
                     }
-                }else{
-                    ApiResult::Invalid{validation:validation_result, request:user}
                 }
             },
             Err(e) => {

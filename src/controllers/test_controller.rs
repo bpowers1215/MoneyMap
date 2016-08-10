@@ -52,14 +52,21 @@ impl TestController{
     /// # Returns
     /// `APIResult` - Result
     pub fn save(&self, req: &mut Request<ControllerManager>) -> ApiResult<TestModel>{
-        let mut test = req.json_as::<TestModel>().unwrap();
-        let validationResult = test.validate();
-
         let result;
-        if validationResult.is_valid(){
-            result = ApiResult::Success{result:test}
-        }else{
-            result = ApiResult::Invalid{validation:validationResult, request:test}
+        match req.json_as::<TestModel>(){
+            Ok(mut test) => {
+                let validationResult = test.validate();
+
+                if validationResult.is_valid(){
+                    result = ApiResult::Success{result:test}
+                }else{
+                    result = ApiResult::Invalid{validation:validationResult, request:test}
+                }
+            },
+            Err(e) => {
+                error!("{}",e);
+                result = ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
+            }
         }
         result
     }//end save
