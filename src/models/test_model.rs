@@ -29,13 +29,13 @@ impl TestModel{
     pub fn validate(&self) -> ValidationResult{
         //validate user
         let mut validation_result = ValidationResult::new();
-        if !Validators::has_value(self.field_1.clone()){
+        if !Validators::not_empty(self.field_1.clone()){
             validation_result.add_error("field_1".to_string(), "field_1 is required.".to_string());
         }
-        if !Validators::has_value(self.field_2.clone()){
+        if !Validators::not_empty(self.field_2.clone()){
             validation_result.add_error("field_2".to_string(), "field_2 is required.".to_string());
         }
-        if !Validators::has_value(self.field_3.clone()){
+        if !Validators::not_empty(self.field_3.clone()){
             validation_result.add_error("field_3".to_string(), "field_3 is required.".to_string());
         }
         validation_result
