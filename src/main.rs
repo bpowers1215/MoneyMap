@@ -69,7 +69,7 @@ fn main() {
     router.get("/", middleware! { |_request, mut response|
         info!("API Endpoint: /");
         response.set(MediaType::Json);
-        format!("{{\"status\":\"success\", \"msg\":\"Welcome to Money Map!\"}}")
+        format!(r#"{{"name":"Money Map", "version":"v0.0.1", "status":"ok"}}"#)
     });
 
     //Test Actions
