@@ -57,7 +57,7 @@ impl UserDAO{
         // Insert document into `users` collection
         match coll.insert_one(doc.clone(), None){
             Ok(result) => Ok(result),
-            Err(e) => Err(MMError::new("Failed to insert user".to_string(), MMErrorKind::DAO))
+            Err(_) => Err(MMError::new("Failed to insert user".to_string(), MMErrorKind::DAO))
         }
     }
 }
