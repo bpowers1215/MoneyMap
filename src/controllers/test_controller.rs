@@ -54,7 +54,7 @@ impl TestController{
     pub fn save(&self, req: &mut Request<ControllerManager>) -> ApiResult<TestModel>{
         let result;
         match req.json_as::<TestModel>(){
-            Ok(mut test) => {
+            Ok(test) => {
                 let validationResult = test.validate();
 
                 if validationResult.is_valid(){
