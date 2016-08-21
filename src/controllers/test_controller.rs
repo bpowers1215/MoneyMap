@@ -4,7 +4,7 @@
 
 //Import
 //External
-use nickel::{JsonBody, Request, Response};
+use nickel::{JsonBody, Request};
 //Utilities
 use ::dao::dao_manager::DAOManager;
 use ::common::api_result::{ApiResult};

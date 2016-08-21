@@ -3,9 +3,8 @@
 /// Test Model
 
 //Import Modules
-use ::rustc_serialize::json;
 use ::common::validation::validators as Validators;
-use ::common::validation::validation_result::{ValidationResult, FieldError};
+use ::common::validation::validation_result::{ValidationResult};
 
 /// TestModel
 #[derive(Debug, RustcDecodable, RustcEncodable)]

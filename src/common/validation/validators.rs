@@ -2,8 +2,6 @@
 
 /// Validators
 
-use std::fmt;
-
 /// Check that a field is not empty
 ///
 /// # Arguments

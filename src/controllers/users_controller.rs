@@ -4,16 +4,12 @@
 
 //Import
 //External
-use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, MediaType};
-use ::rustc_serialize::json;
+use nickel::{JsonBody, Request};
 use ::bson::Bson;
 //Utilities
-use ::common::mm_result::{MMResult, MMError, MMErrorKind};
-use ::common::validation::validation_result::{ValidationResult, FieldError};
 use ::common::api_result::ApiResult;
 //DAO
 use ::dao::dao_manager::DAOManager;
-use ::dao::user_dao::UserDAO;
 //Models
 use ::models::user_model::{UserModel};
 //Controllers

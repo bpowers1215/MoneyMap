@@ -10,7 +10,6 @@ extern crate mongodb;
 use ::mongodb::{Client, ThreadedClient};
 use ::mongodb::db::ThreadedDatabase;
 use ::mongodb::error::Result as MongoResult;
-use ::common::config::Config;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 
 /// Money Map DAO

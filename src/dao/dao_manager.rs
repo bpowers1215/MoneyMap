@@ -4,7 +4,6 @@
 /// Hand out DAOs with database connections
 
 //Import Modules
-use ::common::config::Config;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::database::DB;
 use super::user_dao::UserDAO;

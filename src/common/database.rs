@@ -10,7 +10,6 @@ extern crate mongodb;
 //Import Modules
 use self::mongodb::{Client, ThreadedClient};
 use self::mongodb::db::ThreadedDatabase;
-use self::mongodb::error::Result as MongoResult;
 use super::mm_result::{MMResult, MMError, MMErrorKind};
 use super::config::Config;
 

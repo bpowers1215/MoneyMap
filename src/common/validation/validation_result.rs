@@ -2,10 +2,6 @@
 
 /// Validation Result
 
-// Import Modules
-use std::fmt;
-use ::rustc_serialize::json;
-
 ///ValidationResult
 #[derive(Debug, RustcDecodable, RustcEncodable)]
 pub struct ValidationResult{

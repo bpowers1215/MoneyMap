@@ -3,15 +3,9 @@
 /// User Model
 
 //Import Modules
-use ::rustc_serialize::json;
 use ::bson::oid::ObjectId;
-use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::validation::validators as Validators;
-use ::common::validation::validation_result::{ValidationResult, FieldError};
-
-// Nickel
-//use nickel::{JsonBody, Request, Response};
-use nickel::{Nickel, JsonBody, HttpRouter, Request, Response, MiddlewareResult, MediaType};
+use ::common::validation::validation_result::{ValidationResult};
 
 /// User
 #[derive(RustcDecodable, RustcEncodable)]
