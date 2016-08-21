@@ -15,7 +15,7 @@ pub fn get_routes() -> Router<ControllerManager> {
     router.get("/", middleware! { |_request, mut response|
         info!("API Endpoint: /");
         response.set(MediaType::Json);
-        format!(r#"{{"name":"Money Map", "version":"v0.0.1", "status":"ok"}}"#)
+        format!(r#"{{"name":"Money Map", "version":"{}", "status":"ok"}}"#, env!("CARGO_PKG_VERSION"))
     });
 
     //Test Actions
