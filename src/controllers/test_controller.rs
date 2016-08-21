@@ -55,12 +55,12 @@ impl TestController{
         let result;
         match req.json_as::<TestModel>(){
             Ok(test) => {
-                let validationResult = test.validate();
+                let validation_result = test.validate();
 
-                if validationResult.is_valid(){
+                if validation_result.is_valid(){
                     result = ApiResult::Success{result:test}
                 }else{
-                    result = ApiResult::Invalid{validation:validationResult, request:test}
+                    result = ApiResult::Invalid{validation:validation_result, request:test}
                 }
             },
             Err(e) => {
