@@ -18,7 +18,16 @@ pub struct UserModel {
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub email: Option<String>,
-    pub password: Option<String>
+    pub password: Option<String>,
+    pub confirm_password: Option<String>
+}
+
+#[derive(RustcDecodable, RustcEncodable)]
+pub struct PubUserModel {
+    pub id: Option<ObjectId>,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub email: Option<String>
 }
 
 // User Model Methods
@@ -53,6 +62,19 @@ impl UserModel{
             if let Some(_) = dao.find(Some(filter), None){
                 // A user has been found with this email address
                 validation_result.add_error("email".to_string(), "This email is not available.".to_string());
+            }
+        }
+        if !Validators::not_empty_string(self.password.clone()){
+            validation_result.add_error("password".to_string(), "Password is required.".to_string());
+        }
+        if !Validators::not_empty_string(self.confirm_password.clone()){
+            validation_result.add_error("confirm_password".to_string(), "Confirm Password is required.".to_string());
+        }
+        if let Some(password) = self.password.clone(){
+            if let Some(confirm_password) = self.confirm_password.clone(){
+                if password.as_str() != "" && confirm_password.as_str() != "" && !Validators::equals(password, confirm_password){
+                    validation_result.add_error("confirm_password".to_string(), "Passwords must match.".to_string());
+                }
             }
         }
         validation_result
@@ -121,4 +143,16 @@ impl UserModel{
         self.password.clone()
     }
 
+}
+
+// Pub User Model Methods
+impl PubUserModel{
+    pub fn new(user: UserModel) -> PubUserModel{
+        PubUserModel{
+            id:user.id,
+            first_name:user.first_name,
+            last_name:user.last_name,
+            email:user.email
+        }
+    }
 }

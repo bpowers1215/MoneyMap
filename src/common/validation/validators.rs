@@ -29,3 +29,15 @@ pub fn not_empty_string(val: Option<String>) -> bool{
         None => false
     }
 }
+
+/// Check that two values are identical
+///
+/// # Arguments
+/// val1 - Generic type T
+/// val2 - Generic type T
+///
+/// # Returns
+/// 'bool' - True if valid, false otherwise (None)
+pub fn equals<T: PartialEq>(val1: T, val2: T) -> bool{
+    val1 == val2
+}

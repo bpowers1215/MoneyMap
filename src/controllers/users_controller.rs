@@ -11,7 +11,7 @@ use ::common::api_result::ApiResult;
 // DAO
 use ::dao::dao_manager::DAOManager;
 // Models
-use ::models::user_model::{UserModel};
+use ::models::user_model::{UserModel, PubUserModel};
 // Controllers
 use ::controllers::controller_manager::ControllerManager;
 
@@ -36,7 +36,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<UserModel>>` - ApiResult including a vector of users
-    pub fn find_all(&self, req: &mut Request<ControllerManager>) -> ApiResult<Vec<UserModel>>{
+    pub fn find_all(&self, req: &mut Request<ControllerManager>) -> ApiResult<Vec<PubUserModel>>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Fetch all Users");
@@ -58,20 +58,20 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<UserModel>` - ApiResult including the created user
-    pub fn create(&self, req: &mut Request<ControllerManager>) -> ApiResult<UserModel>{
+    pub fn create(&self, req: &mut Request<ControllerManager>) -> ApiResult<PubUserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Create New User");
 
                 match req.json_as::<UserModel>(){
                     Ok(mut user) => {
-                        //Validate User
+                        // Validate User
                         let validation_result = user.validate(self.dao_manager.get_user_dao().unwrap());
                         if validation_result.is_valid(){
-                            //Save User
+                            // Save User
                             match dao.create(&user){
                                 Ok(result) => {
-                                    //Set user ID
+                                    // Set user ID
                                     match result.inserted_id{
                                         Some(id_wrapper) => {
                                             match id_wrapper{
@@ -82,7 +82,7 @@ impl UsersController{
                                         None => {}
                                     }
 
-                                    ApiResult::Success{result:user}
+                                    ApiResult::Success{result:PubUserModel::new(user)}
                                 },
                                 Err(e) => {
                                     error!("{}",e);
@@ -90,7 +90,7 @@ impl UsersController{
                                 }
                             }
                         }else{
-                            ApiResult::Invalid{validation:validation_result, request:user}
+                            ApiResult::Invalid{validation:validation_result, request:PubUserModel::new(user)}
                         }
                     },
                     Err(e) => {
