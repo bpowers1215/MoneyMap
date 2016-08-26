@@ -47,11 +47,13 @@ pub fn get_routes() -> Router<ControllerManager> {
     });
 
     //Users Actions
-    router.get("/users", middleware! { |_request, mut response|
+    router.get("/users", middleware! { |request, mut response|
         info!("API Endpoint: GET /users");
+        let cm: &ControllerManager = request.server_data();
+        let result = &cm.users_controller.fetch_all(request);
+
         response.set(MediaType::Json);
-        //let user = Controllers::users::PubUser::new("John".to_string(), "Smith".to_string(), "test@test.com".to_string());
-        format!("{{\"status\":\"success\"}}")
+        JsonEncoder::encode(result)
     });
 
     router.post("/users", middleware! { |request, mut response|

@@ -10,11 +10,11 @@ use ::common::validation::validation_result::{ValidationResult};
 /// User
 #[derive(RustcDecodable, RustcEncodable)]
 pub struct UserModel {
-    id: Option<ObjectId>,
-    first_name: Option<String>,
-    last_name: Option<String>,
-    email: Option<String>,
-    password: Option<String>
+    pub id: Option<ObjectId>,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub email: Option<String>,
+    pub password: Option<String>
 }
 
 // User Model Methods

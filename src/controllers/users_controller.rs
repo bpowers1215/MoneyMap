@@ -27,6 +27,29 @@ impl UsersController{
             dao_manager: dao_manager
         }
     }
+    
+    /// Fetch All Users
+    /// ToDo: Remove this endpoint for security
+    ///
+    /// # Arguments
+    /// req - nickel::Request
+    ///
+    /// # Returns
+    /// `ApiResult<Vec<UserModel>>` - ApiResult including a vector of users
+    pub fn fetch_all(&self, req: &mut Request<ControllerManager>) -> ApiResult<Vec<UserModel>>{
+        match self.dao_manager.get_user_dao(){
+            Ok(dao) => {
+                info!("Fetch all Users");
+                let users = dao.fetch_all();
+                
+                ApiResult::Success{result:users}
+            },
+            Err(e) => {
+                error!("{}",e);
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+    }//end fetch_all
 
     /// Create New User
     ///
@@ -34,7 +57,7 @@ impl UsersController{
     /// req - nickel::Request
     ///
     /// # Returns
-    /// `MMResult<String>` - JSON String response
+    /// `ApiResult<UserModel>` - ApiResult including the created user
     pub fn create(&self, req: &mut Request<ControllerManager>) -> ApiResult<UserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
@@ -78,7 +101,7 @@ impl UsersController{
             },
             Err(e) => {
                 error!("{}",e);
-                ApiResult::Failure{msg:"Unable to save user"}
+                ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
     }//end create_user
