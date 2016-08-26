@@ -2,10 +2,14 @@
 
 /// User Model
 
-//Import Modules
+// Import Modules
+// External
 use ::bson::oid::ObjectId;
+// Utilities
 use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
+// DAO
+use ::dao::user_dao::UserDAO;
 
 /// User
 #[derive(RustcDecodable, RustcEncodable)]
@@ -24,10 +28,12 @@ impl UserModel{
     ///
     /// # Arguments
     /// self
+    /// dao - UserDAO
     ///
     /// # Returns
     /// 'ValidationResult' - validation result
-    pub fn validate(&self) -> ValidationResult{
+    pub fn validate(&self, dao: UserDAO) -> ValidationResult{
+        
         //validate user
         let mut validation_result = ValidationResult::new();
         if !Validators::not_empty_string(self.first_name.clone()){
@@ -39,8 +45,18 @@ impl UserModel{
         if !Validators::not_empty_string(self.email.clone()){
             validation_result.add_error("email".to_string(), "Email is required.".to_string());
         }
+        // Verify email is unique
+        if let Some(ref email) = self.email {
+            let filter = doc!{
+                "email" => email
+            };
+            if let Some(_) = dao.find(Some(filter), None){
+                // A user has been found with this email address
+                validation_result.add_error("email".to_string(), "This email is not available.".to_string());
+            }
+        }
         validation_result
-    }//end save
+    }//end validate
 
     /// Get ID
     ///

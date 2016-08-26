@@ -3,18 +3,11 @@
 /// DAO Manager
 /// Hand out DAOs with database connections
 
-//Import Modules
+// Import Modules
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::database::DB;
 use super::user_dao::UserDAO;
 use super::money_map_dao::MoneyMapDAO;
-
-/*pub enum DAOType{
-    UserDAO
-}
-pub enum DAO{
-    UserDAO(UserDAO)
-}*/
 
 /// DAO Manager
 #[derive(Clone)]

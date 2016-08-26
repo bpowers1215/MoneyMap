@@ -2,17 +2,17 @@
 
 /// Users Controller
 
-//Import
-//External
+// Import
+// External
 use nickel::{JsonBody, Request};
 use ::bson::Bson;
-//Utilities
+// Utilities
 use ::common::api_result::ApiResult;
-//DAO
+// DAO
 use ::dao::dao_manager::DAOManager;
-//Models
+// Models
 use ::models::user_model::{UserModel};
-//Controllers
+// Controllers
 use ::controllers::controller_manager::ControllerManager;
 
 #[derive(Clone)]
@@ -36,11 +36,11 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<UserModel>>` - ApiResult including a vector of users
-    pub fn fetch_all(&self, req: &mut Request<ControllerManager>) -> ApiResult<Vec<UserModel>>{
+    pub fn find_all(&self, req: &mut Request<ControllerManager>) -> ApiResult<Vec<UserModel>>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Fetch all Users");
-                let users = dao.fetch_all();
+                let users = dao.find_all();
                 
                 ApiResult::Success{result:users}
             },
@@ -49,7 +49,7 @@ impl UsersController{
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
-    }//end fetch_all
+    }// end fetch_all
 
     /// Create New User
     ///
@@ -66,7 +66,7 @@ impl UsersController{
                 match req.json_as::<UserModel>(){
                     Ok(mut user) => {
                         //Validate User
-                        let validation_result = user.validate();
+                        let validation_result = user.validate(self.dao_manager.get_user_dao().unwrap());
                         if validation_result.is_valid(){
                             //Save User
                             match dao.create(&user){
@@ -104,6 +104,6 @@ impl UsersController{
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
-    }//end create_user
+    }// end create_user
 
 }

@@ -7,12 +7,10 @@
 extern crate mongodb;
 
 //Import Modules
-use ::bson::{Bson};
-use ::bson::oid::ObjectId;
+use ::bson::{Bson, Document};
 use ::mongodb::coll::options::FindOptions;
-use ::mongodb::{Client, ThreadedClient};
+use ::mongodb::{ThreadedClient};
 use ::mongodb::db::ThreadedDatabase;
-use ::mongodb::error::Result as MongoResult;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 //Models
 use ::models::user_model::{UserModel};
@@ -37,51 +35,104 @@ impl UserDAO{
         }
     }
 
-    /// Fetch All Users
+    /// Find All Users
     ///
     /// # Arguments
     /// self
     ///
     /// # Returns
     /// `Vec<UserModel>`
-    pub fn fetch_all(self) -> Vec<UserModel>{
+    pub fn find_all(self) -> Vec<UserModel>{
         let coll = self.db.collection("users");
+        let mut users = Vec::new();
         
         //Set Find Options and retrieve cursor
         let mut find_options = FindOptions::new();
         find_options.projection = Some(doc!{
             "password" => 0//exclude password
         });
-        let mut cursor = coll.find(None, Some(find_options)).unwrap();
         
-        let mut users = Vec::new();
-        
-        for result in cursor {
-            if let Ok(item) = result {
-                let user = UserModel{
-                    id: match item.get("_id"){ 
-                        Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
-                        _ => None
-                    },
-                    first_name: match item.get("first_name"){ 
-                        Some(&Bson::String(ref first_name)) => Some(first_name.clone()),
-                        _ => None
-                    },
-                    last_name: match item.get("last_name"){ 
-                        Some(&Bson::String(ref last_name)) => Some(last_name.clone()),
-                        _ => None
-                    },
-                    email: match item.get("email"){ 
-                        Some(&Bson::String(ref email)) => Some(email.clone()),
-                        _ => None
-                    },
-                    password: None
-                };
-                users.push(user);
+        match coll.find(None, Some(find_options)){
+            Ok(cursor) => {
+                for result in cursor {
+                    if let Ok(item) = result {
+                        let user = UserModel{
+                            id: match item.get("_id"){ 
+                                Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
+                                _ => None
+                            },
+                            first_name: match item.get("first_name"){ 
+                                Some(&Bson::String(ref first_name)) => Some(first_name.clone()),
+                                _ => None
+                            },
+                            last_name: match item.get("last_name"){ 
+                                Some(&Bson::String(ref last_name)) => Some(last_name.clone()),
+                                _ => None
+                            },
+                            email: match item.get("email"){ 
+                                Some(&Bson::String(ref email)) => Some(email.clone()),
+                                _ => None
+                            },
+                            password: None
+                        };
+                        users.push(user);
+                    }
+                }
+            },
+            Err(e) => {
+                error!("Find All Users failed: {}", e)
             }
         }
         users
-    }
+    }// end find_all
+
+    /// Find a User
+    ///
+    /// # Arguments
+    /// self
+    /// filter - Option<Document> The find filter
+    /// options - Option<FindOptions> The find options
+    ///
+    /// # Returns
+    /// `Option<UserModel>` Some UserModel if found, None otherwise
+    pub fn find(self, filter: Option<Document>, options: Option<FindOptions>) -> Option<UserModel>{
+        let coll = self.db.collection("users");
+        
+        match coll.find_one(filter, options){
+            Ok(result) => {
+                if let Some(document) = result{
+                        Some(UserModel{
+                            id: match document.get("_id"){ 
+                                Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
+                                _ => None
+                            },
+                            first_name: match document.get("first_name"){ 
+                                Some(&Bson::String(ref first_name)) => Some(first_name.clone()),
+                                _ => None
+                            },
+                            last_name: match document.get("last_name"){ 
+                                Some(&Bson::String(ref last_name)) => Some(last_name.clone()),
+                                _ => None
+                            },
+                            email: match document.get("email"){ 
+                                Some(&Bson::String(ref email)) => Some(email.clone()),
+                                _ => None
+                            },
+                            password: match document.get("password"){ 
+                                Some(&Bson::String(ref password)) => Some(password.clone()),
+                                _ => None
+                            }
+                        })
+                }else{
+                    None
+                }    
+            },
+            Err(e) => {
+                error!("Find User failed: {}", e);
+                None
+            }
+        }
+    }// end find
 
     /// Create User
     /// Save new user to the users collection
@@ -107,5 +158,5 @@ impl UserDAO{
             Ok(result) => Ok(result),
             Err(_) => Err(MMError::new("Failed to insert user".to_string(), MMErrorKind::DAO))
         }
-    }
+    }// end create
 }

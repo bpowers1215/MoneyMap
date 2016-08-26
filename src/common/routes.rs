@@ -50,7 +50,7 @@ pub fn get_routes() -> Router<ControllerManager> {
     router.get("/users", middleware! { |request, mut response|
         info!("API Endpoint: GET /users");
         let cm: &ControllerManager = request.server_data();
-        let result = &cm.users_controller.fetch_all(request);
+        let result = &cm.users_controller.find_all(request);
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
