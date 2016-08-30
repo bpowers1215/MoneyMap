@@ -1,4 +1,4 @@
-FROM debian:wheezy
+FROM debian:jessie
 MAINTAINER Brandon Powers "bpowers1215@gmail.com"
 
 # needed by cargo
@@ -12,5 +12,5 @@ WORKDIR /source
 
 EXPOSE 6767 27017
 
-CMD ["cargo", "run"]
-#CMD ["bash"]
+#CMD ["cargo", "run"]
+CMD ["bash"]

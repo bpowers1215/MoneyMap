@@ -4,6 +4,8 @@
 
 // Import Modules
 // External
+//use ::sodiumoxide::crypto::secretbox;
+//use ::sodiumoxide::crypto::pwhash;
 use ::bson::oid::ObjectId;
 // Utilities
 use ::common::validation::validators as Validators;
@@ -42,7 +44,7 @@ impl UserModel{
     /// # Returns
     /// 'ValidationResult' - validation result
     pub fn validate(&self, dao: UserDAO) -> ValidationResult{
-        
+
         //validate user
         let mut validation_result = ValidationResult::new();
         if !Validators::not_empty_string(self.first_name.clone()){
