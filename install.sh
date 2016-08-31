@@ -12,13 +12,12 @@ apt-get update && apt-get install -y sudo curl gdb g++-multilib lib32stdc++6 lib
 curl -sSf https://static.rust-lang.org/rustup.sh | sh
 
 # install libsodium
-apt-get install -y pkg-config software-properties-common python-software-properties
-add-apt-repository ppa:chris-lea/libsodium
-apt-get update && apt-get install -y libsodium18 libsodium-dev
+apt-get install -y pkg-config
+apt-get update && apt-get install -y libsodium-dev
 
 # cleanup package manager
-#apt-get remove --purge -y curl && apt-get autoclean && apt-get clean
-#rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+apt-get remove --purge -y curl && apt-get autoclean && apt-get clean
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # prepare dir
 mkdir /source

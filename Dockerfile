@@ -12,5 +12,5 @@ WORKDIR /source
 
 EXPOSE 6767 27017
 
-#CMD ["cargo", "run"]
-CMD ["bash"]
+CMD ["cargo", "run"]
+#CMD ["bash"]
