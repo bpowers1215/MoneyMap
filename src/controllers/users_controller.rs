@@ -11,7 +11,7 @@ use ::common::api_result::ApiResult;
 // DAO
 use ::dao::dao_manager::DAOManager;
 // Models
-use ::models::user_model::{UserModel, PubUserModel};
+use ::models::user_model::{InUserModel, OutUserModel, UserModel};
 // Controllers
 use ::controllers::controller_manager::ControllerManager;
 
@@ -36,11 +36,11 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<UserModel>>` - ApiResult including a vector of users
-    pub fn find_all(&self, req: &mut Request<ControllerManager>) -> ApiResult<Vec<PubUserModel>>{
+    pub fn find_all(&self, req: &mut Request<ControllerManager>) -> ApiResult<Vec<OutUserModel>>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Fetch all Users");
-                let users = dao.find_all();
+                let users = dao.find();
                 
                 ApiResult::Success{result:users}
             },
@@ -57,17 +57,18 @@ impl UsersController{
     /// req - nickel::Request
     ///
     /// # Returns
-    /// `ApiResult<UserModel>` - ApiResult including the created user
-    pub fn create(&self, req: &mut Request<ControllerManager>) -> ApiResult<PubUserModel>{
+    /// `ApiResult<OutUserModel>` - ApiResult including the created user
+    pub fn create(&self, req: &mut Request<ControllerManager>) -> ApiResult<OutUserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Create New User");
 
-                match req.json_as::<UserModel>(){
-                    Ok(mut user) => {
+                match req.json_as::<InUserModel>(){
+                    Ok(mut in_user) => {
                         // Validate User
-                        let validation_result = user.validate(self.dao_manager.get_user_dao().unwrap());
+                        let validation_result = in_user.validate(self.dao_manager.get_user_dao().unwrap());
                         if validation_result.is_valid(){
+                            let mut user = UserModel::new(in_user);
                             // Save User
                             match dao.create(&user){
                                 Ok(result) => {
@@ -82,7 +83,7 @@ impl UsersController{
                                         None => {}
                                     }
 
-                                    ApiResult::Success{result:PubUserModel::new(user)}
+                                    ApiResult::Success{result:OutUserModel::new(user)}
                                 },
                                 Err(e) => {
                                     error!("{}",e);
@@ -90,7 +91,7 @@ impl UsersController{
                                 }
                             }
                         }else{
-                            ApiResult::Invalid{validation:validation_result, request:PubUserModel::new(user)}
+                            ApiResult::Invalid{validation:validation_result, request:OutUserModel::from_in_user(in_user)}
                         }
                     },
                     Err(e) => {
@@ -105,5 +106,52 @@ impl UsersController{
             }
         }
     }// end create_user
+    
+    /// Log In
+    ///
+    /// # Arguments
+    /// req - nickel::Request
+    ///
+    /// # Returns
+    /// `ApiResult<OutUserModel>` - ApiResult including the logged in user if login successful
+    pub fn login(&self, req: &mut Request<ControllerManager>) -> ApiResult<OutUserModel>{
+        match self.dao_manager.get_user_dao(){
+            Ok(dao) => {
+                // parse input
+                match req.json_as::<InUserModel>(){
+                    Ok(mut in_user) => {
+                        
+                        // validate (require email and password)
+                        let validation_result = in_user.login_validate();
+                        if validation_result.is_valid() {
+                            info!("Login: Form valid");
+                            let filter = doc!{
+                                "email" => { in_user.email.unwrap() }
+                            };
+                            
+                            if let Some(found_user) = dao.find_one(Some(filter), None){
+                                info!("Login: found user for email");
+                                if found_user.verify_password(in_user.password.unwrap()) {
+                                    info!("Login: passwords match");
+                                    return ApiResult::Success{result:OutUserModel::new(found_user)};
+                                }
+                            }
+                            ApiResult::Failure{msg:"Invalid email address or password."}
+                        }else{
+                            ApiResult::Invalid{validation:validation_result, request:OutUserModel::from_in_user(in_user)}
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}",e);
+                        ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
+                    }
+                }
+            },
+            Err(e) => {
+                error!("{}",e);
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+    }// end login
 
 }

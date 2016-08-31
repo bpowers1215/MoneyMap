@@ -12,4 +12,4 @@ extern crate mongodb;
 #[macro_use]
 extern crate nickel;
 extern crate rustc_serialize;
-//extern crate sodiumoxide;
+extern crate sodiumoxide;

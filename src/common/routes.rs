@@ -64,5 +64,14 @@ pub fn get_routes() -> Router<ControllerManager> {
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
     });
+
+    router.post("/users/login", middleware! { |request, mut response|
+        info!("API Endpoint: POST /users/login");
+        let cm: &ControllerManager = request.server_data();
+        let result = &cm.users_controller.login(request);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
 router
 }

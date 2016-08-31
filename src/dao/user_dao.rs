@@ -13,7 +13,7 @@ use ::mongodb::{ThreadedClient};
 use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 //Models
-use ::models::user_model::{UserModel, PubUserModel};
+use ::models::user_model::{UserModel, OutUserModel};
 
 /// User DAO
 pub struct UserDAO{
@@ -41,8 +41,8 @@ impl UserDAO{
     /// self
     ///
     /// # Returns
-    /// `Vec<PubUserModel>`
-    pub fn find_all(self) -> Vec<PubUserModel>{
+    /// `Vec<OutUserModel>`
+    pub fn find(self) -> Vec<OutUserModel>{
         let coll = self.db.collection("users");
         let mut users = Vec::new();
         
@@ -56,7 +56,7 @@ impl UserDAO{
             Ok(cursor) => {
                 for result in cursor {
                     if let Ok(item) = result {
-                        let user = PubUserModel{
+                        let user = OutUserModel{
                             id: match item.get("_id"){ 
                                 Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
                                 _ => None
@@ -83,9 +83,9 @@ impl UserDAO{
             }
         }
         users
-    }// end find_all
+    }// end find
 
-    /// Find a User
+    /// Find a single User
     ///
     /// # Arguments
     /// self
@@ -94,13 +94,13 @@ impl UserDAO{
     ///
     /// # Returns
     /// `Option<UserModel>` Some UserModel if found, None otherwise
-    pub fn find(self, filter: Option<Document>, options: Option<FindOptions>) -> Option<PubUserModel>{
+    pub fn find_one(self, filter: Option<Document>, options: Option<FindOptions>) -> Option<UserModel>{
         let coll = self.db.collection("users");
         
         match coll.find_one(filter, options){
             Ok(result) => {
                 if let Some(document) = result{
-                        Some(PubUserModel{
+                        Some(UserModel{
                             id: match document.get("_id"){ 
                                 Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
                                 _ => None
@@ -116,6 +116,10 @@ impl UserDAO{
                             email: match document.get("email"){ 
                                 Some(&Bson::String(ref email)) => Some(email.clone()),
                                 _ => None
+                            },
+                            password: match document.get("password"){ 
+                                Some(&Bson::String(ref password)) => Some(password.clone()),
+                                _ => None
                             }
                         })
                 }else{
@@ -127,7 +131,7 @@ impl UserDAO{
                 None
             }
         }
-    }// end find
+    }// end find_one
 
     /// Create User
     /// Save new user to the users collection

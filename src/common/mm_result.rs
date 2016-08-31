@@ -17,7 +17,8 @@ pub struct MMError{
 pub enum MMErrorKind{
     Database,
     DAO,
-    Validation,
+    Model,
+    Controller,
     Other
 }
 
