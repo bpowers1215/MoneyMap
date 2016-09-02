@@ -44,6 +44,15 @@ pub struct OutUserModel {
     pub email: Option<String>
 }
 
+#[derive(RustcDecodable, RustcEncodable)]
+pub struct LoginUserModel {
+    pub id: Option<ObjectId>,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub email: Option<String>,
+    pub token: Option<String>
+}
+
 // User Model Methods
 impl UserModel{
 
@@ -67,7 +76,7 @@ impl UserModel{
             }
         }
     }// end new
-    
+
     /// Hash password and base64 encode for storage
     ///
     /// # Arguments
@@ -78,7 +87,7 @@ impl UserModel{
     pub fn hash_password(password: String) -> MMResult<String>{
         //convert password to byte vector
         let pwd = password.as_bytes();
-        
+
         //hash the password
         if let Ok(pwh) = pwhash::pwhash(pwd, pwhash::OPSLIMIT_INTERACTIVE, pwhash::MEMLIMIT_INTERACTIVE){
             //base64 encode byte vector
@@ -153,7 +162,7 @@ impl UserModel{
     pub fn get_password(&self) -> Option<String>{
         self.password.clone()
     }
-    
+
     /// Hash password and base64 encode for storage
     ///
     /// # Arguments
@@ -163,9 +172,9 @@ impl UserModel{
     /// # Returns
     /// bool - True if passwords match, false otherwise
     pub fn verify_password(&self, password: String) -> bool{
-        
+
         if let Some(pws) = self.get_password(){
-            
+
             // base64 decode password string
             if let Ok(pwb) = pws.from_base64(){
                 // create HashedPassword for comparison
@@ -232,7 +241,7 @@ impl InUserModel{
         }
         validation_result
     }//end validate
-    
+
     /// Login Validate User
     /// Require email and password fields
     ///
@@ -255,7 +264,7 @@ impl InUserModel{
 
 // Pub User Model Methods
 impl OutUserModel{
-    
+
     /// Create a OutUserModel from UserModel
     ///
     /// # Arguments
@@ -270,8 +279,8 @@ impl OutUserModel{
             last_name:user.last_name,
             email:user.email
         }
-    }
-        
+    }// end new
+
     /// Create a OutUserModel from InUserModel
     ///
     /// # Arguments
@@ -286,5 +295,43 @@ impl OutUserModel{
             last_name:user.last_name,
             email:user.email
         }
-    }
+    }// end from_in_user
+}
+
+// Login User Model Methods
+impl LoginUserModel{
+
+    /// Create a LoginUserModel from UserModel
+    ///
+    /// # Arguments
+    /// user - UserModel
+    ///
+    /// # Returns
+    /// LoginUserModel - The user
+    pub fn new(user: UserModel, token: String) -> LoginUserModel{
+        LoginUserModel{
+            id:user.id,
+            first_name:user.first_name,
+            last_name:user.last_name,
+            email:user.email,
+            token: Some(token)
+        }
+    }// end new
+
+    /// Create a LoginUserModel from InUserModel
+    ///
+    /// # Arguments
+    /// user - InUserModel
+    ///
+    /// # Returns
+    /// LoginUserModel - The user
+    pub fn from_in_user(user: InUserModel) -> LoginUserModel{
+        LoginUserModel{
+            id:user.id,
+            first_name:user.first_name,
+            last_name:user.last_name,
+            email:user.email,
+            token:None
+        }
+    }// end from_in_user
 }

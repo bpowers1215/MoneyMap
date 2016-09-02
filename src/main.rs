@@ -46,7 +46,7 @@ fn main() {
     let configuration = Config::new();
 
     //Initialize Database Connection
-    let db = match DB::new(configuration){
+    let db = match DB::new(configuration.clone()){
         Ok(db) => db,
         Err(e) => {
             //Cannot create database connection
@@ -60,7 +60,7 @@ fn main() {
     //Initialize Controllers
     let controller_manager = ControllerManager{
         test_controller: TestController::new(dao_manager.clone()),
-        users_controller: UsersController::new(dao_manager.clone())
+        users_controller: UsersController::new(dao_manager.clone(), configuration.clone())
     };
 
     let mut server = Nickel::with_data(controller_manager);

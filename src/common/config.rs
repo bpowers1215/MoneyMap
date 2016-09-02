@@ -10,17 +10,52 @@ use std::io;
 use std::io::prelude::*;
 use std::fs::File;
 
+#[derive(Clone)]
 pub struct Config {
-    pub database: Database
+    pub database: Database,
+    pub auth: Auth
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Database {
     pub host: Option<String>,
     pub port: Option<i64>,
     pub name: Option<String>,
     pub username: Option<String>,
     pub password: Option<String>,
+}
+
+impl Database{
+    /// Define Database defaults
+    ///
+    /// # Returns
+    /// `Database`
+    pub fn default() -> Database{
+        Database{
+            host: None,
+            port: None,
+            name: None,
+            username: None,
+            password: None
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Auth {
+    pub auth_secret: Option<String>
+}
+
+impl Auth{
+    /// Define Database defaults
+    ///
+    /// # Returns
+    /// `Database`
+    pub fn default() -> Auth{
+        Auth{
+            auth_secret: None
+        }
+    }
 }
 
 impl Config{
@@ -32,13 +67,15 @@ impl Config{
     pub fn new() -> Config{
 
         let mut database = None;
+        let mut auth = None;
 
         match read_config_from_file("config/config.toml"){
             Ok(config_string) => {
                 //debug!("Config String: {}", configString);
                 match toml::Parser::new(&config_string).parse(){
                     Some(config_table) => {
-                        database = parse_database_config(config_table);
+                        database = parse_database_config(config_table.clone());
+                        auth = parse_auth_config(config_table.clone());
                     }
                     None => {}
                 }
@@ -50,14 +87,12 @@ impl Config{
 
         Config {
             database: match database{
-                None => Database{
-                    host: None,
-                    port: None,
-                    name: None,
-                    username: None,
-                    password: None
-                },
-                Some(d) => d
+                Some(d) => d,
+                None => Database::default()
+            },
+            auth:match auth{
+                Some(a) => a,
+                None => Auth::default()
             }
         }
     }
@@ -179,6 +214,50 @@ fn parse_database_config(config_table: toml::Table) -> Option<Database>{
         },
         None => {
             warn!("No `database` configuration found.");
+            None
+        }
+    }
+}
+
+/// Parse authentication configuration
+///
+/// # Arguments
+/// * `config_table` - toml::Table The toml file represented as a BTreeMap
+///
+/// # Returns
+/// `Option<Auth>` - Auth Config
+fn parse_auth_config(config_table: toml::Table) -> Option<Auth>{
+    match config_table.get("auth"){
+        Some(ac) => {
+            match ac.as_table(){
+                Some(auth_config) => {
+                    //std::collections::BTreeMap
+                    let auth_secret = match auth_config.get("auth_secret"){
+                        Some(v) => {
+                            //v: toml::Value
+                            match v.as_str(){
+                                Some(vs) => Some(vs.to_string()),
+                                None => {
+                                    warn!("Cannot read authentication auth_secret as string");
+                                    None
+                                }
+                            }
+                        },
+                        None => {
+                            warn!("Authentication auth_secret not found in configuration");
+                            None
+                        }
+                    };
+
+                    Some(Auth{
+                        auth_secret: auth_secret
+                    })
+                },
+                None => None
+            }
+        },
+        None => {
+            warn!("No `authentication` configuration found.");
             None
         }
     }

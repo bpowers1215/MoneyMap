@@ -4,3 +4,5 @@ port = 27017
 name = "moneyMap"
 username = "money_map_client"
 password = "ds(9sj@^DFe>D;3kc"
+[auth]
+auth_secret = "B@4GWjJZ6bKHa1o99Bmv@nWMNh7tNR"

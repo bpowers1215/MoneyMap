@@ -4,30 +4,38 @@
 
 // Import
 // External
-use nickel::{JsonBody, Request};
+use ::nickel::{JsonBody, Request};
 use ::bson::Bson;
+use ::hyper::header;
+use ::hyper::header::{Authorization, Bearer};
+use ::std::default::Default;
+use ::crypto::sha2::Sha256;
+use ::jwt::{Header, Registered, Token};
 // Utilities
 use ::common::api_result::ApiResult;
+use ::common::config::Config;
 // DAO
 use ::dao::dao_manager::DAOManager;
 // Models
-use ::models::user_model::{InUserModel, OutUserModel, UserModel};
+use ::models::user_model::{InUserModel, LoginUserModel, OutUserModel, UserModel};
 // Controllers
 use ::controllers::controller_manager::ControllerManager;
 
 #[derive(Clone)]
 pub struct UsersController{
-    dao_manager: DAOManager
+    dao_manager: DAOManager,
+    config: Config
 }
 
 impl UsersController{
 
-    pub fn new(dao_manager: DAOManager) -> UsersController{
+    pub fn new(dao_manager: DAOManager, config: Config) -> UsersController{
         UsersController{
-            dao_manager: dao_manager
+            dao_manager: dao_manager,
+            config: config
         }
     }
-    
+
     /// Fetch All Users
     /// ToDo: Remove this endpoint for security
     ///
@@ -41,7 +49,7 @@ impl UsersController{
             Ok(dao) => {
                 info!("Fetch all Users");
                 let users = dao.find();
-                
+
                 ApiResult::Success{result:users}
             },
             Err(e) => {
@@ -106,7 +114,7 @@ impl UsersController{
             }
         }
     }// end create_user
-    
+
     /// Log In
     ///
     /// # Arguments
@@ -114,31 +122,55 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<OutUserModel>` - ApiResult including the logged in user if login successful
-    pub fn login(&self, req: &mut Request<ControllerManager>) -> ApiResult<OutUserModel>{
+    pub fn login(&self, req: &mut Request<ControllerManager>) -> ApiResult<LoginUserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 // parse input
                 match req.json_as::<InUserModel>(){
                     Ok(mut in_user) => {
-                        
+
                         // validate (require email and password)
                         let validation_result = in_user.login_validate();
                         if validation_result.is_valid() {
-                            info!("Login: Form valid");
                             let filter = doc!{
                                 "email" => { in_user.email.unwrap() }
                             };
-                            
+
                             if let Some(found_user) = dao.find_one(Some(filter), None){
-                                info!("Login: found user for email");
+                                // Found user for email
                                 if found_user.verify_password(in_user.password.unwrap()) {
-                                    info!("Login: passwords match");
-                                    return ApiResult::Success{result:OutUserModel::new(found_user)};
+                                    // Passwords match
+
+                                    //Create a signed JASON Web Token (JWT) for authentication
+                                    let header: Header = Default::default();
+
+                                    // Define claims
+                                    let claims = Registered {
+                                        sub: Some(found_user.get_email().unwrap()),
+                                        ..Default::default()
+                                    };
+
+                                    let token = Token::new(header, claims);
+
+                                    // Sign the token
+                                    if let Some(ref auth_secret) = self.config.auth.auth_secret{
+                                        match token.signed(auth_secret.as_bytes(), Sha256::new()){
+                                            Ok(jwt) => {
+                                                return ApiResult::Success{result:LoginUserModel::new(found_user, jwt)};
+                                            }
+                                            Err(e) => {
+                                                error!("Login Error. Unable to sign JWT Token: {:?}.", e);
+                                            }
+                                        }
+                                    }else{
+                                        error!("Login Error. Unable to sign JWT Toke. No auth_secret key.");
+                                    }
+                                    return ApiResult::Failure{msg:"Unable to sign token for authentication."};
                                 }
                             }
                             ApiResult::Failure{msg:"Invalid email address or password."}
                         }else{
-                            ApiResult::Invalid{validation:validation_result, request:OutUserModel::from_in_user(in_user)}
+                            ApiResult::Invalid{validation:validation_result, request:LoginUserModel::from_in_user(in_user)}
                         }
                     },
                     Err(e) => {
