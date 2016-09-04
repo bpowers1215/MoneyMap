@@ -6,8 +6,6 @@
 // External
 use ::nickel::{JsonBody, Request};
 use ::bson::Bson;
-use ::hyper::header;
-use ::hyper::header::{Authorization, Bearer};
 use ::std::default::Default;
 use ::crypto::sha2::Sha256;
 use ::jwt::{Header, Registered, Token};
