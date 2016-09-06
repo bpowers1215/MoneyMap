@@ -8,6 +8,7 @@ use nickel::{JsonBody, Request};
 //Utilities
 use ::dao::dao_manager::DAOManager;
 use ::common::api_result::{ApiResult};
+use ::common::data_access::ServerData;
 //Models
 use ::models::test_model::{TestModel};
 //Controllers
@@ -51,7 +52,7 @@ impl TestController{
     ///
     /// # Returns
     /// `APIResult` - Result
-    pub fn save(&self, req: &mut Request<ControllerManager>) -> ApiResult<TestModel>{
+    pub fn save(&self, req: &mut Request<ServerData>) -> ApiResult<TestModel>{
         let result;
         match req.json_as::<TestModel>(){
             Ok(test) => {

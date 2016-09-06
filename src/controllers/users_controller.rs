@@ -12,6 +12,7 @@ use ::jwt::{Header, Registered, Token};
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
+use ::common::data_access::ServerData;
 // DAO
 use ::dao::dao_manager::DAOManager;
 // Models
@@ -42,7 +43,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<UserModel>>` - ApiResult including a vector of users
-    pub fn find_all(&self, req: &mut Request<ControllerManager>) -> ApiResult<Vec<OutUserModel>>{
+    pub fn find_all(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<OutUserModel>>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Fetch all Users");
@@ -64,7 +65,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<OutUserModel>` - ApiResult including the created user
-    pub fn create(&self, req: &mut Request<ControllerManager>) -> ApiResult<OutUserModel>{
+    pub fn create(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Create New User");
@@ -120,7 +121,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<OutUserModel>` - ApiResult including the logged in user if login successful
-    pub fn login(&self, req: &mut Request<ControllerManager>) -> ApiResult<LoginUserModel>{
+    pub fn login(&self, req: &mut Request<ServerData>) -> ApiResult<LoginUserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 // parse input

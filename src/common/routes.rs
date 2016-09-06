@@ -7,10 +7,9 @@
 use nickel::{HttpRouter, MediaType, Nickel, Router};
 // Common Utilities
 use ::common::api_result::{JsonEncoder};
-// Controllers
-use ::controllers::controller_manager::ControllerManager;
+use ::common::data_access::ServerData;
 
-pub fn get_routes() -> Router<ControllerManager> {
+pub fn get_routes() -> Router<ServerData> {
     let mut router = Nickel::router();
     router.get("/", middleware! { |_request, mut response|
         info!("API Endpoint: /");
@@ -21,8 +20,8 @@ pub fn get_routes() -> Router<ControllerManager> {
     //Test Actions
     router.get("/test/retrieve", middleware! { |request, mut response|
         info!("API Endpoint: POST /test/retrieve");
-        let cm: &ControllerManager = request.server_data();
-        let result = &cm.test_controller.retrieve();
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.test_controller.retrieve();
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
@@ -30,8 +29,8 @@ pub fn get_routes() -> Router<ControllerManager> {
 
     router.post("/test/save", middleware! { |request, mut response|
         info!("API Endpoint: POST /test/save");
-        let cm: &ControllerManager = request.server_data();
-        let result = &cm.test_controller.save(request);
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.test_controller.save(request);
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
@@ -39,8 +38,8 @@ pub fn get_routes() -> Router<ControllerManager> {
 
     router.get("/test/failure", middleware! { |request, mut response|
         info!("API Endpoint: GET /test/failure");
-        let cm: &ControllerManager = request.server_data();
-        let result = &cm.test_controller.failure();
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.test_controller.failure();
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
@@ -49,8 +48,8 @@ pub fn get_routes() -> Router<ControllerManager> {
     //Users Actions
     router.get("/users", middleware! { |request, mut response|
         info!("API Endpoint: GET /users");
-        let cm: &ControllerManager = request.server_data();
-        let result = &cm.users_controller.find_all(request);
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.users_controller.find_all(request);
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
@@ -58,8 +57,8 @@ pub fn get_routes() -> Router<ControllerManager> {
 
     router.post("/users", middleware! { |request, mut response|
         info!("API Endpoint: POST /users");
-        let cm: &ControllerManager = request.server_data();
-        let result = &cm.users_controller.create(request);
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.users_controller.create(request);
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
@@ -67,8 +66,8 @@ pub fn get_routes() -> Router<ControllerManager> {
 
     router.post("/users/login", middleware! { |request, mut response|
         info!("API Endpoint: POST /users/login");
-        let cm: &ControllerManager = request.server_data();
-        let result = &cm.users_controller.login(request);
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.users_controller.login(request);
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)

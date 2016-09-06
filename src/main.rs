@@ -29,8 +29,9 @@ use jwt::{Header, Registered, Token};
 use nickel::{MiddlewareResult, Nickel, Response, Request};
 use nickel::status::StatusCode::{Forbidden};
 // Common Utilities
-use money_map::common::database::DB as DB;
-use money_map::common::config::Config as Config;
+use money_map::common::data_access::ServerData;
+use money_map::common::database::DB;
+use money_map::common::config::Config;
 use money_map::common::routes;
 //DAO
 use money_map::dao::dao_manager::{DAOManager};
@@ -65,7 +66,13 @@ fn main() {
         users_controller: UsersController::new(dao_manager.clone(), configuration.clone())
     };
 
-    let mut server = Nickel::with_data(controller_manager);
+    //Initialize Data Access object
+    let server_data = ServerData{
+        config: configuration,
+        controller_manager: controller_manager
+    };
+
+    let mut server = Nickel::with_data(server_data);
 
     server.utilize(authenticator);
     server.utilize(routes::get_routes());
@@ -75,7 +82,7 @@ fn main() {
 
 //TODO: Use the auth secret set in config by passing Config to a new data object passed to Nickel
 static AUTH_SECRET: &'static str = "B@4GWjJZ6bKHa1o99Bmv@nWMNh7tNR";
-fn authenticator<'mw>(request: &mut Request<ControllerManager>, response: Response<'mw, ControllerManager> ) ->MiddlewareResult<'mw, ControllerManager> {
+fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw, ServerData> ) ->MiddlewareResult<'mw, ServerData> {
   // Check if we are getting an OPTIONS request
   if request.origin.method.to_string() == "OPTIONS".to_string() {
       // The middleware should not be used for OPTIONS, so continue
