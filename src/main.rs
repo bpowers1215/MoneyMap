@@ -80,50 +80,48 @@ fn main() {
     server.listen("0.0.0.0:6767");
 }
 
-//TODO: Use the auth secret set in config by passing Config to a new data object passed to Nickel
-static AUTH_SECRET: &'static str = "B@4GWjJZ6bKHa1o99Bmv@nWMNh7tNR";
 fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw, ServerData> ) ->MiddlewareResult<'mw, ServerData> {
-  // Check if we are getting an OPTIONS request
-  if request.origin.method.to_string() == "OPTIONS".to_string() {
-      // The middleware should not be used for OPTIONS, so continue
-      response.next_middleware()
-  } else {
-    // We do not want to apply the middleware to the login route
-    if request.origin.uri.to_string() == "/users/login".to_string() {
+    let server_data: &ServerData = request.server_data();
+
+    // Check if we are getting an OPTIONS request
+    if request.origin.method.to_string() == "OPTIONS".to_string() {
+        // The middleware should not be used for OPTIONS, so continue
         response.next_middleware()
     } else {
-        // Get the full Authorization header from the incoming request headers
-        let auth_header = match request.origin.headers.get::<Authorization<Bearer>>() {
-            Some(header) => header,
-            None => {
-                return response.error(Forbidden, "Access denied. Authentication required.");
+        // We do not want to apply the middleware to the login route
+        if request.origin.uri.to_string() == "/users/login".to_string() {
+            response.next_middleware()
+        } else {
+            // Get the full Authorization header from the incoming request headers
+            let auth_header = match request.origin.headers.get::<Authorization<Bearer>>() {
+                Some(header) => header,
+                None => {
+                    return response.error(Forbidden, "Access denied. Authentication required.");
+                }
+            };
+
+            // Format the header to only take the value
+            let jwt = header::HeaderFormatter(auth_header).to_string();
+
+            // We don't need the Bearer part,
+            // so get whatever is after an index of 7
+            let jwt_slice = &jwt[7..];
+
+            // Parse the token
+            if let Ok(token) = Token::<Header, Registered>::parse(jwt_slice){
+                if let Some(ref auth_secret) = server_data.config.auth.auth_secret{
+                    let secret = auth_secret.as_bytes();
+
+                    // Verify the token
+                    if token.verify(&secret, Sha256::new()) {
+                        return response.next_middleware();
+                    } else {
+                        return response.error(Forbidden, "Access denied. Invalid token.");
+                    }
+                }
+                error!("Authentication failure. Unable to verify JWT Toke. No auth_secret key.");
             }
-        };
-
-        // Format the header to only take the value
-        let jwt = header::HeaderFormatter(auth_header).to_string();
-
-        // We don't need the Bearer part,
-        // so get whatever is after an index of 7
-        let jwt_slice = &jwt[7..];
-
-        // Parse the token
-        if let Ok(token) = Token::<Header, Registered>::parse(jwt_slice){
-            // Get the secret key as bytes
-            let secret = AUTH_SECRET.as_bytes();
-
-            // Verify the token
-            if token.verify(&secret, Sha256::new()) {
-                response.next_middleware()
-            } else {
-                response.error(Forbidden, "Access denied. Invalid token.")
-            }
-        }else{
             response.error(Forbidden, "Access denied. Invalid token format.")
         }
-
-
     }
-  }
-
 }
