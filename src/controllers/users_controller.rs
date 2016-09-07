@@ -4,6 +4,7 @@
 
 // Import
 // External
+use ::chrono::{DateTime, Duration, Local};
 use ::nickel::{JsonBody, Request};
 use ::bson::Bson;
 use ::std::default::Default;
@@ -144,10 +145,7 @@ impl UsersController{
                                     let header: Header = Default::default();
 
                                     // Define claims
-                                    let claims = Registered {
-                                        sub: Some(found_user.get_email().unwrap()),
-                                        ..Default::default()
-                                    };
+                                    let claims = get_auth_claims(&self.config, found_user.get_email().unwrap());
 
                                     let token = Token::new(header, claims);
 
@@ -185,4 +183,28 @@ impl UsersController{
         }
     }// end login
 
-}
+}// end impl UsersController
+
+/// Get JWT auth claims for token
+///
+/// # Arguments
+/// email - String The users email
+///
+/// # Returns
+/// `Registered` - The claims for the JWT token
+fn get_auth_claims(config: &Config, email: String) -> Registered{
+    let mut iss = String::new();
+    if let Some(ref claim_iss) = config.auth.claim_iss{
+        iss = claim_iss.clone();
+    }
+    let iat: DateTime<Local> = Local::now();
+    let exp: DateTime<Local> = Local::now() + Duration::days(1);
+    let claims = Registered {
+        iss: Some(iss),
+        sub: Some(email),
+        exp: Some(exp.timestamp() as u64),
+        iat: Some(iat.timestamp() as u64),
+        ..Default::default()
+    };
+    claims
+}// end get_auth_claims

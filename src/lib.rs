@@ -5,6 +5,7 @@ pub mod models;
 
 #[macro_use(bson, doc)]
 extern crate bson;
+extern crate chrono;
 extern crate crypto;
 extern crate jwt;
 #[macro_use]

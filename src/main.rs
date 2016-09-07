@@ -23,6 +23,7 @@ extern crate log4rs;
 
 // Import
 // External
+use chrono::{DateTime, Local};
 use crypto::sha2::Sha256;
 use hyper::header::{self, Authorization, Bearer};
 use jwt::{Header, Registered, Token};
@@ -114,6 +115,13 @@ fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw,
 
                     // Verify the token
                     if token.verify(&secret, Sha256::new()) {
+                        //Verify The claims
+                        if let Some(exp) = token.claims.exp{
+                            let current_time: DateTime<Local> = Local::now();
+                            if exp as i64 - current_time.timestamp() <= 0{
+                                return response.error(Forbidden, "Access denied. Expired token.");
+                            }
+                        }
                         return response.next_middleware();
                     } else {
                         return response.error(Forbidden, "Access denied. Invalid token.");

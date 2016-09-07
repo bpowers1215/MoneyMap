@@ -43,7 +43,8 @@ impl Database{
 
 #[derive(Clone, Debug)]
 pub struct Auth {
-    pub auth_secret: Option<String>
+    pub auth_secret: Option<String>,
+    pub claim_iss: Option<String>
 }
 
 impl Auth{
@@ -53,7 +54,8 @@ impl Auth{
     /// `Database`
     pub fn default() -> Auth{
         Auth{
-            auth_secret: None
+            auth_secret: None,
+            claim_iss: None
         }
     }
 }
@@ -248,9 +250,26 @@ fn parse_auth_config(config_table: toml::Table) -> Option<Auth>{
                             None
                         }
                     };
+                    let claim_iss = match auth_config.get("claim_iss"){
+                        Some(v) => {
+                            //v: toml::Value
+                            match v.as_str(){
+                                Some(vs) => Some(vs.to_string()),
+                                None => {
+                                    warn!("Cannot read authentication claim_iss as string");
+                                    None
+                                }
+                            }
+                        },
+                        None => {
+                            warn!("Authentication claim_iss not found in configuration");
+                            None
+                        }
+                    };
 
                     Some(Auth{
-                        auth_secret: auth_secret
+                        auth_secret: auth_secret,
+                        claim_iss: claim_iss
                     })
                 },
                 None => None
