@@ -111,29 +111,65 @@ fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw,
             // Parse the token
             if let Ok(token) = Token::<Header, Registered>::parse(jwt_slice){
                 if let Some(ref auth_secret) = server_data.config.auth.auth_secret{
-                    if let Some(ref claim_iss) = server_data.config.auth.claim_iss{
-                        let secret = auth_secret.as_bytes();
+                    let secret = auth_secret.as_bytes();
 
-                        // Verify the token
-                        if token.verify(&secret, Sha256::new()) {
-                            // Verify The claims
-                            if let Some(iss) = token.claims.iss{
-                                // Verify Issuer
-                                if iss.ne(claim_iss){
-                                    return response.error(Forbidden, "Access denied. Invalid token issuer.");
+                    // Verify the token
+                    if token.verify(&secret, Sha256::new()) {
+                        // Verify The claims
+                        let current_time: DateTime<Local> = Local::now();
+
+                        // Verify Issuer claim
+                        if let Some(ref claim_iss) = server_data.config.auth.claim_iss{
+                            match token.claims.iss{
+                                Some(iss) => {
+                                    if iss.ne(claim_iss){
+                                        return response.error(Forbidden, "Access denied. Invalid token issuer.");
+                                    }
+                                },
+                                None => {
+                                    return response.error(Forbidden, "Access denied. Token invalid. Claim iss is required).");
                                 }
                             }
-                            if let Some(exp) = token.claims.exp{
-                                // Verify Expiration
-                                let current_time: DateTime<Local> = Local::now();
-                                if exp as i64 - current_time.timestamp() <= 0{
-                                    return response.error(Forbidden, "Access denied. Expired token.");
-                                }
-                            }
-                            return response.next_middleware();
-                        } else {
-                            return response.error(Forbidden, "Access denied. Invalid token.");
                         }
+
+                        // Verify Issued-At claim
+                        if let Some(ref iat_ack_s) = server_data.config.auth.iat_ack{
+                            match token.claims.iat{
+                                Some(iat) => {
+                                    match DateTime::parse_from_rfc3339(iat_ack_s.as_str()){
+                                        Ok(iat_ack) => {
+                                            if iat as i64 - iat_ack.timestamp() <= 0{
+                                                // Token was issued before iat_ack
+                                                return response.error(Forbidden, "Access denied. Expired token (iat).");
+                                            }
+                                        },
+                                        Err(e) => {
+                                            error!("Authentication: iat_inception format invalid. {}", e);
+                                        }
+                                    }
+                                },
+                                None => {
+                                    return response.error(Forbidden, "Access denied. Token invalid. Claim iat is required).");
+                                }
+                            }
+                        }
+
+                        // Verify Expiration claim
+                        match token.claims.exp{
+                            Some(exp) => {
+                                if exp as i64 - current_time.timestamp() <= 0{
+                                    return response.error(Forbidden, "Access denied. Expired token (exp).");
+                                }
+                            },
+                            None => {
+                                return response.error(Forbidden, "Access denied. Token invalid. Claim exp is required).");
+                            }
+                        }
+
+                        // Token signature and claims verified
+                        return response.next_middleware();
+                    } else {
+                        return response.error(Forbidden, "Access denied. Invalid token.");
                     }
                 }
                 error!("Authentication failure. Unable to verify JWT Toke. No auth_secret key.");

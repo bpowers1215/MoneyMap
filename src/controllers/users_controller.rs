@@ -194,7 +194,7 @@ impl UsersController{
 /// `Registered` - The claims for the JWT token
 fn get_auth_claims(config: &Config, email: String) -> Registered{
     let mut iss = String::new();
-    let mut exp_duration = 1;
+    let mut exp_duration = 1;// default expiration duration to 1 minute
     if let Some(ref claim_iss) = config.auth.claim_iss{
         iss = claim_iss.clone();
     }

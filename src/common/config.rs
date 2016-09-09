@@ -45,7 +45,8 @@ impl Database{
 pub struct Auth {
     pub auth_secret: Option<String>,
     pub claim_iss: Option<String>,
-    pub exp_duration: Option<i64>
+    pub exp_duration: Option<i64>,
+    pub iat_ack: Option<String>
 }
 
 impl Auth{
@@ -57,7 +58,8 @@ impl Auth{
         Auth{
             auth_secret: None,
             claim_iss: None,
-            exp_duration: None
+            exp_duration: None,
+            iat_ack: None
         }
     }
 }
@@ -207,10 +209,10 @@ fn parse_database_config(config_table: toml::Table) -> Option<Database>{
 
                     Some(Database{
                         host: host,
-                        port:  port,
-                        name:  name,
-                        username:  username,
-                        password:  password
+                        port: port,
+                        name: name,
+                        username: username,
+                        password: password
                     })
                 },
                 None => None
@@ -275,11 +277,28 @@ fn parse_auth_config(config_table: toml::Table) -> Option<Auth>{
                             None
                         }
                     };
+                    let iat_ack = match auth_config.get("iat_ack"){
+                        Some(v) => {
+                            //v: toml::Value
+                            match v.as_str(){
+                                Some(vs) => Some(vs.to_string()),
+                                None => {
+                                    warn!("Cannot read authentication iat_ack as string");
+                                    None
+                                }
+                            }
+                        },
+                        None => {
+                            warn!("Authentication iat_ack not found in configuration");
+                            None
+                        }
+                    };
 
                     Some(Auth{
                         auth_secret: auth_secret,
                         claim_iss: claim_iss,
-                        exp_duration: exp_duration
+                        exp_duration: exp_duration,
+                        iat_ack: iat_ack
                     })
                 },
                 None => None
