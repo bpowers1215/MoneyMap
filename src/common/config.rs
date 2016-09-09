@@ -44,7 +44,8 @@ impl Database{
 #[derive(Clone, Debug)]
 pub struct Auth {
     pub auth_secret: Option<String>,
-    pub claim_iss: Option<String>
+    pub claim_iss: Option<String>,
+    pub exp_duration: Option<i64>
 }
 
 impl Auth{
@@ -55,7 +56,8 @@ impl Auth{
     pub fn default() -> Auth{
         Auth{
             auth_secret: None,
-            claim_iss: None
+            claim_iss: None,
+            exp_duration: None
         }
     }
 }
@@ -73,7 +75,7 @@ impl Config{
 
         match read_config_from_file("config/config.toml"){
             Ok(config_string) => {
-                //debug!("Config String: {}", configString);
+
                 match toml::Parser::new(&config_string).parse(){
                     Some(config_table) => {
                         database = parse_database_config(config_table.clone());
@@ -266,10 +268,18 @@ fn parse_auth_config(config_table: toml::Table) -> Option<Auth>{
                             None
                         }
                     };
+                    let exp_duration = match auth_config.get("exp_duration"){
+                        Some(v) => v.as_integer(),//v: toml::Value
+                        None => {
+                            warn!("Authentication exp_duration not found in configuration");
+                            None
+                        }
+                    };
 
                     Some(Auth{
                         auth_secret: auth_secret,
-                        claim_iss: claim_iss
+                        claim_iss: claim_iss,
+                        exp_duration: exp_duration
                     })
                 },
                 None => None

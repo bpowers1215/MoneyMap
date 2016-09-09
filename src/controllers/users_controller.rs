@@ -194,11 +194,15 @@ impl UsersController{
 /// `Registered` - The claims for the JWT token
 fn get_auth_claims(config: &Config, email: String) -> Registered{
     let mut iss = String::new();
+    let mut exp_duration = 1;
     if let Some(ref claim_iss) = config.auth.claim_iss{
         iss = claim_iss.clone();
     }
+    if let Some(ref exp_dur) = config.auth.exp_duration{
+        exp_duration = exp_dur.clone();
+    }
     let iat: DateTime<Local> = Local::now();
-    let exp: DateTime<Local> = Local::now() + Duration::days(1);
+    let exp: DateTime<Local> = Local::now() + Duration::minutes(exp_duration);
     let claims = Registered {
         iss: Some(iss),
         sub: Some(email),
