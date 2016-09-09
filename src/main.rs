@@ -111,20 +111,29 @@ fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw,
             // Parse the token
             if let Ok(token) = Token::<Header, Registered>::parse(jwt_slice){
                 if let Some(ref auth_secret) = server_data.config.auth.auth_secret{
-                    let secret = auth_secret.as_bytes();
+                    if let Some(ref claim_iss) = server_data.config.auth.claim_iss{
+                        let secret = auth_secret.as_bytes();
 
-                    // Verify the token
-                    if token.verify(&secret, Sha256::new()) {
-                        //Verify The claims
-                        if let Some(exp) = token.claims.exp{
-                            let current_time: DateTime<Local> = Local::now();
-                            if exp as i64 - current_time.timestamp() <= 0{
-                                return response.error(Forbidden, "Access denied. Expired token.");
+                        // Verify the token
+                        if token.verify(&secret, Sha256::new()) {
+                            // Verify The claims
+                            if let Some(iss) = token.claims.iss{
+                                // Verify Issuer
+                                if iss.ne(claim_iss){
+                                    return response.error(Forbidden, "Access denied. Invalid token issuer.");
+                                }
                             }
+                            if let Some(exp) = token.claims.exp{
+                                // Verify Expiration
+                                let current_time: DateTime<Local> = Local::now();
+                                if exp as i64 - current_time.timestamp() <= 0{
+                                    return response.error(Forbidden, "Access denied. Expired token.");
+                                }
+                            }
+                            return response.next_middleware();
+                        } else {
+                            return response.error(Forbidden, "Access denied. Invalid token.");
                         }
-                        return response.next_middleware();
-                    } else {
-                        return response.error(Forbidden, "Access denied. Invalid token.");
                     }
                 }
                 error!("Authentication failure. Unable to verify JWT Toke. No auth_secret key.");
