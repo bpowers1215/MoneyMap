@@ -138,7 +138,7 @@ fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw,
                                 Some(iat) => {
                                     match DateTime::parse_from_rfc3339(iat_ack_s.as_str()){
                                         Ok(iat_ack) => {
-                                            if iat as i64 - iat_ack.timestamp() <= 0{
+                                            if iat as i64 <= iat_ack.timestamp(){
                                                 // Token was issued before iat_ack
                                                 return response.error(Forbidden, "Access denied. Expired token (iat).");
                                             }
@@ -157,7 +157,7 @@ fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw,
                         // Verify Expiration claim
                         match token.claims.exp{
                             Some(exp) => {
-                                if exp as i64 - current_time.timestamp() <= 0{
+                                if exp as i64 <= current_time.timestamp(){
                                     return response.error(Forbidden, "Access denied. Expired token (exp).");
                                 }
                             },
