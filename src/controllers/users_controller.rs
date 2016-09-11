@@ -18,8 +18,6 @@ use ::common::data_access::ServerData;
 use ::dao::dao_manager::DAOManager;
 // Models
 use ::models::user_model::{InUserModel, LoginUserModel, OutUserModel, UserModel};
-// Controllers
-use ::controllers::controller_manager::ControllerManager;
 
 #[derive(Clone)]
 pub struct UsersController{
@@ -44,7 +42,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<UserModel>>` - ApiResult including a vector of users
-    pub fn find_all(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<OutUserModel>>{
+    pub fn find_all(&self) -> ApiResult<Vec<OutUserModel>>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Fetch all Users");
@@ -72,7 +70,7 @@ impl UsersController{
                 info!("Create New User");
 
                 match req.json_as::<InUserModel>(){
-                    Ok(mut in_user) => {
+                    Ok(in_user) => {
                         // Validate User
                         let validation_result = in_user.validate(self.dao_manager.get_user_dao().unwrap());
                         if validation_result.is_valid(){
@@ -127,7 +125,7 @@ impl UsersController{
             Ok(dao) => {
                 // parse input
                 match req.json_as::<InUserModel>(){
-                    Ok(mut in_user) => {
+                    Ok(in_user) => {
 
                         // validate (require email and password)
                         let validation_result = in_user.login_validate();
