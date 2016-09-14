@@ -2,6 +2,20 @@
 
 /// Validators
 
+/// Check that a field is not supplied, or None
+///
+/// # Arguments
+/// val - Option<T> the Option field
+///
+/// # Returns
+/// 'bool' - True if valid, false otherwise (None)
+pub fn empty<T>(val: &Option<T>) -> bool{
+    match val{
+        &Some(_) => false,
+        &None => true
+    }
+}
+
 /// Check that a field is not empty
 ///
 /// # Arguments

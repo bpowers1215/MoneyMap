@@ -67,12 +67,11 @@ impl UsersController{
     pub fn create(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
-                info!("Create New User");
 
                 match req.json_as::<InUserModel>(){
                     Ok(in_user) => {
                         // Validate User
-                        let validation_result = in_user.validate(self.dao_manager.get_user_dao().unwrap());
+                        let validation_result = in_user.validate_new(self.dao_manager.get_user_dao().unwrap());
                         if validation_result.is_valid(){
                             let mut user = UserModel::new(in_user);
                             // Save User
@@ -112,6 +111,50 @@ impl UsersController{
             }
         }
     }// end create_user
+
+    /// Modify User
+    ///
+    /// # Arguments
+    /// req - nickel::Request
+    ///
+    /// # Returns
+    /// `ApiResult<OutUserModel>` - ApiResult including the modified user
+    pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel>{
+        match self.dao_manager.get_user_dao(){
+            Ok(dao) => {
+
+                match req.json_as::<InUserModel>(){
+                    Ok(in_user) => {
+                        // Validate User
+                        let validation_result = in_user.validate_existing(self.dao_manager.get_user_dao().unwrap());
+                        if validation_result.is_valid(){
+                            let mut user = UserModel::new(in_user);
+                            // Save User
+                            match dao.update(&user){
+                                Ok(result) => {
+                                    ApiResult::Success{result:OutUserModel::new(user)}
+                                },
+                                Err(e) => {
+                                    error!("{}",e);
+                                    ApiResult::Failure{msg:"Unable to save user"}
+                                }
+                            }
+                        }else{
+                            ApiResult::Invalid{validation:validation_result, request:OutUserModel::from_in_user(in_user)}
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}",e);
+                        ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
+                    }
+                }
+            },
+            Err(e) => {
+                error!("{}",e);
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+    }// end modify
 
     /// Log In
     ///

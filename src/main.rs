@@ -81,7 +81,7 @@ fn main() {
     server.listen("0.0.0.0:6767");
 }
 
-fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw, ServerData> ) ->MiddlewareResult<'mw, ServerData> {
+fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw, ServerData> ) -> MiddlewareResult<'mw, ServerData> {
     let server_data: &ServerData = request.server_data();
 
     // Check if we are getting an OPTIONS request
@@ -90,7 +90,7 @@ fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<'mw,
         response.next_middleware()
     } else {
         // We do not want to apply the middleware to the login route
-        if request.origin.uri.to_string() == "/users/login".to_string() {
+        if request.origin.uri.to_string() == "/account/login".to_string() {
             response.next_middleware()
         } else {
             // Get the full Authorization header from the incoming request headers

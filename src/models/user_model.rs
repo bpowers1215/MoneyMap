@@ -195,7 +195,7 @@ impl UserModel{
 // In User Model Methods
 impl InUserModel{
 
-    /// Validate User
+    /// Validate New User
     ///
     /// # Arguments
     /// self
@@ -203,7 +203,7 @@ impl InUserModel{
     ///
     /// # Returns
     /// 'ValidationResult' - validation result
-    pub fn validate(&self, dao: UserDAO) -> ValidationResult{
+    pub fn validate_new(&self, dao: UserDAO) -> ValidationResult{
 
         //validate user
         let mut validation_result = ValidationResult::new();
@@ -240,7 +240,48 @@ impl InUserModel{
             }
         }
         validation_result
-    }//end validate
+    }//end validate_new
+
+    /// Validate Existing User
+    ///
+    /// # Arguments
+    /// self
+    /// dao - UserDAO
+    ///
+    /// # Returns
+    /// 'ValidationResult' - validation result
+    pub fn validate_existing(&self, dao: UserDAO) -> ValidationResult{
+
+        //validate user
+        let mut validation_result = ValidationResult::new();
+        if !Validators::empty(&self.first_name){
+            if !Validators::not_empty_string(self.first_name.clone()){
+                validation_result.add_error("first_name".to_string(), "First Name is required.".to_string());
+            }
+        }
+        if !Validators::empty(&self.last_name){
+            if !Validators::not_empty_string(self.last_name.clone()){
+                validation_result.add_error("last_name".to_string(), "Last Name is required.".to_string());
+            }
+        }
+        if !Validators::empty(&self.email){
+            validation_result.add_error("email".to_string(), "Email cannot be changed.".to_string());
+        }
+        if Validators::not_empty_string(self.password.clone()){
+            // Verify confirm password and passwords match if a password is supplied
+            if !Validators::not_empty_string(self.confirm_password.clone()){
+                validation_result.add_error("confirm_password".to_string(), "Confirm Password is required.".to_string());
+            }
+            if let Some(password) = self.password.clone(){
+                if let Some(confirm_password) = self.confirm_password.clone(){
+                    if password.as_str() != "" && confirm_password.as_str() != "" && !Validators::equals(password.clone(), confirm_password){
+                        validation_result.add_error("confirm_password".to_string(), "Passwords must match.".to_string());
+                    }
+                }
+            }
+        }
+        validation_result
+    }//end validate_existing
 
     /// Login Validate User
     /// Require email and password fields

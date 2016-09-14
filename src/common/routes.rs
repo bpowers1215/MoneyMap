@@ -55,8 +55,8 @@ pub fn get_routes() -> Router<ServerData> {
         JsonEncoder::encode(result)
     });
 
-    router.post("/users", middleware! { |request, mut response|
-        info!("API Endpoint: POST /users");
+    router.post("/account", middleware! { |request, mut response|
+        info!("API Endpoint: POST /account");
         let sd: &ServerData = request.server_data();
         let result = &sd.controller_manager.users_controller.create(request);
 
@@ -64,8 +64,17 @@ pub fn get_routes() -> Router<ServerData> {
         JsonEncoder::encode(result)
     });
 
-    router.post("/users/login", middleware! { |request, mut response|
-        info!("API Endpoint: POST /users/login");
+    router.patch("/account", middleware! { |request, mut response|
+        info!("API Endpoint: PUT /account");
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.users_controller.modify(request);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
+
+    router.post("/account/login", middleware! { |request, mut response|
+        info!("API Endpoint: POST /account/login");
         let sd: &ServerData = request.server_data();
         let result = &sd.controller_manager.users_controller.login(request);
 
