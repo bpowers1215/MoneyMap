@@ -40,7 +40,7 @@ impl DAOManager{
     pub fn get_user_dao(&self) -> MMResult<UserDAO>{
         match self.db.get_database(){
             Some(db) => Ok(UserDAO::new(db)),
-            None => Err(MMError::new("Error: database connection not established".to_string(), MMErrorKind::Database))
+            None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
     }
 
@@ -54,7 +54,7 @@ impl DAOManager{
     pub fn get_money_map_dao(&self) -> MMResult<MoneyMapDAO>{
         match self.db.get_database(){
             Some(db) => Ok(MoneyMapDAO::new(db)),
-            None => Err(MMError::new("Error: database connection not established".to_string(), MMErrorKind::Database))
+            None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
     }
 
@@ -66,7 +66,7 @@ impl DAOManager{
                     UserDAO => Ok(DAO::UserDAO(UserDAO::new(db)))
                 }
             },
-            None => return Err(MMError::new("Error: database connection not established".to_string(), MMErrorKind::Database))
+            None => return Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
     }*/
 }

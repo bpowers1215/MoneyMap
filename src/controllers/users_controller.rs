@@ -14,6 +14,7 @@ use ::jwt::{Header, Registered, Token};
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
 use ::common::data_access::ServerData;
+use ::common::session as Session;
 // DAO
 use ::dao::dao_manager::DAOManager;
 // Models
@@ -51,7 +52,7 @@ impl UsersController{
                 ApiResult::Success{result:users}
             },
             Err(e) => {
-                error!("{}",e);
+                error!("{}",e.get_message().to_string());
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
@@ -106,7 +107,7 @@ impl UsersController{
                 }
             },
             Err(e) => {
-                error!("{}",e);
+                error!("{}",e.get_message().to_string());
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
@@ -120,6 +121,17 @@ impl UsersController{
     /// # Returns
     /// `ApiResult<OutUserModel>` - ApiResult including the modified user
     pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel>{
+
+        let email = match Session::get_session_email(req){
+            Ok(email) => email,
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                return ApiResult::Failure{msg:"Unable to retrieve session data."};
+            }
+        };
+        //TODO: Pass email to dao.update to update the appropriate user
+        debug!("SESSION EMAIL: {}", email);
+
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
 
@@ -150,7 +162,7 @@ impl UsersController{
                 }
             },
             Err(e) => {
-                error!("{}",e);
+                error!("{}",e.get_message().to_string());
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
@@ -186,7 +198,7 @@ impl UsersController{
                                     let header: Header = Default::default();
 
                                     // Define claims
-                                    let claims = get_auth_claims(&self.config, found_user.get_email().unwrap());
+                                    let claims = create_auth_claims(&self.config, found_user.get_email().unwrap());
 
                                     let token = Token::new(header, claims);
 
@@ -218,7 +230,7 @@ impl UsersController{
                 }
             },
             Err(e) => {
-                error!("{}",e);
+                error!("{}",e.get_message().to_string());
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
@@ -233,7 +245,7 @@ impl UsersController{
 ///
 /// # Returns
 /// `Registered` - The claims for the JWT token
-fn get_auth_claims(config: &Config, email: String) -> Registered{
+fn create_auth_claims(config: &Config, email: String) -> Registered{
     let mut iss = String::new();
     let mut exp_duration = 1;// default expiration duration to 1 minute
     if let Some(ref claim_iss) = config.auth.claim_iss{
@@ -252,4 +264,4 @@ fn get_auth_claims(config: &Config, email: String) -> Registered{
         ..Default::default()
     };
     claims
-}// end get_auth_claims
+}// end create_auth_claims

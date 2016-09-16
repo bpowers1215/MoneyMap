@@ -10,7 +10,7 @@ pub type MMResult<T> = Result<T, MMError>;
 #[derive(Debug)]
 pub struct MMError{
     kind:MMErrorKind,
-    message: String
+    message: &'static str
 }
 
 #[derive(Debug)]
@@ -23,11 +23,14 @@ pub enum MMErrorKind{
 }
 
 impl MMError{
-    pub fn new(msg: String, kind: MMErrorKind) -> MMError{
+    pub fn new(msg: &'static str, kind: MMErrorKind) -> MMError{
         MMError{
             kind:kind,
             message:msg
         }
+    }
+    pub fn get_message(self) -> &'static str{
+        self.message
     }
 }
 impl fmt::Display for MMError {

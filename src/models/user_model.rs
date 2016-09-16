@@ -93,10 +93,9 @@ impl UserModel{
             //base64 encode byte vector
             let pwh_bytes = &pwh[..];
             let pwd_string = pwh_bytes.to_base64(Base64::STANDARD);
-            debug!("Hashed base64 Password: {:?}", pwd_string);
             Ok(pwd_string)
         }else{
-            Err(MMError::new("Unable to hash password".to_string(), MMErrorKind::Model))
+            Err(MMError::new("Unable to hash password", MMErrorKind::Model))
         }
     }// end hash_password
 

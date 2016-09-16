@@ -6,7 +6,10 @@
 //import
 extern crate mongodb;
 
-//Import Modules
+// Import Modules
+// External
+use std::error::Error;
+// Common Utilities
 use ::bson::{Bson, Document};
 use ::mongodb::coll::options::FindOptions;
 use ::mongodb::{ThreadedClient};
@@ -155,7 +158,10 @@ impl UserDAO{
         // Insert document into `users` collection
         match coll.insert_one(doc.clone(), None){
             Ok(result) => Ok(result),
-            Err(e) => Err(MMError::new(format!("Failed to insert user: {}", e), MMErrorKind::DAO))
+            Err(e) => {
+                warn!("{}", e);
+                Err(MMError::new("Failed to insert user", MMErrorKind::DAO))
+            }
         }
     }// end create
 
@@ -191,7 +197,10 @@ impl UserDAO{
         // Update the user
         match coll.update_one(filter.clone(), update_doc.clone(), None){
             Ok(result) => Ok(result),
-            Err(e) => Err(MMError::new(format!("Failed to update user: {}", e), MMErrorKind::DAO))
+            Err(e) => {
+                warn!("{}", e);
+                Err(MMError::new("Failed to update user.", MMErrorKind::DAO))
+            }
         }
     }// end update
 }

@@ -39,35 +39,35 @@ impl DB{
             Some(v) => v,
             None => {
                 warn!("Database configuration missing: host");
-                return Err(MMError::new("Database configuration missing: host".to_string(), MMErrorKind::Database));
+                return Err(MMError::new("Database configuration missing: host", MMErrorKind::Database));
             }
         };
         let db_port = match config.database.port{
             Some(v) => v,
             None => {
                 warn!("Database configuration missing: port");
-                return Err(MMError::new("Database configuration missing: port".to_string(), MMErrorKind::Database));
+                return Err(MMError::new("Database configuration missing: port", MMErrorKind::Database));
             }
         };
         let db_name = match config.database.name{
             Some(v) => v,
             None => {
                 warn!("Database configuration missing: name");
-                return Err(MMError::new("Database configuration missing: name".to_string(), MMErrorKind::Database));
+                return Err(MMError::new("Database configuration missing: name", MMErrorKind::Database));
             }
         };
         let db_user = match config.database.username{
             Some(v) => v,
             None => {
                 warn!("Database configuration missing: username");
-                return Err(MMError::new("Database configuration missing: username".to_string(), MMErrorKind::Database));
+                return Err(MMError::new("Database configuration missing: username", MMErrorKind::Database));
             }
         };
         let db_pass = match config.database.password{
             Some(v) => v,
             None => {
                 warn!("Database configuration missing: password");
-                return Err(MMError::new("Database configuration missing: password".to_string(), MMErrorKind::Database));
+                return Err(MMError::new("Database configuration missing: password", MMErrorKind::Database));
             }
         };
         let mut db = DB {
@@ -150,7 +150,7 @@ impl DB{
             None => {
                 //Database connection could not be established
                 warn!("Error establishing database connection");
-                return Err(MMError::new("Error establishing database connection.".to_string(), MMErrorKind::Database));
+                return Err(MMError::new("Error establishing database connection.", MMErrorKind::Database));
             }
         }
     }
@@ -169,12 +169,12 @@ impl DB{
                 match db.auth(&self.db_user, &self.db_pass){
                     Ok(_) => Ok(()),
                     Err(_) => {
-                        Err(MMError::new("Failed to authorize database user.".to_string(), MMErrorKind::Database))
+                        Err(MMError::new("Failed to authorize database user.", MMErrorKind::Database))
                     }
                 }
             },
             &None => {
-                Err(MMError::new("No database connection to authenticate on.".to_string(), MMErrorKind::Database))
+                Err(MMError::new("No database connection to authenticate on.", MMErrorKind::Database))
             }
         }
 
@@ -202,13 +202,13 @@ impl DB{
                     Ok(count) => Ok(count),
                     Err(e) => {
                         warn!("Get Count: {}", e);
-                        Err(MMError::new("Error getting count from DB".to_string(), MMErrorKind::Database))
+                        Err(MMError::new("Error getting count from DB", MMErrorKind::Database))
                     }
                 }
             },
             None => {
                 warn!("{}", ERROR_DB_MISS);
-                Err(MMError::new(ERROR_DB_MISS.to_string(), MMErrorKind::Database))
+                Err(MMError::new(ERROR_DB_MISS, MMErrorKind::Database))
             }
         }
     }
