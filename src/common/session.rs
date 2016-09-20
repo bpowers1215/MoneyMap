@@ -71,7 +71,7 @@ pub fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<
 ///
 /// # Returns
 /// `MMResult<()>` Ok if token is verified, Err otherwise
-pub fn get_session_email(request: &Request<ServerData>) -> MMResult<String>{
+pub fn get_session_id(request: &Request<ServerData>) -> MMResult<String>{
     let server_data: &ServerData = request.server_data();
 
     let token = match get_jwt_from_header(request){
@@ -84,12 +84,12 @@ pub fn get_session_email(request: &Request<ServerData>) -> MMResult<String>{
     if let Some(ref auth_secret) = server_data.config.auth.auth_secret{
         let secret = auth_secret.as_bytes();
 
-        return get_token_email(token, &secret);
+        return get_token_sub(token, &secret);
     }
     error!("Authentication failure. Unable to verify JWT Token. No auth_secret key.");
 
     Err(MMError::new("Token claim cannot be retrieved.", MMErrorKind::Other))
-}// end get_session_email
+}// end get_session_id
 
 /// Validate a JWT Token
 /// Verify the signature and validate claims
@@ -210,7 +210,7 @@ fn get_jwt_from_header(request: &Request<ServerData>) -> MMResult<Token<Header, 
 ///
 /// # Returns
 /// `MMResult<()>` Ok if token is verified, Err otherwise
-fn get_token_email(token: Token<Header, Registered>, secret: &[u8]) -> MMResult<String>{
+fn get_token_sub(token: Token<Header, Registered>, secret: &[u8]) -> MMResult<String>{
     // Verify the token
     if token.verify(secret, Sha256::new()) {
 
@@ -220,4 +220,4 @@ fn get_token_email(token: Token<Header, Registered>, secret: &[u8]) -> MMResult<
         }
     }
     Err(MMError::new("Token claim cannot be retrieved.", MMErrorKind::Other))
-}// end get_token_email
+}// end get_token_sub

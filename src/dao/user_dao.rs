@@ -11,6 +11,7 @@ extern crate mongodb;
 use std::error::Error;
 // Common Utilities
 use ::bson::{Bson, Document};
+use ::bson::oid::ObjectId;
 use ::mongodb::coll::options::FindOptions;
 use ::mongodb::{ThreadedClient};
 use ::mongodb::db::ThreadedDatabase;
@@ -170,35 +171,44 @@ impl UserDAO{
     ///
     /// # Arguments
     /// self
+    /// user_id - String User identifier
     /// &user - models::user_model::UserModel The user
     ///
     /// # Returns
     /// `MMResult<()>`
-    pub fn update(self, user: &UserModel) -> MMResult<mongodb::coll::results::UpdateResult>{
+    pub fn update(self, user_id: String, user: &UserModel) -> MMResult<mongodb::coll::results::UpdateResult>{
         let coll = self.db.collection("users");
 
-        let filter = doc! {
-            "email" => ""// TODO: pass in the authenticated user's email
-        };
+        match ObjectId::with_string(user_id.as_str()){
+            Ok(id) => {
+                let filter = doc! {
+                    "_id" => id
+                };
 
-        // Build `$set` document to update document
-        let mut set_doc = doc!{};
-        if let Some(first_name) = user.get_first_name(){
-            set_doc.insert_bson("first_name".to_string(), Bson::String(first_name));
-        }
-        if let Some(last_name) = user.get_last_name(){
-            set_doc.insert_bson("last_name".to_string(), Bson::String(last_name));
-        }
-        if let Some(password) = user.get_password(){
-            set_doc.insert_bson("password".to_string(), Bson::String(password));
-        }
-        let update_doc = doc! {"$set" => set_doc};
+                // Build `$set` document to update document
+                let mut set_doc = doc!{};
+                if let Some(first_name) = user.get_first_name(){
+                    set_doc.insert_bson("first_name".to_string(), Bson::String(first_name));
+                }
+                if let Some(last_name) = user.get_last_name(){
+                    set_doc.insert_bson("last_name".to_string(), Bson::String(last_name));
+                }
+                if let Some(password) = user.get_password(){
+                    set_doc.insert_bson("password".to_string(), Bson::String(password));
+                }
+                let update_doc = doc! {"$set" => set_doc};
 
-        // Update the user
-        match coll.update_one(filter.clone(), update_doc.clone(), None){
-            Ok(result) => Ok(result),
+                // Update the user
+                match coll.update_one(filter.clone(), update_doc.clone(), None){
+                    Ok(result) => Ok(result),
+                    Err(e) => {
+                        error!("{}", e);
+                        Err(MMError::new("Failed to update user.", MMErrorKind::DAO))
+                    }
+                }
+            },
             Err(e) => {
-                warn!("{}", e);
+                error!("{}", e);
                 Err(MMError::new("Failed to update user.", MMErrorKind::DAO))
             }
         }

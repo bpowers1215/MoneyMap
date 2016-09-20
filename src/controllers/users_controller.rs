@@ -10,6 +10,7 @@ use ::bson::Bson;
 use ::std::default::Default;
 use ::crypto::sha2::Sha256;
 use ::jwt::{Header, Registered, Token};
+use ::rustc_serialize::hex::ToHex;
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
@@ -122,15 +123,13 @@ impl UsersController{
     /// `ApiResult<OutUserModel>` - ApiResult including the modified user
     pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel>{
 
-        let email = match Session::get_session_email(req){
-            Ok(email) => email,
+        let user_id = match Session::get_session_id(req){
+            Ok(id) => id,
             Err(e) => {
                 error!("{}",e.get_message().to_string());
                 return ApiResult::Failure{msg:"Unable to retrieve session data."};
             }
         };
-        //TODO: Pass email to dao.update to update the appropriate user
-        debug!("SESSION EMAIL: {}", email);
 
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
@@ -142,9 +141,13 @@ impl UsersController{
                         if validation_result.is_valid(){
                             let mut user = UserModel::new(in_user);
                             // Save User
-                            match dao.update(&user){
+                            match dao.update(user_id, &user){
                                 Ok(result) => {
-                                    ApiResult::Success{result:OutUserModel::new(user)}
+                                    if result.acknowledged && result.modified_count > 0 {
+                                        ApiResult::Success{result:OutUserModel::new(user)}
+                                    }else{
+                                        ApiResult::Failure{msg:"Unable failed."}
+                                    }
                                 },
                                 Err(e) => {
                                     error!("{}",e);
@@ -198,7 +201,7 @@ impl UsersController{
                                     let header: Header = Default::default();
 
                                     // Define claims
-                                    let claims = create_auth_claims(&self.config, found_user.get_email().unwrap());
+                                    let claims = create_auth_claims(&self.config, found_user.get_id().unwrap().to_hex());
 
                                     let token = Token::new(header, claims);
 
@@ -241,11 +244,11 @@ impl UsersController{
 /// Get JWT auth claims for token
 ///
 /// # Arguments
-/// email - String The users email
+/// id - String The users ID
 ///
 /// # Returns
 /// `Registered` - The claims for the JWT token
-fn create_auth_claims(config: &Config, email: String) -> Registered{
+fn create_auth_claims(config: &Config, id: String) -> Registered{
     let mut iss = String::new();
     let mut exp_duration = 1;// default expiration duration to 1 minute
     if let Some(ref claim_iss) = config.auth.claim_iss{
@@ -258,7 +261,7 @@ fn create_auth_claims(config: &Config, email: String) -> Registered{
     let exp: DateTime<Local> = Local::now() + Duration::minutes(exp_duration);
     let claims = Registered {
         iss: Some(iss),
-        sub: Some(email),
+        sub: Some(id),
         exp: Some(exp.timestamp() as u64),
         iat: Some(iat.timestamp() as u64),
         ..Default::default()
