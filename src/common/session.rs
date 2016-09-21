@@ -8,7 +8,7 @@ use chrono::{DateTime, Local};
 use crypto::sha2::Sha256;
 use hyper::header::{self, Authorization, Bearer};
 use jwt::{Header, Registered, Token};
-use nickel::{MiddlewareResult, Nickel, Response, Request};
+use nickel::{MiddlewareResult, Response, Request};
 use nickel::status::StatusCode::{Forbidden};
 // Common Utilities
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
@@ -38,7 +38,7 @@ pub fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<
 
             let token = match get_jwt_from_header(request){
                 Ok(jwt_token) => jwt_token,
-                Err(e) => {
+                Err(_) => {
                     return response.error(Forbidden, "Access denied. Unable to parse token.")
                 }
             };

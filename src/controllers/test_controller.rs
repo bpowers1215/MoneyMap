@@ -11,8 +11,6 @@ use ::common::api_result::{ApiResult};
 use ::common::data_access::ServerData;
 //Models
 use ::models::test_model::{TestModel};
-//Controllers
-use ::controllers::controller_manager::ControllerManager;
 
 #[derive(Clone)]
 pub struct TestController{

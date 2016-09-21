@@ -142,7 +142,7 @@ impl UsersController{
                         // Validate User
                         let validation_result = in_user.validate_existing(self.dao_manager.get_user_dao().unwrap());
                         if validation_result.is_valid(){
-                            let mut user = UserModel::new(in_user);
+                            let user = UserModel::new(in_user);
                             // Save User
                             match dao.update(user_id, &user){
                                 Ok(result) => {

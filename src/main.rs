@@ -23,8 +23,7 @@ extern crate log4rs;
 
 // Import
 // External
-use nickel::{MiddlewareResult, Nickel, Response, Request};
-use nickel::status::StatusCode::{Forbidden};
+use nickel::{Nickel};
 // Common Utilities
 use money_map::common::session as Session;
 use money_map::common::data_access::ServerData;

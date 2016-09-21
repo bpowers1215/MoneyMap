@@ -7,13 +7,10 @@
 extern crate mongodb;
 
 // Import Modules
-// External
-use std::error::Error;
 // Common Utilities
 use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
 use ::mongodb::coll::options::FindOptions;
-use ::mongodb::{ThreadedClient};
 use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 //Models
