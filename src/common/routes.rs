@@ -55,6 +55,15 @@ pub fn get_routes() -> Router<ServerData> {
         JsonEncoder::encode(result)
     });
 
+    router.get("/account", middleware! { |request, mut response|
+        info!("API Endpoint: POST /account");
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.users_controller.get_account(request);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
+
     router.post("/account", middleware! { |request, mut response|
         info!("API Endpoint: POST /account");
         let sd: &ServerData = request.server_data();

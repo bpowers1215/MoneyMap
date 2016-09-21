@@ -7,6 +7,7 @@
 use ::chrono::{DateTime, Duration, Local};
 use ::nickel::{JsonBody, Request};
 use ::bson::Bson;
+use ::bson::oid::ObjectId;
 use ::std::default::Default;
 use ::crypto::sha2::Sha256;
 use ::jwt::{Header, Registered, Token};
@@ -40,7 +41,7 @@ impl UsersController{
     /// ToDo: Remove this endpoint for security
     ///
     /// # Arguments
-    /// req - nickel::Request
+    /// &self
     ///
     /// # Returns
     /// `ApiResult<Vec<UserModel>>` - ApiResult including a vector of users
@@ -62,6 +63,7 @@ impl UsersController{
     /// Create New User
     ///
     /// # Arguments
+    /// &self
     /// req - nickel::Request
     ///
     /// # Returns
@@ -117,6 +119,7 @@ impl UsersController{
     /// Modify User
     ///
     /// # Arguments
+    /// &self
     /// req - nickel::Request
     ///
     /// # Returns
@@ -146,7 +149,7 @@ impl UsersController{
                                     if result.acknowledged && result.modified_count > 0 {
                                         ApiResult::Success{result:OutUserModel::new(user)}
                                     }else{
-                                        ApiResult::Failure{msg:"Unable failed."}
+                                        ApiResult::Failure{msg:"Update failed."}
                                     }
                                 },
                                 Err(e) => {
@@ -174,6 +177,7 @@ impl UsersController{
     /// Log In
     ///
     /// # Arguments
+    /// &self
     /// req - nickel::Request
     ///
     /// # Returns
@@ -238,6 +242,50 @@ impl UsersController{
             }
         }
     }// end login
+
+    /// Get current user details
+    ///
+    /// # Arguments
+    /// &self
+    /// req - nickel::Request
+    ///
+    /// # Returns
+    /// `ApiResult<OutUserModel>` - ApiResult including the logged in user
+    pub fn get_account(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel>{
+        let user_id = match Session::get_session_id(req){
+            Ok(id) => id,
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                return ApiResult::Failure{msg:"Unable to retrieve session data."};
+            }
+        };
+
+        match self.dao_manager.get_user_dao(){
+            Ok(dao) => {
+                match ObjectId::with_string(user_id.as_str()){
+                    Ok(id) => {
+                        let filter = doc! {
+                            "_id" => id
+                        };
+
+                        if let Some(user) = dao.find_one(Some(filter), None){
+                            ApiResult::Success{result:OutUserModel::new(user)}
+                        }else{
+                            ApiResult::Failure{msg:"Unable to find user."}
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}", e);
+                        ApiResult::Failure{msg:"Failed to find user. Invalid ID."}
+                    }
+                }
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+    }// end get_account
 
 }// end impl UsersController
 
