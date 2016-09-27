@@ -17,7 +17,7 @@ pub fn get_routes() -> Router<ServerData> {
         format!(r#"{{"name":"Money Map", "version":"{}", "status":"ok"}}"#, env!("CARGO_PKG_VERSION"))
     });
 
-    //Test Actions
+    // Test Actions
     router.get("/test/retrieve", middleware! { |request, mut response|
         info!("API Endpoint: POST /test/retrieve");
         let sd: &ServerData = request.server_data();
@@ -45,7 +45,7 @@ pub fn get_routes() -> Router<ServerData> {
         JsonEncoder::encode(result)
     });
 
-    //Users Actions
+    // Users Actions
     router.get("/users", middleware! { |request, mut response|
         info!("API Endpoint: GET /users");
         let sd: &ServerData = request.server_data();
@@ -74,7 +74,7 @@ pub fn get_routes() -> Router<ServerData> {
     });
 
     router.patch("/account", middleware! { |request, mut response|
-        info!("API Endpoint: PUT /account");
+        info!("API Endpoint: PATCH /account");
         let sd: &ServerData = request.server_data();
         let result = &sd.controller_manager.users_controller.modify(request);
 
@@ -90,5 +90,17 @@ pub fn get_routes() -> Router<ServerData> {
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
     });
-router
+
+    // Money Maps
+    router.post("/money_maps", middleware! { |request, mut response|
+        info!("API Endpoint: POST /money_maps");
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.money_maps_controller.create(request);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
+
+    // Return router
+    router
 }

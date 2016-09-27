@@ -96,7 +96,7 @@ impl UsersController{
                                 },
                                 Err(e) => {
                                     error!("{}",e);
-                                    ApiResult::Failure{msg:"Unable to save user"}
+                                    ApiResult::Failure{msg:"Unable to create user"}
                                 }
                             }
                         }else{
@@ -114,7 +114,7 @@ impl UsersController{
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
-    }// end create_user
+    }// end create
 
     /// Modify User
     ///
