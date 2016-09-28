@@ -40,10 +40,11 @@ impl UserDAO{
     ///
     /// # Arguments
     /// self
+    /// filter - Option<Document> The find filter
     ///
     /// # Returns
     /// `Vec<OutUserModel>`
-    pub fn find(self) -> Vec<OutUserModel>{
+    pub fn find(&self, filter: Option<Document>) -> Vec<OutUserModel>{
         let coll = self.db.collection("users");
         let mut users = Vec::new();
 
@@ -53,7 +54,7 @@ impl UserDAO{
             "password" => 0//exclude password
         });
 
-        match coll.find(None, Some(find_options)){
+        match coll.find(filter, Some(find_options)){
             Ok(cursor) => {
                 for result in cursor {
                     if let Ok(item) = result {

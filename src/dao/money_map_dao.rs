@@ -44,25 +44,20 @@ impl MoneyMapDAO{
     ///
     /// # Arguments
     /// self
+    /// filter - Option<Document> The find filter
     ///
     /// # Returns
     /// `Vec<MoneyMapModel>`
-    pub fn find(self) -> Vec<MoneyMapModel>{
+    pub fn find(self, filter: Option<Document>) -> Vec<MoneyMapModel>{
         let coll = self.db.collection(money_map_collection);
         let mut money_maps = Vec::new();
-
-        // Set Find Options and retrieve cursor
-        let mut filter = doc!{
-            "deleted" => {
-                "$ne" => true
-            }
-        };
+        
         let mut find_options = FindOptions::new();
         find_options.projection = Some(doc!{
             "deleted" => 0//exclude password
         });
 
-        match coll.find(Some(filter), Some(find_options)){
+        match coll.find(filter, Some(find_options)){
             Ok(cursor) => {
                 for result in cursor {
                     if let Ok(item) = result {

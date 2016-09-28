@@ -6,7 +6,7 @@
 // External
 use ::chrono::{DateTime, Duration, Local};
 use ::nickel::{JsonBody, Request};
-use ::bson::Bson;
+use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
 use ::std::default::Default;
 use ::crypto::sha2::Sha256;
@@ -47,11 +47,52 @@ impl MoneyMapsController{
     /// # Returns
     /// `ApiResult<Vec<MoneyMapModel>>` - ApiResult including a vector of money maps
     pub fn find(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<MoneyMapModel>>{
+
+        let user_id = match Session::get_session_id(req){
+            Ok(id) => id,
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                return ApiResult::Failure{msg:"Unable to retrieve session data."};
+            }
+        };
+        
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
-                let money_maps = dao.find();
+                match self.dao_manager.get_user_dao(){
+                    Ok(user_dao) => {
+                        //Get list of money maps for this user
+                        let mut money_maps = dao.find(Some(doc!{
+                            "users" => user_id,
+                            "deleted" => {
+                                "$ne" => true
+                            }
+                        }));
+                        
+                        // Get list of user details for each money map
+                        for i in 0..money_maps.len(){
+                            if let Some(users) = money_maps[i].get_users(){
+                                let mut users_list = Vec::new();
+                                for user in users{
+                                    if let Some(id) = user.id{
+                                        users_list.push(Bson::ObjectId(id));
+                                    }
+                                }
+                                let users = &user_dao.find(Some(doc!{
+                                    "_id" => {
+                                        "$in" => users_list
+                                    }
+                                }));
+                                money_maps[i].set_users(Some(users.clone()));
+                            }
+                        }
 
-                ApiResult::Success{result:money_maps}
+                        ApiResult::Success{result:money_maps}
+                    },
+                    Err(e) => {
+                        error!("{}",e.get_message().to_string());
+                        ApiResult::Failure{msg:"Unable to interact with database"}
+                    }
+                }
             },
             Err(e) => {
                 error!("{}",e.get_message().to_string());

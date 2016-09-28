@@ -49,7 +49,7 @@ impl UsersController{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Fetch all Users");
-                let users = dao.find();
+                let users = dao.find(None);
 
                 ApiResult::Success{result:users}
             },
