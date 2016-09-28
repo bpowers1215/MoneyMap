@@ -164,7 +164,6 @@ impl UserDAO{
     }// end create
 
     /// Save an existing User
-    /// Save new user to the users collection
     ///
     /// # Arguments
     /// self

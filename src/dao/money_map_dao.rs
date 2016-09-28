@@ -46,14 +46,22 @@ impl MoneyMapDAO{
     ///
     /// # Returns
     /// `Vec<MoneyMapModel>`
-    pub fn find_all(self) -> Vec<MoneyMapModel>{
+    pub fn find(self) -> Vec<MoneyMapModel>{
         let coll = self.db.collection(money_map_collection);
         let mut money_maps = Vec::new();
 
         // Set Find Options and retrieve cursor
+        let mut filter = doc!{
+            "deleted" => {
+                "$ne" => true
+            }
+        };
         let mut find_options = FindOptions::new();
+        find_options.projection = Some(doc!{
+            "deleted" => 0//exclude password
+        });
 
-        match coll.find(None, Some(find_options)){
+        match coll.find(Some(filter), Some(find_options)){
             Ok(cursor) => {
                 for result in cursor {
                     if let Ok(item) = result {
@@ -76,7 +84,7 @@ impl MoneyMapDAO{
             }
         }
         money_maps
-    }// end find_all
+    }// end find
 
     /// Create Money Map
     /// Save new money mmap to the money maps collection
@@ -91,7 +99,8 @@ impl MoneyMapDAO{
         let coll = self.db.collection(money_map_collection);
 
         let doc = doc! {
-            "name" => (match money_map.get_name(){Some(val) => val, None => "".to_string()})
+            "name" => (match money_map.get_name(){Some(val) => val, None => "".to_string()}),
+            "deleted" => false
         };
 
         // Insert document into `money_maps` collection
@@ -103,4 +112,44 @@ impl MoneyMapDAO{
             }
         }
     }// end create
+
+    /// Delete a money map
+    /// Only allow deleting a money map owned by the current user
+    ///
+    /// # Arguments
+    /// self
+    /// money_map_id - String User identifier
+    ///
+    /// # Returns
+    /// `MMResult<()>`
+    pub fn delete(self, money_map_id: &str) -> MMResult<mongodb::coll::results::UpdateResult>{
+        let coll = self.db.collection(money_map_collection);
+
+        match ObjectId::with_string(money_map_id){
+            Ok(id) => {
+                //TODO: Add filter for user - only allow deleting a map owned by current user
+                let filter = doc! {
+                    "_id" => id
+                };
+
+                // Build `$set` document to update document
+                let mut set_doc = doc!{};
+                set_doc.insert_bson("deleted".to_string(), Bson::Boolean(true));
+                let update_doc = doc! {"$set" => set_doc};
+
+                // Update the user
+                match coll.update_one(filter.clone(), update_doc.clone(), None){
+                    Ok(result) => Ok(result),
+                    Err(e) => {
+                        error!("{}", e);
+                        Err(MMError::new("Failed to delete money map.", MMErrorKind::DAO))
+                    }
+                }
+            },
+            Err(e) => {
+                error!("{}", e);
+                Err(MMError::new("Failed to delete money map.", MMErrorKind::DAO))
+            }
+        }
+    }// end delete
 }

@@ -45,10 +45,10 @@ impl MoneyMapsController{
     ///
     /// # Returns
     /// `ApiResult<Vec<MoneyMapModel>>` - ApiResult including a vector of money maps
-    pub fn find_all(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<MoneyMapModel>>{
+    pub fn find(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<MoneyMapModel>>{
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
-                let money_maps = dao.find_all();
+                let money_maps = dao.find();
 
                 ApiResult::Success{result:money_maps}
             },
@@ -113,5 +113,37 @@ impl MoneyMapsController{
             }
         }
     }// end create
+
+    /// Delete a Money Map
+    ///
+    /// # Arguments
+    /// &self
+    /// id - String
+    ///
+    /// # Returns
+    /// `ApiResult<String>` - ApiResult
+    pub fn delete(&self, id: &str) -> ApiResult<String>{
+        match self.dao_manager.get_money_map_dao(){
+            Ok(dao) => {
+                match dao.delete(id){
+                    Ok(result) => {
+                        if result.acknowledged && result.modified_count > 0 {
+                            ApiResult::Success{result:"Successfully deleted money map".to_string()}
+                        }else{
+                            ApiResult::Failure{msg:"Unable to delete money map"}
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}",e);
+                        ApiResult::Failure{msg:"Delete failed"}
+                    }
+                }
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+    }// end delete
 
 }

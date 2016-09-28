@@ -95,7 +95,7 @@ pub fn get_routes() -> Router<ServerData> {
     router.get("/money_maps", middleware! { |request, mut response|
         info!("API Endpoint: GET /money_maps");
         let sd: &ServerData = request.server_data();
-        let result = &sd.controller_manager.money_maps_controller.find_all(request);
+        let result = &sd.controller_manager.money_maps_controller.find(request);
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
@@ -104,6 +104,15 @@ pub fn get_routes() -> Router<ServerData> {
         info!("API Endpoint: POST /money_maps");
         let sd: &ServerData = request.server_data();
         let result = &sd.controller_manager.money_maps_controller.create(request);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
+    router.delete("/money_maps/:id", middleware! { |request, mut response|
+        info!("API Endpoint: POST /money_maps");
+        let sd: &ServerData = request.server_data();
+        let id = request.param("id").unwrap();
+        let result = &sd.controller_manager.money_maps_controller.delete(id);
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
