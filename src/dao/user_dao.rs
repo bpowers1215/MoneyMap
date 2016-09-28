@@ -16,6 +16,9 @@ use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 //Models
 use ::models::user_model::{UserModel, OutUserModel};
 
+// Constants
+static USERS_COLLECTION: &'static str = "users";
+
 /// User DAO
 pub struct UserDAO{
     db: mongodb::db::Database
@@ -45,7 +48,7 @@ impl UserDAO{
     /// # Returns
     /// `Vec<OutUserModel>`
     pub fn find(&self, filter: Option<Document>) -> Vec<OutUserModel>{
-        let coll = self.db.collection("users");
+        let coll = self.db.collection(USERS_COLLECTION);
         let mut users = Vec::new();
 
         //Set Find Options and retrieve cursor
@@ -97,7 +100,7 @@ impl UserDAO{
     /// # Returns
     /// `Option<UserModel>` Some UserModel if found, None otherwise
     pub fn find_one(self, filter: Option<Document>, options: Option<FindOptions>) -> Option<UserModel>{
-        let coll = self.db.collection("users");
+        let coll = self.db.collection(USERS_COLLECTION);
 
         match coll.find_one(filter, options){
             Ok(result) => {
@@ -145,7 +148,7 @@ impl UserDAO{
     /// # Returns
     /// `MMResult<()>`
     pub fn create(self, user: &UserModel) -> MMResult<mongodb::coll::results::InsertOneResult>{
-        let coll = self.db.collection("users");
+        let coll = self.db.collection(USERS_COLLECTION);
 
         let doc = doc! {
             "first_name" => (match user.get_first_name(){Some(val) => val, None => "".to_string()}),
@@ -174,7 +177,7 @@ impl UserDAO{
     /// # Returns
     /// `MMResult<()>`
     pub fn update(self, user_id: String, user: &UserModel) -> MMResult<mongodb::coll::results::UpdateResult>{
-        let coll = self.db.collection("users");
+        let coll = self.db.collection(USERS_COLLECTION);
 
         match ObjectId::with_string(user_id.as_str()){
             Ok(id) => {

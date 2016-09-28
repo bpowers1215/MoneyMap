@@ -18,7 +18,7 @@ use ::models::money_map_model::{MoneyMapModel};
 use ::models::user_model::{OutUserModel};
 
 // Constants
-static money_map_collection: &'static str = "money_maps";
+static MONEY_MAP_COLLECTION: &'static str = "money_maps";
 
 /// Money Map DAO
 pub struct MoneyMapDAO{
@@ -49,7 +49,7 @@ impl MoneyMapDAO{
     /// # Returns
     /// `Vec<MoneyMapModel>`
     pub fn find(self, filter: Option<Document>) -> Vec<MoneyMapModel>{
-        let coll = self.db.collection(money_map_collection);
+        let coll = self.db.collection(MONEY_MAP_COLLECTION);
         let mut money_maps = Vec::new();
         
         let mut find_options = FindOptions::new();
@@ -112,7 +112,7 @@ impl MoneyMapDAO{
     /// # Returns
     /// `MMResult<()>`
     pub fn create(self, money_map: &MoneyMapModel, user_id: String) -> MMResult<mongodb::coll::results::InsertOneResult>{
-        let coll = self.db.collection(money_map_collection);
+        let coll = self.db.collection(MONEY_MAP_COLLECTION);
 
         /*let doc = doc! {
             "name" => (match money_map.get_name(){Some(val) => val, None => "".to_string()}),
@@ -146,7 +146,7 @@ impl MoneyMapDAO{
     /// # Returns
     /// `MMResult<()>`
     pub fn delete(self, money_map_id: &str) -> MMResult<mongodb::coll::results::UpdateResult>{
-        let coll = self.db.collection(money_map_collection);
+        let coll = self.db.collection(MONEY_MAP_COLLECTION);
 
         match ObjectId::with_string(money_map_id){
             Ok(id) => {
