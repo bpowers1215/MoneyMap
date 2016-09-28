@@ -13,6 +13,8 @@ use ::sodiumoxide::crypto::pwhash::HashedPassword;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
+// Models
+use ::models::user_model::{OutUserModel};
 // DAO
 use ::dao::money_map_dao::MoneyMapDAO;
 
@@ -20,7 +22,8 @@ use ::dao::money_map_dao::MoneyMapDAO;
 #[derive(RustcDecodable, RustcEncodable)]
 pub struct MoneyMapModel {
     pub id: Option<ObjectId>,
-    pub name: Option<String>
+    pub name: Option<String>,
+    pub users: Option<Vec<OutUserModel>>
 }
 
 
@@ -55,6 +58,28 @@ impl MoneyMapModel{
     /// 'Option<String>' - name
     pub fn get_name(&self) -> Option<String>{
         self.name.clone()
+    }
+
+    /// Get Users
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<Vec<OutUserModel>>' - name
+    pub fn get_users(&self) -> Option<Vec<OutUserModel>>{
+        self.users.clone()
+    }
+
+    /// Get Users
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<Vec<OutUserModel>>' - name
+    pub fn set_users(&mut self, users: Option<Vec<OutUserModel>>){
+        self.users = users;
     }
 
     /// Validate Money Map

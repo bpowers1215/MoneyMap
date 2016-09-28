@@ -15,6 +15,7 @@ use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 // Models
 use ::models::money_map_model::{MoneyMapModel};
+use ::models::user_model::{OutUserModel};
 
 // Constants
 static money_map_collection: &'static str = "money_maps";
@@ -73,6 +74,25 @@ impl MoneyMapDAO{
                             name: match item.get("name"){
                                 Some(&Bson::String(ref name)) => Some(name.clone()),
                                 _ => None
+                            },
+                            users: match item.get("users"){
+                                Some(&Bson::Array(ref users)) => {
+                                    let mut user_mods = Vec::new();
+                                    for user in users{
+                                        if let &Bson::String(ref user_id) = user{
+                                            if let Ok(id) = ObjectId::with_string(user_id.as_str()){
+                                                user_mods.push(OutUserModel{
+                                                    id:Some(id),
+                                                    first_name:None,
+                                                    last_name:None,
+                                                    email:None
+                                                });
+                                            }
+                                        }
+                                    }
+                                    Some(user_mods)
+                                },
+                                _ => None
                             }
                         };
                         money_maps.push(money_map);
@@ -91,17 +111,25 @@ impl MoneyMapDAO{
     ///
     /// # Arguments
     /// self
-    /// &user - models::money_map_model::MoneyMapModel The Money Map
+    /// &money_map - models::money_map_model::MoneyMapModel The Money Map
+    /// user_id - The user ID this money map belongs to
     ///
     /// # Returns
     /// `MMResult<()>`
-    pub fn create(self, money_map: &MoneyMapModel) -> MMResult<mongodb::coll::results::InsertOneResult>{
+    pub fn create(self, money_map: &MoneyMapModel, user_id: String) -> MMResult<mongodb::coll::results::InsertOneResult>{
         let coll = self.db.collection(money_map_collection);
 
-        let doc = doc! {
+        /*let doc = doc! {
             "name" => (match money_map.get_name(){Some(val) => val, None => "".to_string()}),
+            "users" => (match money_map.get_users(){Some(val) => val, None =>)}),
             "deleted" => false
-        };
+        };*/
+        // Build the document
+        let mut doc = doc!{ "deleted" => false};
+        if let Some(name) = money_map.get_name(){
+            doc.insert_bson("name".to_string(), Bson::String(name));
+        }
+        doc.insert_bson("users".to_string(), Bson::Array(vec![ Bson::String(user_id) ]));
 
         // Insert document into `money_maps` collection
         match coll.insert_one(doc.clone(), None){

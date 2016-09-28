@@ -36,7 +36,7 @@ pub struct InUserModel {
     pub confirm_password: Option<String>
 }
 
-#[derive(RustcDecodable, RustcEncodable)]
+#[derive(Clone, RustcDecodable, RustcEncodable)]
 pub struct OutUserModel {
     pub id: Option<ObjectId>,
     pub first_name: Option<String>,

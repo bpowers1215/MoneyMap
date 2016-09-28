@@ -20,6 +20,7 @@ use ::common::session as Session;
 // DAO
 use ::dao::dao_manager::DAOManager;
 // Models
+use ::models::user_model::{OutUserModel};
 use ::models::money_map_model::{MoneyMapModel};
 
 #[derive(Clone)]
@@ -68,6 +69,15 @@ impl MoneyMapsController{
     /// # Returns
     /// `ApiResult<MoneyMapModel>` - ApiResult including the create money map
     pub fn create(&self, req: &mut Request<ServerData>) -> ApiResult<MoneyMapModel>{
+
+        let user_id = match Session::get_session_id(req){
+            Ok(id) => id,
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                return ApiResult::Failure{msg:"Unable to retrieve session data."};
+            }
+        };
+        
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
 
@@ -75,9 +85,9 @@ impl MoneyMapsController{
                     Ok(mut money_map) => {
                         // Validate
                         let validation_result = money_map.validate();
-                        if validation_result.is_valid(){
+                        if validation_result.is_valid(){                            
                             // Save User
-                            match dao.create(&money_map){
+                            match dao.create(&money_map, user_id){
                                 Ok(result) => {
                                     // Set user ID
                                     match result.inserted_id{
