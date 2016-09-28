@@ -37,7 +37,7 @@ impl UsersController{
         }
     }
 
-    /// Fetch All Users
+    /// Find All Users
     /// ToDo: Remove this endpoint for security
     ///
     /// # Arguments
@@ -58,7 +58,7 @@ impl UsersController{
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
-    }// end fetch_all
+    }// end find_all
 
     /// Create New User
     ///

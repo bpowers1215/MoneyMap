@@ -37,6 +37,28 @@ impl MoneyMapsController{
         }
     }
 
+    /// Find All Money Maps belonging to the requesting user
+    ///
+    /// # Arguments
+    /// &self
+    /// req - nickel::Request
+    ///
+    /// # Returns
+    /// `ApiResult<Vec<MoneyMapModel>>` - ApiResult including a vector of money maps
+    pub fn find_all(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<MoneyMapModel>>{
+        match self.dao_manager.get_money_map_dao(){
+            Ok(dao) => {
+                let money_maps = dao.find_all();
+
+                ApiResult::Success{result:money_maps}
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+    }// end find_all
+
     /// Create Money Map
     ///
     /// # Arguments

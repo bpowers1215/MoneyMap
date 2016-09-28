@@ -92,6 +92,14 @@ pub fn get_routes() -> Router<ServerData> {
     });
 
     // Money Maps
+    router.get("/money_maps", middleware! { |request, mut response|
+        info!("API Endpoint: GET /money_maps");
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.money_maps_controller.find_all(request);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
     router.post("/money_maps", middleware! { |request, mut response|
         info!("API Endpoint: POST /money_maps");
         let sd: &ServerData = request.server_data();
