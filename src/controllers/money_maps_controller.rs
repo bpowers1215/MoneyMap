@@ -121,40 +121,54 @@ impl MoneyMapsController{
 
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
+                match self.dao_manager.get_user_dao(){
+                    Ok(user_dao) => {
 
-                match req.json_as::<MoneyMapModel>(){
-                    Ok(mut money_map) => {
-                        // Validate
-                        let validation_result = money_map.validate();
-                        if validation_result.is_valid(){
-                            // Save User
-                            match dao.create(&money_map, user_id){
-                                Ok(result) => {
-                                    // Set user ID
-                                    match result.inserted_id{
-                                        Some(id_wrapper) => {
-                                            match id_wrapper{
-                                                Bson::ObjectId(id) => money_map.set_id(id),
-                                                _ => {}
+                        match req.json_as::<MoneyMapModel>(){
+                            Ok(mut money_map) => {
+                                // Validate
+                                let validation_result = money_map.validate();
+                                if validation_result.is_valid(){
+                                    // Save User
+                                    match dao.create(&money_map, user_id.clone()){
+                                        Ok(result) => {
+                                            // Set user ID
+                                            match result.inserted_id{
+                                                Some(id_wrapper) => {
+                                                    match id_wrapper{
+                                                        Bson::ObjectId(id) => money_map.set_id(id),
+                                                        _ => {}
+                                                    }
+                                                },
+                                                None => {}
                                             }
-                                        },
-                                        None => {}
-                                    }
+                                            // Add user details
+                                            if let Ok(id) = ObjectId::with_string(user_id.as_str()){
+                                                if let Some(user) = user_dao.find_one(Some(doc!{"_id" => id}), None){
+                                                    money_map.set_users(Some(vec![OutUserModel::new(user)]));
+                                                }
+                                            }
 
-                                    ApiResult::Success{result:money_map}
-                                },
-                                Err(e) => {
-                                    error!("{}",e);
-                                    ApiResult::Failure{msg:"Unable to create money map"}
+                                            ApiResult::Success{result:money_map}
+                                        },
+                                        Err(e) => {
+                                            error!("{}",e);
+                                            ApiResult::Failure{msg:"Unable to create money map"}
+                                        }
+                                    }
+                                }else{
+                                    ApiResult::Invalid{validation:validation_result, request:money_map}
                                 }
+                            },
+                            Err(e) => {
+                                error!("{}",e);
+                                ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
                             }
-                        }else{
-                            ApiResult::Invalid{validation:validation_result, request:money_map}
                         }
                     },
                     Err(e) => {
-                        error!("{}",e);
-                        ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
+                        error!("{}",e.get_message().to_string());
+                        ApiResult::Failure{msg:"Unable to interact with database"}
                     }
                 }
             },
