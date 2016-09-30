@@ -55,7 +55,7 @@ impl MoneyMapsController{
                 return ApiResult::Failure{msg:"Unable to retrieve session data."};
             }
         };
-        
+
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
                 match self.dao_manager.get_user_dao(){
@@ -67,7 +67,7 @@ impl MoneyMapsController{
                                 "$ne" => true
                             }
                         }));
-                        
+
                         // Get list of user details for each money map
                         for i in 0..money_maps.len(){
                             if let Some(users) = money_maps[i].get_users(){
@@ -118,7 +118,7 @@ impl MoneyMapsController{
                 return ApiResult::Failure{msg:"Unable to retrieve session data."};
             }
         };
-        
+
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
 
@@ -126,7 +126,7 @@ impl MoneyMapsController{
                     Ok(mut money_map) => {
                         // Validate
                         let validation_result = money_map.validate();
-                        if validation_result.is_valid(){                            
+                        if validation_result.is_valid(){
                             // Save User
                             match dao.create(&money_map, user_id){
                                 Ok(result) => {
@@ -186,7 +186,7 @@ impl MoneyMapsController{
                     },
                     Err(e) => {
                         error!("{}",e);
-                        ApiResult::Failure{msg:"Delete failed"}
+                        ApiResult::Failure{msg:"Malformed ID"}
                     }
                 }
             },

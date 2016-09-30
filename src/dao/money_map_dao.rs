@@ -51,7 +51,7 @@ impl MoneyMapDAO{
     pub fn find(self, filter: Option<Document>) -> Vec<MoneyMapModel>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
         let mut money_maps = Vec::new();
-        
+
         let mut find_options = FindOptions::new();
         find_options.projection = Some(doc!{
             "deleted" => 0//exclude password
@@ -160,7 +160,7 @@ impl MoneyMapDAO{
                 set_doc.insert_bson("deleted".to_string(), Bson::Boolean(true));
                 let update_doc = doc! {"$set" => set_doc};
 
-                // Update the user
+                // Soft delete money map
                 match coll.update_one(filter.clone(), update_doc.clone(), None){
                     Ok(result) => Ok(result),
                     Err(e) => {
