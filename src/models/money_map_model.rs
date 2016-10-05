@@ -23,7 +23,13 @@ use ::dao::money_map_dao::MoneyMapDAO;
 pub struct MoneyMapModel {
     pub id: Option<ObjectId>,
     pub name: Option<String>,
-    pub users: Option<Vec<OutUserModel>>
+    pub users: Option<Vec<MoneyMapUserModel>>
+}
+
+#[derive(Clone, RustcDecodable, RustcEncodable)]
+pub struct MoneyMapUserModel {
+    pub user: Option<OutUserModel>,
+    pub owner: bool
 }
 
 
@@ -66,8 +72,8 @@ impl MoneyMapModel{
     /// &self
     ///
     /// # Returns
-    /// 'Option<Vec<OutUserModel>>' - name
-    pub fn get_users(&self) -> Option<Vec<OutUserModel>>{
+    /// 'Option<Vec<MoneyMapUserModel>>' - name
+    pub fn get_users(&self) -> Option<Vec<MoneyMapUserModel>>{
         self.users.clone()
     }
 
@@ -77,8 +83,8 @@ impl MoneyMapModel{
     /// &self
     ///
     /// # Returns
-    /// 'Option<Vec<OutUserModel>>' - name
-    pub fn set_users(&mut self, users: Option<Vec<OutUserModel>>){
+    /// 'Option<Vec<MoneyMapUserModel>>' - name
+    pub fn set_users(&mut self, users: Option<Vec<MoneyMapUserModel>>){
         self.users = users;
     }
 
@@ -99,6 +105,14 @@ impl MoneyMapModel{
 
         validation_result
     }//end validate
+}
 
-
+/// MoneyMapUserModel Methods
+impl MoneyMapUserModel{
+    pub fn new(user: OutUserModel, owner: bool) -> MoneyMapUserModel{
+        MoneyMapUserModel{
+            user: Some(user),
+            owner: owner
+        }
+    }
 }

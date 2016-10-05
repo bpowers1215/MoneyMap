@@ -21,7 +21,7 @@ use ::common::session as Session;
 use ::dao::dao_manager::DAOManager;
 // Models
 use ::models::user_model::{OutUserModel};
-use ::models::money_map_model::{MoneyMapModel};
+use ::models::money_map_model::{MoneyMapModel, MoneyMapUserModel};
 
 #[derive(Clone)]
 pub struct MoneyMapsController{
@@ -58,41 +58,52 @@ impl MoneyMapsController{
 
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
-                match self.dao_manager.get_user_dao(){
-                    Ok(user_dao) => {
-                        //Get list of money maps for this user
-                        let mut money_maps = dao.find(Some(doc!{
-                            "users" => user_id,
-                            "deleted" => {
-                                "$ne" => true
-                            }
-                        }));
+                //Get list of money maps for this user
+                let mut money_maps = dao.find(Some(doc!{
+                    "users.user_id" => user_id,
+                    "deleted" => {
+                        "$ne" => true
+                    }
+                }));
 
-                        // Get list of user details for each money map
-                        for i in 0..money_maps.len(){
-                            if let Some(users) = money_maps[i].get_users(){
-                                let mut users_list = Vec::new();
-                                for user in users{
-                                    if let Some(id) = user.id{
-                                        users_list.push(Bson::ObjectId(id));
+
+                // Get list of user details for each money map
+                for i in 0..money_maps.len(){
+                    if let Some(mm_users) = money_maps[i].get_users(){
+                        // Initialze a list of user details for this money map
+                        let mut users_list = Vec::new();
+
+                        // For each user associated with this money map
+                        for mm_user in mm_users{
+                            match self.dao_manager.get_user_dao(){
+                                Ok(user_dao) => {
+
+                                    // Fetch the user's details
+                                    let user_id = Bson::ObjectId(mm_user.user.unwrap().id.unwrap());
+                                    let found_user = user_dao.find_one(Some(doc!{
+                                        "_id" => user_id
+                                    }), None);
+                                    if let Some(user) = found_user{
+                                        // Add the user details to the list
+                                        users_list.push(
+                                            MoneyMapUserModel::new(OutUserModel::new(user), mm_user.owner)
+                                        );
                                     }
+                                },
+                                Err(e) => {
+                                    error!("{}",e.get_message().to_string());
+                                    return ApiResult::Failure{msg:"Unable to interact with database"};
                                 }
-                                let users = &user_dao.find(Some(doc!{
-                                    "_id" => {
-                                        "$in" => users_list
-                                    }
-                                }));
-                                money_maps[i].set_users(Some(users.clone()));
                             }
                         }
 
-                        ApiResult::Success{result:money_maps}
-                    },
-                    Err(e) => {
-                        error!("{}",e.get_message().to_string());
-                        ApiResult::Failure{msg:"Unable to interact with database"}
+                        // Add the new list of user details to the money map
+                        money_maps[i].set_users(Some(users_list));
                     }
                 }
+
+                // Return the list of money maps
+                ApiResult::Success{result:money_maps}
             },
             Err(e) => {
                 error!("{}",e.get_message().to_string());
@@ -145,7 +156,11 @@ impl MoneyMapsController{
                                             // Add user details
                                             if let Ok(id) = ObjectId::with_string(user_id.as_str()){
                                                 if let Some(user) = user_dao.find_one(Some(doc!{"_id" => id}), None){
-                                                    money_map.set_users(Some(vec![OutUserModel::new(user)]));
+                                                    money_map.set_users(Some(
+                                                        vec![
+                                                            MoneyMapUserModel::new(OutUserModel::new(user), true)
+                                                        ]
+                                                    ));
                                                 }
                                             }
 

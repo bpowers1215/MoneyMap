@@ -14,7 +14,7 @@ use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 // Models
-use ::models::money_map_model::{MoneyMapModel};
+use ::models::money_map_model::{MoneyMapModel, MoneyMapUserModel};
 use ::models::user_model::{OutUserModel};
 
 // Constants
@@ -74,13 +74,23 @@ impl MoneyMapDAO{
                                 Some(&Bson::Array(ref users)) => {
                                     let mut user_mods = Vec::new();
                                     for user in users{
-                                        if let &Bson::String(ref user_id) = user{
-                                            if let Ok(id) = ObjectId::with_string(user_id.as_str()){
-                                                user_mods.push(OutUserModel{
-                                                    id:Some(id),
+                                        if let &Bson::Document(ref mm_user_bson) = user{
+                                            if let Some(&Bson::String(ref user_id)) = mm_user_bson.get("user_id"){
+                                                let user = OutUserModel{
+                                                    id: Some(ObjectId::with_string(user_id.as_str()).unwrap()),
                                                     first_name:None,
                                                     last_name:None,
                                                     email:None
+                                                };
+
+                                                let mut owner = false;
+                                                if let Some(&Bson::Boolean(is_owner)) = mm_user_bson.get("owner"){
+                                                    owner = is_owner;
+                                                }
+
+                                                user_mods.push(MoneyMapUserModel{
+                                                    user: Some(user),
+                                                    owner: owner
                                                 });
                                             }
                                         }
@@ -124,7 +134,11 @@ impl MoneyMapDAO{
         if let Some(name) = money_map.get_name(){
             doc.insert_bson("name".to_string(), Bson::String(name));
         }
-        doc.insert_bson("users".to_string(), Bson::Array(vec![ Bson::String(user_id) ]));
+        let mm_user = doc!{
+            "user_id" => user_id,
+            "owner" => true
+        };
+        doc.insert_bson("users".to_string(), Bson::Array(vec![ Bson::Document(mm_user) ]));
 
         // Insert document into `money_maps` collection
         match coll.insert_one(doc.clone(), None){
