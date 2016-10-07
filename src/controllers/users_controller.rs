@@ -140,7 +140,7 @@ impl UsersController{
                 match req.json_as::<InUserModel>(){
                     Ok(in_user) => {
                         // Validate User
-                        let validation_result = in_user.validate_existing(self.dao_manager.get_user_dao().unwrap());
+                        let validation_result = in_user.validate_existing();
                         if validation_result.is_valid(){
                             let user = UserModel::new(in_user);
                             // Save User

@@ -245,11 +245,10 @@ impl InUserModel{
     ///
     /// # Arguments
     /// self
-    /// dao - UserDAO
     ///
     /// # Returns
     /// 'ValidationResult' - validation result
-    pub fn validate_existing(&self, dao: UserDAO) -> ValidationResult{
+    pub fn validate_existing(&self) -> ValidationResult{
 
         //validate user
         let mut validation_result = ValidationResult::new();
