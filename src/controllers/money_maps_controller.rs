@@ -205,9 +205,7 @@ impl MoneyMapsController{
 
                             if let Some(money_map) = dao.find_one(Some(filter), None){
 
-                            // Verify User has access
-
-                            // Validate
+                                // Validate
                                 let validation_result = edit_money_map.validate();
                                 if validation_result.is_valid(){
                                     // Save
