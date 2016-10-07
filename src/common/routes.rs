@@ -108,6 +108,14 @@ pub fn get_routes() -> Router<ServerData> {
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
     });
+    router.patch("/money_maps", middleware! { |request, mut response|
+        info!("API Endpoint: PATCH /money_maps");
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.money_maps_controller.modify(request);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
     router.delete("/money_maps/:id", middleware! { |request, mut response|
         info!("API Endpoint: POST /money_maps");
         let sd: &ServerData = request.server_data();

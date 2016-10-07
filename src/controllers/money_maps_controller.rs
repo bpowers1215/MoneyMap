@@ -194,6 +194,76 @@ impl MoneyMapsController{
         }
     }// end create
 
+    /// Modify Money Map
+    ///
+    /// # Arguments
+    /// &self
+    /// req - nickel::Request
+    ///
+    /// # Returns
+    /// `ApiResult<MoneyMapModel>` - ApiResult including the modified user
+    pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<MoneyMapModel>{
+
+        let user_id = match Session::get_session_id(req){
+            Ok(id) => id,
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                return ApiResult::Failure{msg:"Unable to retrieve session data."};
+            }
+        };
+
+        match self.dao_manager.get_money_map_dao(){
+            Ok(dao) => {
+
+                match req.json_as::<MoneyMapModel>(){
+                    Ok(edit_money_map) => {
+                        // Get Money Map
+                        if let Some(mm_id) = edit_money_map.get_id(){
+                            let filter = doc!{
+                                "_id" => mm_id,
+                                "users.user_id" => user_id
+                            };
+
+                            if let Some(money_map) = dao.find_one(Some(filter), None){
+
+                            // Verify User has access
+
+                            // Validate
+                                let validation_result = edit_money_map.validate();
+                                if validation_result.is_valid(){
+                                    // Save
+                                    match dao.update(&edit_money_map){
+                                        Ok(result) => {
+                                            ApiResult::Success{result:result}
+                                        },
+                                        Err(e) => {
+                                            ApiResult::Failure{msg:e.get_message()}
+                                        }
+                                    }
+                                }else{
+                                    ApiResult::Invalid{validation:validation_result, request:edit_money_map}
+                                }
+
+                            }else{
+                                ApiResult::Failure{msg:"Unable to find Money Map"}
+                            }
+                        }else{
+                            ApiResult::Failure{msg:"Invalid Money Map ID"}
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}",e);
+                        ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
+                    }
+                }
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+    }// end modify
+
     /// Delete a Money Map
     ///
     /// # Arguments
