@@ -5,18 +5,11 @@
 // Import Modules
 // External
 use ::bson::oid::ObjectId;
-use ::rustc_serialize::base64 as Base64;
-use ::rustc_serialize::base64::{FromBase64, ToBase64};
-use ::sodiumoxide::crypto::pwhash;
-use ::sodiumoxide::crypto::pwhash::HashedPassword;
 // Utilities
-use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
 // Models
 use ::models::user_model::{OutUserModel};
-// DAO
-use ::dao::money_map_dao::MoneyMapDAO;
 
 /// Money Map
 #[derive(RustcDecodable, RustcEncodable)]

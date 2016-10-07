@@ -4,14 +4,9 @@
 
 // Import
 // External
-use ::chrono::{DateTime, Duration, Local};
 use ::nickel::{JsonBody, Request};
-use ::bson::{Bson, Document};
+use ::bson::{Bson};
 use ::bson::oid::ObjectId;
-use ::std::default::Default;
-use ::crypto::sha2::Sha256;
-use ::jwt::{Header, Registered, Token};
-use ::rustc_serialize::hex::ToHex;
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
@@ -203,7 +198,7 @@ impl MoneyMapsController{
                                 "users.user_id" => user_id
                             };
 
-                            if let Some(money_map) = dao.find_one(Some(filter), None){
+                            if let Some(_) = dao.find_one(Some(filter), None){
 
                                 // Validate
                                 let validation_result = edit_money_map.validate();
@@ -218,6 +213,7 @@ impl MoneyMapsController{
                                                     ApiResult::Success{result:updated_mm}
                                                 },
                                                 Err(e) => {
+                                                    warn!("{}",e);
                                                     ApiResult::Success{result:updated_mm}
                                                 }
                                             }
