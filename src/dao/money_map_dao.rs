@@ -14,7 +14,8 @@ use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 // Models
-use ::models::money_map_model::{MoneyMapModel, MoneyMapUserModel};
+use ::models::money_map_model::{MoneyMapModel};
+use ::models::money_map_user_model::{MoneyMapUserModel};
 use ::models::user_model::{OutUserModel};
 
 // Constants

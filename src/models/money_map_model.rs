@@ -1,4 +1,4 @@
-// src/models/money_map_dao.rs
+// src/models/money_map_model.rs
 
 /// Money Map Model
 
@@ -9,7 +9,7 @@ use ::bson::oid::ObjectId;
 use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
 // Models
-use ::models::user_model::{OutUserModel};
+use ::models::money_map_user_model::{MoneyMapUserModel};
 
 /// Money Map
 #[derive(RustcDecodable, RustcEncodable)]
@@ -18,13 +18,6 @@ pub struct MoneyMapModel {
     pub name: Option<String>,
     pub users: Option<Vec<MoneyMapUserModel>>
 }
-
-#[derive(Clone, RustcDecodable, RustcEncodable)]
-pub struct MoneyMapUserModel {
-    pub user: Option<OutUserModel>,
-    pub owner: bool
-}
-
 
 // Money Map Model Methods
 impl MoneyMapModel{
@@ -98,14 +91,4 @@ impl MoneyMapModel{
 
         validation_result
     }//end validate
-}
-
-/// MoneyMapUserModel Methods
-impl MoneyMapUserModel{
-    pub fn new(user: OutUserModel, owner: bool) -> MoneyMapUserModel{
-        MoneyMapUserModel{
-            user: Some(user),
-            owner: owner
-        }
-    }
 }

@@ -17,7 +17,8 @@ use ::common::session as Session;
 use ::dao::dao_manager::DAOManager;
 // Models
 use ::models::user_model::{OutUserModel};
-use ::models::money_map_model::{MoneyMapModel, MoneyMapUserModel};
+use ::models::money_map_model::{MoneyMapModel};
+use ::models::money_map_user_model::{MoneyMapUserModel};
 
 #[derive(Clone)]
 pub struct MoneyMapsController{
