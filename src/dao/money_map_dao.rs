@@ -183,18 +183,20 @@ impl MoneyMapDAO{
     ///
     /// # Arguments
     /// self
-    /// money_map_id - String User identifier
+    /// user_id - &str User ID
+    /// mm_id - &str Money Map ID
     ///
     /// # Returns
     /// `MMResult<()>`
-    pub fn delete(self, money_map_id: &str) -> MMResult<mongodb::coll::results::UpdateResult>{
+    pub fn delete(self, user_id: &str, mm_id: &str) -> MMResult<mongodb::coll::results::UpdateResult>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
 
-        match ObjectId::with_string(money_map_id){
+        match ObjectId::with_string(mm_id){
             Ok(id) => {
                 //TODO: Add filter for user - only allow deleting a map owned by current user
                 let filter = doc! {
-                    "_id" => id
+                    "_id" => id,
+                    "users.user_id" => user_id
                 };
 
                 // Build `$set` document to update document

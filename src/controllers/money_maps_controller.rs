@@ -251,17 +251,29 @@ impl MoneyMapsController{
     ///
     /// # Arguments
     /// &self
-    /// id - String
+    /// req - &nickel::Request
+    /// mm_id - String
     ///
     /// # Returns
     /// `ApiResult<String>` - ApiResult
-    pub fn delete(&self, id: &str) -> ApiResult<String>{
+    pub fn delete(&self, req: &Request<ServerData>, mm_id: &str) -> ApiResult<String>{
+
+        let user_id = match Session::get_session_id(req){
+            Ok(id) => id,
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                return ApiResult::Failure{msg:"Unable to retrieve session data."};
+            }
+        };
+
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
-                match dao.delete(id){
+                match dao.delete(&user_id, mm_id){
                     Ok(result) => {
                         if result.acknowledged && result.modified_count > 0 {
                             ApiResult::Success{result:"Successfully deleted money map".to_string()}
+                        }else if result.acknowledged && result.matched_count == 0{
+                            ApiResult::Failure{msg:"Unable to find money map"}
                         }else{
                             ApiResult::Failure{msg:"Unable to delete money map"}
                         }

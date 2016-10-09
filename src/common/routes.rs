@@ -120,7 +120,7 @@ pub fn get_routes() -> Router<ServerData> {
         info!("API Endpoint: POST /money_maps");
         let sd: &ServerData = request.server_data();
         let id = request.param("id").unwrap();
-        let result = &sd.controller_manager.money_maps_controller.delete(id);
+        let result = &sd.controller_manager.money_maps_controller.delete(request, id);
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
