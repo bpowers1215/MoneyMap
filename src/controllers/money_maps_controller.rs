@@ -13,12 +13,14 @@ use ::common::config::Config;
 use ::common::data_access::ServerData;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::session as Session;
-// DAO
-use ::dao::dao_manager::DAOManager;
+// Controllers
+use ::controllers::money_map_users_controller::{MoneyMapUsersController};
 // Models
 use ::models::user_model::{OutUserModel};
 use ::models::money_map_model::{MoneyMapModel};
 use ::models::money_map_user_model::{MoneyMapUserModel};
+// DAO
+use ::dao::dao_manager::DAOManager;
 
 #[derive(Clone)]
 pub struct MoneyMapsController{
@@ -66,7 +68,7 @@ impl MoneyMapsController{
 
                 // Get list of user details for each money map
                 for i in 0..money_maps.len(){
-                    match self.get_users_for_mm(&money_maps[i]){
+                    match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &money_maps[i]){
                         Ok(users_list) => {
                             // Add the new list of user details to the money map
                             money_maps[i].set_users(Some(users_list));
@@ -207,7 +209,7 @@ impl MoneyMapsController{
                                     // Save
                                     match dao.update(&edit_money_map){
                                         Ok(mut updated_mm) => {
-                                            match self.get_users_for_mm(&updated_mm){
+                                            match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &updated_mm){
                                                 Ok(users_list) => {
                                                     // Add the new list of user details to the money map
                                                     updated_mm.set_users(Some(users_list));
@@ -290,36 +292,4 @@ impl MoneyMapsController{
             }
         }
     }// end delete
-
-    fn get_users_for_mm(&self, money_map: &MoneyMapModel) -> MMResult<Vec<MoneyMapUserModel>>{
-        // Initialze a list of user details for this money map
-        let mut users_list = Vec::new();
-        if let Some(mm_users) = money_map.get_users(){
-
-            // For each user associated with this money map
-            for mm_user in mm_users{
-                match self.dao_manager.get_user_dao(){
-                    Ok(user_dao) => {
-
-                        // Fetch the user's details
-                        let user_id = Bson::ObjectId(mm_user.user.unwrap().id.unwrap());
-                        let found_user = user_dao.find_one(Some(doc!{
-                            "_id" => user_id
-                        }), None);
-                        if let Some(user) = found_user{
-                            // Add the user details to the list
-                            users_list.push(
-                                MoneyMapUserModel::new(OutUserModel::new(user), mm_user.owner)
-                            );
-                        }
-                    },
-                    Err(e) => {
-                        error!("{}",e.get_message().to_string());
-                        return Err(MMError::new("Unable to interact with database", MMErrorKind::Controller));
-                    }
-                }
-            }
-        }
-        Ok(users_list)
-    }
 }
