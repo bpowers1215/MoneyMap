@@ -32,7 +32,7 @@ impl TestController{
     ///
     /// # Returns
     /// `APIResult` - Result
-    pub fn retrieve(&self) -> ApiResult<TestModel>{
+    pub fn retrieve(&self) -> ApiResult<TestModel, ()>{
         let test = TestModel{
             field_1: Some(String::from("Field One")),
             field_2: Some(String::from("Field Two")),
@@ -50,7 +50,7 @@ impl TestController{
     ///
     /// # Returns
     /// `APIResult` - Result
-    pub fn save(&self, req: &mut Request<ServerData>) -> ApiResult<TestModel>{
+    pub fn save(&self, req: &mut Request<ServerData>) -> ApiResult<TestModel, TestModel>{
         let result;
         match req.json_as::<TestModel>(){
             Ok(test) => {
@@ -79,7 +79,7 @@ impl TestController{
     ///
     /// # Returns
     /// `APIResult` - Result
-    pub fn failure(&self) -> ApiResult<TestModel>{
+    pub fn failure(&self) -> ApiResult<TestModel, ()>{
         error!("(Test) Fatal error occurred");
         ApiResult::Failure{msg:"Fatal error occurred"}
     }

@@ -18,7 +18,7 @@ use ::dao::dao_manager::DAOManager;
 // Models
 use ::models::user_model::{OutUserModel};
 use ::models::money_map_model::{MoneyMapModel};
-use ::models::money_map_user_model::{MoneyMapUserModel};
+use ::models::money_map_user_model::{MoneyMapUserModel, InMoneyMapUserModel};
 
 #[derive(Clone)]
 pub struct MoneyMapUsersController{
@@ -44,7 +44,7 @@ impl MoneyMapUsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<MoneyMapUserModel>>` - ApiResult including the list of money map users
-    pub fn find(&self, req: &Request<ServerData>, mm_id: &str) -> ApiResult<Vec<MoneyMapUserModel>>{
+    pub fn find(&self, req: &Request<ServerData>, mm_id: &str) -> ApiResult<Vec<MoneyMapUserModel>, ()>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -114,8 +114,66 @@ impl MoneyMapUsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<MoneyMapUserModel>>` - ApiResult including the updated list of money map users
-    pub fn add(&self, req: &mut Request<ServerData>, mm_id: &str) -> ApiResult<Vec<MoneyMapUserModel>>{
-        ApiResult::Failure{msg:"Add needs to be implemented"}
+    pub fn add(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<Vec<MoneyMapUserModel>, InMoneyMapUserModel>{
+
+        let user_id = match Session::get_session_id(req){
+            Ok(id) => id,
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                return ApiResult::Failure{msg:"Unable to retrieve session data."};
+            }
+        };
+
+        match self.dao_manager.get_money_map_dao(){
+            Ok(dao) => {
+
+                match req.json_as::<InMoneyMapUserModel>(){
+                    Ok(mut money_map_user) => {
+
+                        match ObjectId::with_string(&mm_id){
+                            Ok(id) => {
+                                //Get list of money maps for this user
+                                let filter = doc!{
+                                    "_id" => id,
+                                    "users.user_id" => user_id,
+                                    "deleted" => {
+                                        "$ne" => true
+                                    }
+                                };
+                                match dao.find_one(Some(filter), None){
+                                    Some(mut money_map) => {
+
+                                        // Validate
+                                        let validation_result = money_map_user.validate(&self.dao_manager);
+                                        if validation_result.is_valid(){
+
+                                            ApiResult::Failure{msg:"SAVE IT"}
+                                        }else{
+                                            ApiResult::Invalid{validation:validation_result, request:money_map_user}
+                                        }
+                                    },
+                                    None => {
+                                        ApiResult::Failure{msg:"Unable to find money map."}
+                                    }
+                                }
+                            },
+                            Err(e) => {
+                                error!("{}", e);
+                                ApiResult::Failure{msg:"Failed to find money map. Invalid ID."}
+                            }
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}",e);
+                        ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
+                    }
+                }
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
     }// end add
 
     /// Delete a Money Map User
@@ -129,7 +187,7 @@ impl MoneyMapUsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<MoneyMapUserModel>>` - ApiResult including the updated list of money map users
-    pub fn delete(&self, mm_id: &str, user_id: &str) -> ApiResult<Vec<MoneyMapUserModel>>{
+    pub fn delete(&self, mm_id: &str, user_id: &str) -> ApiResult<Vec<MoneyMapUserModel>, ()>{
         ApiResult::Failure{msg:"Delete needs to be implemented"}
     }// end delete
 

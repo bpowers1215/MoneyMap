@@ -45,7 +45,7 @@ impl MoneyMapsController{
     ///
     /// # Returns
     /// `ApiResult<Vec<MoneyMapModel>>` - ApiResult including a vector of money maps
-    pub fn find(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<MoneyMapModel>>{
+    pub fn find(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<MoneyMapModel>, ()>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -97,7 +97,7 @@ impl MoneyMapsController{
     ///
     /// # Returns
     /// `ApiResult<MoneyMapModel>` - ApiResult including the create money map
-    pub fn create(&self, req: &mut Request<ServerData>) -> ApiResult<MoneyMapModel>{
+    pub fn create(&self, req: &mut Request<ServerData>) -> ApiResult<MoneyMapModel, MoneyMapModel>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -179,7 +179,7 @@ impl MoneyMapsController{
     ///
     /// # Returns
     /// `ApiResult<MoneyMapModel>` - ApiResult including the modified user
-    pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<MoneyMapModel>{
+    pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<MoneyMapModel, MoneyMapModel>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -258,7 +258,7 @@ impl MoneyMapsController{
     ///
     /// # Returns
     /// `ApiResult<String>` - ApiResult
-    pub fn delete(&self, req: &Request<ServerData>, mm_id: &str) -> ApiResult<String>{
+    pub fn delete(&self, req: &Request<ServerData>, mm_id: &str) -> ApiResult<String, ()>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,

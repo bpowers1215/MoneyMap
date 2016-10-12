@@ -45,7 +45,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<UserModel>>` - ApiResult including a vector of users
-    pub fn find_all(&self) -> ApiResult<Vec<OutUserModel>>{
+    pub fn find_all(&self) -> ApiResult<Vec<OutUserModel>, ()>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 info!("Fetch all Users");
@@ -68,7 +68,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<OutUserModel>` - ApiResult including the created user
-    pub fn create(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel>{
+    pub fn create(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel, OutUserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
 
@@ -124,7 +124,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<OutUserModel>` - ApiResult including the modified user
-    pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel>{
+    pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel, OutUserModel>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -182,7 +182,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<OutUserModel>` - ApiResult including the logged in user if login successful
-    pub fn login(&self, req: &mut Request<ServerData>) -> ApiResult<LoginUserModel>{
+    pub fn login(&self, req: &mut Request<ServerData>) -> ApiResult<LoginUserModel, LoginUserModel>{
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 // parse input
@@ -251,7 +251,7 @@ impl UsersController{
     ///
     /// # Returns
     /// `ApiResult<OutUserModel>` - ApiResult including the logged in user
-    pub fn get_account(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel>{
+    pub fn get_account(&self, req: &mut Request<ServerData>) -> ApiResult<OutUserModel, ()>{
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
             Err(e) => {
