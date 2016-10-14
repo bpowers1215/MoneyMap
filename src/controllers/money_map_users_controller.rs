@@ -124,19 +124,21 @@ impl MoneyMapUsersController{
             }
         };
 
+        // START Retrieve DAO ---------------------------------------------------------------------
         match self.dao_manager.get_money_map_user_dao(){
             Ok(mm_user_dao) => {
                 match self.dao_manager.get_money_map_dao(){
                     Ok(mm_dao) => {
                         match self.dao_manager.get_user_dao(){
                             Ok(user_dao) => {
+                                // END Retrieve DAO -----------------------------------------------
 
                                 match req.json_as::<InMoneyMapUserModel>(){
                                     Ok(mut money_map_user) => {
 
                                         match ObjectId::with_string(&mm_id){
                                             Ok(id) => {
-                                                //Get list of money maps for this user
+                                                //Find Money Map
                                                 let filter = doc!{
                                                     "_id" => id,
                                                     "users.user_id" => user_id,
@@ -186,6 +188,9 @@ impl MoneyMapUsersController{
                                         ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
                                     }
                                 }
+                                
+                                
+                                // START Retrieve DAO Error Handling ------------------------------
                             },
                             Err(e) => {
                                 // Unable to retrieve UserDAO
@@ -207,6 +212,8 @@ impl MoneyMapUsersController{
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
+        // END Retrieve DAO Error Handling --------------------------------------------------------
+        
     }// end add
 
     /// Delete a Money Map User
