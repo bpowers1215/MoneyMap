@@ -335,6 +335,50 @@ impl OutUserModel{
             email:user.email
         }
     }// end from_in_user
+
+    /// Get ID
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<ObjectId>' - id
+    pub fn get_id(&self) -> Option<ObjectId>{
+        self.id.clone()
+    }
+
+    /// Get First Name
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<String>' - first name
+    pub fn get_first_name(&self) -> Option<String>{
+        self.first_name.clone()
+    }
+
+    /// Get Last Name
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<String>' - last name
+    pub fn get_last_name(&self) -> Option<String>{
+        self.last_name.clone()
+    }
+
+    /// Get Email
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<String>' - email
+    pub fn get_email(&self) -> Option<String>{
+        self.email.clone()
+    }
 }
 
 // Login User Model Methods

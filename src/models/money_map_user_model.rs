@@ -9,7 +9,8 @@ use ::bson::oid::ObjectId;
 use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
 // Models
-use ::models::user_model::{OutUserModel};
+use ::models::money_map_model::{MoneyMapModel};
+use ::models::user_model::{UserModel, OutUserModel};
 // DAO
 use ::dao::dao_manager::DAOManager;
 
@@ -34,6 +35,17 @@ impl MoneyMapUserModel{
             owner: owner
         }
     }
+
+    /// Get User
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<ObjectId>' - id
+    pub fn get_user(&self) -> Option<OutUserModel>{
+        self.user.clone()
+    }
 }
 
 /// InMoneyMapUserModel Methods
@@ -48,10 +60,12 @@ impl InMoneyMapUserModel{
     ///
     /// # Arguments
     /// self
+    /// user_option &Option<UserModel> The User to add to money map
+    /// money_map &MoneyMapModel The money map
     ///
     /// # Returns
     /// 'ValidationResult' - validation result
-    pub fn validate(&self, dao_manager: &DAOManager) -> ValidationResult{
+    pub fn validate(&self, user_option: &Option<UserModel>, money_map: &MoneyMapModel) -> ValidationResult{
 
         //validate user
         let mut validation_result = ValidationResult::new();
@@ -59,34 +73,19 @@ impl InMoneyMapUserModel{
             validation_result.add_error("email".to_string(), "Email is required.".to_string());
         }
         // Verify email is unique
-        match dao_manager.get_user_dao(){
-            Ok(user_dao) => {
-                match dao_manager.get_money_map_user_dao(){
-                    Ok(mm_user_dao) => {
-                        if let Some(ref email) = self.email {
-                            let filter = doc!{
-                                "email" => email
-                            };
-                            match user_dao.find_one(Some(filter), None){
-                                Some(user) => {
-                                    // A user has been found with this email address, verify the user isn't already a member of this money map
-                                },
-                                None => {
-                                    validation_result.add_error("email".to_string(), "A user cannot be found with this email address.".to_string());
-                                }
-                            }
-                        }
-                    },
-                    Err(e) => {
-                        error!("{}",e.get_message().to_string());
-                        validation_result.add_error("email".to_string(), "Error: Unable to verify money map user.".to_string());
+        if let &Some(ref user) = user_option {
+            // A user has been found with this email address, verify the user isn't already a member of this money map
+            let user_id = user.get_id().unwrap();
+            if let Some(mm_users) = money_map.get_users(){
+                for mm_user in mm_users{
+                    if mm_user.get_user().unwrap().get_id().unwrap() == user_id {
+                        validation_result.add_error("email".to_string(), "User already a member of this money map".to_string());
+                        break;
                     }
                 }
-            },
-            Err(e) => {
-                error!("{}",e.get_message().to_string());
-                validation_result.add_error("email".to_string(), "Error: Unable to verify email address.".to_string());
             }
+        }else{
+            validation_result.add_error("email".to_string(), "A user cannot be found with this email address.".to_string());
         }
 
         validation_result
