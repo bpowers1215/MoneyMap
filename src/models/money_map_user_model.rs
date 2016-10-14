@@ -56,6 +56,17 @@ impl InMoneyMapUserModel{
         }
     }
 
+    /// Get Email
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<String>' - The email
+    pub fn get_email(&self) -> Option<String>{
+        self.email.clone()
+    }
+
     /// Validate Money Map
     ///
     /// # Arguments
@@ -65,27 +76,12 @@ impl InMoneyMapUserModel{
     ///
     /// # Returns
     /// 'ValidationResult' - validation result
-    pub fn validate(&self, user_option: &Option<UserModel>, money_map: &MoneyMapModel) -> ValidationResult{
+    pub fn validate(&self) -> ValidationResult{
 
         //validate user
         let mut validation_result = ValidationResult::new();
         if !Validators::not_empty_string(self.email.clone()){
             validation_result.add_error("email".to_string(), "Email is required.".to_string());
-        }
-        // Verify email is unique
-        if let &Some(ref user) = user_option {
-            // A user has been found with this email address, verify the user isn't already a member of this money map
-            let user_id = user.get_id().unwrap();
-            if let Some(mm_users) = money_map.get_users(){
-                for mm_user in mm_users{
-                    if mm_user.get_user().unwrap().get_id().unwrap() == user_id {
-                        validation_result.add_error("email".to_string(), "User already a member of this money map".to_string());
-                        break;
-                    }
-                }
-            }
-        }else{
-            validation_result.add_error("email".to_string(), "A user cannot be found with this email address.".to_string());
         }
 
         validation_result

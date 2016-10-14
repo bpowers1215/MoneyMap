@@ -148,28 +148,48 @@ impl MoneyMapUsersController{
                                                 };
                                                 match mm_dao.find_one(Some(filter), None){
                                                     Some(mut money_map) => {
+                                                        
+                                                        // Standard Validation
+                                                        let mut validation_result = money_map_user.validate();
+                                                        if validation_result.is_valid(){
 
-                                                        // Get user for email
-                                                        if let Some(ref email) = money_map_user.clone().email {
+                                                            // Get user for email
                                                             let filter = doc!{
-                                                                "email" => email
+                                                                "email" => (money_map_user.clone().get_email().unwrap())
                                                             };
-                                                            let user = user_dao.find_one(Some(filter), None);
-
-                                                            // Validate
-                                                            let validation_result = money_map_user.validate(&user, &money_map);
-                                                            if validation_result.is_valid(){
-                                                                if let Ok(result) = mm_user_dao.add_user(money_map.get_id().unwrap(), user.unwrap().get_id().unwrap()){
-                                                                    if result.acknowledged && result.modified_count > 0 {
-                                                                        return ApiResult::Success{result:"Successfully added user to money map".to_string()};
+                                                            if let Some(user) = user_dao.find_one(Some(filter), None){
+                                                                
+                                                                // A user has been found with this email address, verify the user isn't already a member of this money map
+                                                                let user_id = user.get_id().unwrap();
+                                                                if let Some(mm_users) = money_map.get_users(){
+                                                                    for mm_user in mm_users{
+                                                                        if mm_user.get_user().unwrap().get_id().unwrap() == user_id {
+                                                                            // User already member of money map validation
+                                                                            validation_result.add_error("email".to_string(), "User already a member of this money map".to_string());
+                                                                            return ApiResult::Invalid{validation:validation_result, request:money_map_user};
+                                                                        }
                                                                     }
                                                                 }
-                                                                ApiResult::Failure{msg:"Error add user to money map"}
+                                                                
+                                                                // All is well, add the user to the money map
+                                                                if let Ok(result) = mm_user_dao.add_user(money_map.get_id().unwrap(), user.get_id().unwrap()){
+                                                                    if result.acknowledged && result.modified_count > 0 {
+                                                                        ApiResult::Success{result:"Successfully added user to money map".to_string()}
+                                                                    }else{
+                                                                        ApiResult::Failure{msg:"Unable to add user to money map"}
+                                                                    }
+                                                                }else{
+                                                                    ApiResult::Failure{msg:"Error adding user to money map"}
+                                                                }
+                                                                
                                                             }else{
+                                                                // User not found validation
+                                                                validation_result.add_error("email".to_string(), "A user cannot be found with this email address.".to_string());
                                                                 ApiResult::Invalid{validation:validation_result, request:money_map_user}
                                                             }
                                                         }else{
-                                                            ApiResult::Failure{msg:"Error, email required."}
+                                                            // Standard Validation failed
+                                                            ApiResult::Invalid{validation:validation_result, request:money_map_user}
                                                         }
                                                     },
                                                     None => {
