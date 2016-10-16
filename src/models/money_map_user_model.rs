@@ -46,6 +46,17 @@ impl MoneyMapUserModel{
     pub fn get_user(&self) -> Option<OutUserModel>{
         self.user.clone()
     }
+
+    /// Get member owner flag
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'bool' - Owner flag
+    pub fn is_owner(&self) -> bool{
+        self.owner
+    }
 }
 
 /// InMoneyMapUserModel Methods

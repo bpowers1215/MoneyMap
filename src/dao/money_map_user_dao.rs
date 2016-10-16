@@ -57,7 +57,7 @@ impl MoneyMapUserDAO{
             "_id" => ( mm_id )
         };
 
-        // Build `$set` document to update document
+        // Build `$push` document to update document
         let update_doc = doc! {
             "$push" => {
                 "users" => {
@@ -78,4 +78,41 @@ impl MoneyMapUserDAO{
             }
         }
     }// end add_user
+
+    /// Remove user from money map
+    ///
+    /// # Arguments
+    /// self
+    /// mm_id - ObjectId The Money Map ID
+    /// user_id - ObjectId The User ID
+    ///
+    /// # Returns
+    /// `MMResult<UpdateResult>`
+    pub fn remove_user(&self, mm_id: ObjectId, user_id: ObjectId) -> MMResult<mongodb::coll::results::UpdateResult>{
+        let coll = self.db.collection(MONEY_MAP_COLLECTION);
+
+        let filter = doc! {
+            "_id" => ( mm_id )
+        };
+
+        // Build `$pull` document to update document
+        let update_doc = doc! {
+            "$pull" => {
+                "users" => {
+                    "user_id" => user_id
+                }
+            }
+        };
+
+        // Update the money map
+        match coll.update_one(filter.clone(), update_doc.clone(), None){
+            Ok(result) => {
+                Ok(result)
+            },
+            Err(e) => {
+                error!("{}", e);
+                Err(MMError::new("Failed to update money map.", MMErrorKind::DAO))
+            }
+        }
+    }
 }
