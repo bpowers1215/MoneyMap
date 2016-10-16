@@ -59,36 +59,44 @@ impl MoneyMapUsersController{
 
                 match ObjectId::with_string(mm_id){
                     Ok(id) => {
-                        //Get list of money maps for this user
-                        let filter = doc!{
-                            "_id" => id,
-                            "users.user_id" => user_id,
-                            "deleted" => {
-                                "$ne" => true
-                            }
-                        };
-                        match dao.find_one(Some(filter), None){
-                            Some(mut money_map) => {
+                        match ObjectId::with_string(&user_id){
+                            Ok(user_obj_id) => {
+                                //Get list of money maps for this user
+                                let filter = doc!{
+                                    "_id" => id,
+                                    "users.user_id" => user_obj_id,
+                                    "deleted" => {
+                                        "$ne" => true
+                                    }
+                                };
+                                match dao.find_one(Some(filter), None){
+                                    Some(mut money_map) => {
 
-                                // Get list of user details for money map
-                                match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &money_map){
-                                    Ok(users_list) => {
-                                        // Add the new list of user details to the money map
-                                        money_map.set_users(Some(users_list));
+                                        // Get list of user details for money map
+                                        match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &money_map){
+                                            Ok(users_list) => {
+                                                // Add the new list of user details to the money map
+                                                money_map.set_users(Some(users_list));
+                                            },
+                                            Err(e) => {
+                                                return ApiResult::Failure{msg:e.get_message()};
+                                            }
+                                        }
+
+                                        // Return the list of money maps
+                                        match money_map.get_users(){
+                                            Some(users) => ApiResult::Success{result:users},
+                                            None => ApiResult::Failure{msg:"Unable to find user details for money map"}
+                                        }
                                     },
-                                    Err(e) => {
-                                        return ApiResult::Failure{msg:e.get_message()};
+                                    None => {
+                                        ApiResult::Failure{msg:"Unable to find money map."}
                                     }
                                 }
-
-                                // Return the list of money maps
-                                match money_map.get_users(){
-                                    Some(users) => ApiResult::Success{result:users},
-                                    None => ApiResult::Failure{msg:"Unable to find user details for money map"}
-                                }
                             },
-                            None => {
-                                ApiResult::Failure{msg:"Unable to find money map."}
+                            Err(e) => {
+                                error!("{}", e);
+                                ApiResult::Failure{msg:"Failed to find money map. Invalid user ID."}
                             }
                         }
                     },
@@ -138,62 +146,70 @@ impl MoneyMapUsersController{
 
                                         match ObjectId::with_string(&mm_id){
                                             Ok(id) => {
-                                                //Find Money Map
-                                                let filter = doc!{
-                                                    "_id" => id,
-                                                    "users.user_id" => user_id,
-                                                    "deleted" => {
-                                                        "$ne" => true
-                                                    }
-                                                };
-                                                match mm_dao.find_one(Some(filter), None){
-                                                    Some(mut money_map) => {
-                                                        
-                                                        // Standard Validation
-                                                        let mut validation_result = money_map_user.validate();
-                                                        if validation_result.is_valid(){
+                                                match ObjectId::with_string(&user_id){
+                                                    Ok(user_obj_id) => {
+                                                        //Find Money Map
+                                                        let filter = doc!{
+                                                            "_id" => id,
+                                                            "users.user_id" => user_obj_id,
+                                                            "deleted" => {
+                                                                "$ne" => true
+                                                            }
+                                                        };
+                                                        match mm_dao.find_one(Some(filter), None){
+                                                            Some(mut money_map) => {
 
-                                                            // Get user for email
-                                                            let filter = doc!{
-                                                                "email" => (money_map_user.clone().get_email().unwrap())
-                                                            };
-                                                            if let Some(user) = user_dao.find_one(Some(filter), None){
-                                                                
-                                                                // A user has been found with this email address, verify the user isn't already a member of this money map
-                                                                let user_id = user.get_id().unwrap();
-                                                                if let Some(mm_users) = money_map.get_users(){
-                                                                    for mm_user in mm_users{
-                                                                        if mm_user.get_user().unwrap().get_id().unwrap() == user_id {
-                                                                            // User already member of money map validation
-                                                                            validation_result.add_error("email".to_string(), "User already a member of this money map".to_string());
-                                                                            return ApiResult::Invalid{validation:validation_result, request:money_map_user};
+                                                                // Standard Validation
+                                                                let mut validation_result = money_map_user.validate();
+                                                                if validation_result.is_valid(){
+
+                                                                    // Get user for email
+                                                                    let filter = doc!{
+                                                                        "email" => (money_map_user.clone().get_email().unwrap())
+                                                                    };
+                                                                    if let Some(user) = user_dao.find_one(Some(filter), None){
+
+                                                                        // A user has been found with this email address, verify the user isn't already a member of this money map
+                                                                        let user_id = user.get_id().unwrap();
+                                                                        if let Some(mm_users) = money_map.get_users(){
+                                                                            for mm_user in mm_users{
+                                                                                if mm_user.get_user().unwrap().get_id().unwrap() == user_id {
+                                                                                    // User already member of money map validation
+                                                                                    validation_result.add_error("email".to_string(), "User already a member of this money map".to_string());
+                                                                                    return ApiResult::Invalid{validation:validation_result, request:money_map_user};
+                                                                                }
+                                                                            }
                                                                         }
-                                                                    }
-                                                                }
-                                                                
-                                                                // All is well, add the user to the money map
-                                                                if let Ok(result) = mm_user_dao.add_user(money_map.get_id().unwrap(), user.get_id().unwrap()){
-                                                                    if result.acknowledged && result.modified_count > 0 {
-                                                                        ApiResult::Success{result:"Successfully added user to money map".to_string()}
+
+                                                                        // All is well, add the user to the money map
+                                                                        if let Ok(result) = mm_user_dao.add_user(money_map.get_id().unwrap(), user.get_id().unwrap()){
+                                                                            if result.acknowledged && result.modified_count > 0 {
+                                                                                ApiResult::Success{result:"Successfully added user to money map".to_string()}
+                                                                            }else{
+                                                                                ApiResult::Failure{msg:"Unable to add user to money map"}
+                                                                            }
+                                                                        }else{
+                                                                            ApiResult::Failure{msg:"Error adding user to money map"}
+                                                                        }
+
                                                                     }else{
-                                                                        ApiResult::Failure{msg:"Unable to add user to money map"}
+                                                                        // User not found validation
+                                                                        validation_result.add_error("email".to_string(), "A user cannot be found with this email address.".to_string());
+                                                                        ApiResult::Invalid{validation:validation_result, request:money_map_user}
                                                                     }
                                                                 }else{
-                                                                    ApiResult::Failure{msg:"Error adding user to money map"}
+                                                                    // Standard Validation failed
+                                                                    ApiResult::Invalid{validation:validation_result, request:money_map_user}
                                                                 }
-                                                                
-                                                            }else{
-                                                                // User not found validation
-                                                                validation_result.add_error("email".to_string(), "A user cannot be found with this email address.".to_string());
-                                                                ApiResult::Invalid{validation:validation_result, request:money_map_user}
+                                                            },
+                                                            None => {
+                                                                ApiResult::Failure{msg:"Unable to find money map."}
                                                             }
-                                                        }else{
-                                                            // Standard Validation failed
-                                                            ApiResult::Invalid{validation:validation_result, request:money_map_user}
                                                         }
                                                     },
-                                                    None => {
-                                                        ApiResult::Failure{msg:"Unable to find money map."}
+                                                    Err(e) => {
+                                                        error!("{}", e);
+                                                        ApiResult::Failure{msg:"Failed to find money map. Invalid user ID."}
                                                     }
                                                 }
                                             },
@@ -208,8 +224,8 @@ impl MoneyMapUsersController{
                                         ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
                                     }
                                 }
-                                
-                                
+
+
                                 // START Retrieve DAO Error Handling ------------------------------
                             },
                             Err(e) => {
@@ -233,7 +249,7 @@ impl MoneyMapUsersController{
             }
         }
         // END Retrieve DAO Error Handling --------------------------------------------------------
-        
+
     }// end add
 
     /// Delete a Money Map User
@@ -270,7 +286,7 @@ impl MoneyMapUsersController{
                     Ok(user_dao) => {
 
                         // Fetch the user's details
-                        let user_id = Bson::ObjectId(mm_user.user.unwrap().id.unwrap());
+                        let user_id = mm_user.user.unwrap().id.unwrap();
                         let found_user = user_dao.find_one(Some(doc!{
                             "_id" => user_id
                         }), None);

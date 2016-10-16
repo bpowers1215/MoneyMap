@@ -41,7 +41,7 @@ impl MoneyMapDAO{
         }
     }
 
-    /// Find All Money Maps belonging to a user
+    /// Find All Money Maps for filter
     ///
     /// # Arguments
     /// self
@@ -111,7 +111,7 @@ impl MoneyMapDAO{
     ///
     /// # Returns
     /// `MMResult<()>`
-    pub fn create(&self, money_map: &MoneyMapModel, user_id: String) -> MMResult<mongodb::coll::results::InsertOneResult>{
+    pub fn create(&self, money_map: &MoneyMapModel, user_id: &str) -> MMResult<mongodb::coll::results::InsertOneResult>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
 
         /*let doc = doc! {
@@ -124,18 +124,26 @@ impl MoneyMapDAO{
         if let Some(name) = money_map.get_name(){
             doc.insert_bson("name".to_string(), Bson::String(name));
         }
-        let mm_user = doc!{
-            "user_id" => user_id,
-            "owner" => true
-        };
-        doc.insert_bson("users".to_string(), Bson::Array(vec![ Bson::Document(mm_user) ]));
+        match ObjectId::with_string(user_id){
+            Ok(user_obj_id) => {
+                let mm_user = doc!{
+                    "user_id" => user_obj_id,
+                    "owner" => true
+                };
+                doc.insert_bson("users".to_string(), Bson::Array(vec![ Bson::Document(mm_user) ]));
 
-        // Insert document into `money_maps` collection
-        match coll.insert_one(doc.clone(), None){
-            Ok(result) => Ok(result),
+                // Insert document into `money_maps` collection
+                match coll.insert_one(doc.clone(), None){
+                    Ok(result) => Ok(result),
+                    Err(e) => {
+                        warn!("{}", e);
+                        Err(MMError::new("Failed to insert money_map", MMErrorKind::DAO))
+                    }
+                }
+            },
             Err(e) => {
                 warn!("{}", e);
-                Err(MMError::new("Failed to insert money_map", MMErrorKind::DAO))
+                Err(MMError::new("Failed to insert money_map. Invalid User ID", MMErrorKind::DAO))
             }
         }
     }// end create
@@ -193,22 +201,30 @@ impl MoneyMapDAO{
 
         match ObjectId::with_string(mm_id){
             Ok(id) => {
-                //TODO: Add filter for user - only allow deleting a map owned by current user
-                let filter = doc! {
-                    "_id" => id,
-                    "users.user_id" => user_id
-                };
+                match ObjectId::with_string(user_id){
+                    Ok(user_obj_id) => {
+                        //TODO: Add filter for user - only allow deleting a map owned by current user
+                        let filter = doc! {
+                            "_id" => id,
+                            "users.user_id" => user_obj_id
+                        };
 
-                // Build `$set` document to update document
-                let mut set_doc = doc!{};
-                set_doc.insert_bson("deleted".to_string(), Bson::Boolean(true));
-                let update_doc = doc! {"$set" => set_doc};
+                        // Build `$set` document to update document
+                        let mut set_doc = doc!{};
+                        set_doc.insert_bson("deleted".to_string(), Bson::Boolean(true));
+                        let update_doc = doc! {"$set" => set_doc};
 
-                // Soft delete money map
-                match coll.update_one(filter.clone(), update_doc.clone(), None){
-                    Ok(result) => Ok(result),
+                        // Soft delete money map
+                        match coll.update_one(filter.clone(), update_doc.clone(), None){
+                            Ok(result) => Ok(result),
+                            Err(e) => {
+                                error!("{}", e);
+                                Err(MMError::new("Failed to delete money map.", MMErrorKind::DAO))
+                            }
+                        }
+                    },
                     Err(e) => {
-                        error!("{}", e);
+                        error!("{}",e);
                         Err(MMError::new("Failed to delete money map.", MMErrorKind::DAO))
                     }
                 }
@@ -236,23 +252,26 @@ fn document_to_model(doc: Document) -> MoneyMapModel{
                 let mut user_mods = Vec::new();
                 for user in users{
                     if let &Bson::Document(ref mm_user_bson) = user{
-                        if let Some(&Bson::String(ref user_id)) = mm_user_bson.get("user_id"){
-                            let user = OutUserModel{
-                                id: Some(ObjectId::with_string(user_id.as_str()).unwrap()),
-                                first_name:None,
-                                last_name:None,
-                                email:None
-                            };
+                        match mm_user_bson.get("user_id"){
+                            Some(&Bson::ObjectId(ref user_id)) => {
+                                let user = OutUserModel{
+                                    id: Some(user_id.clone()),
+                                    first_name:None,
+                                    last_name:None,
+                                    email:None
+                                };
 
-                            let mut owner = false;
-                            if let Some(&Bson::Boolean(is_owner)) = mm_user_bson.get("owner"){
-                                owner = is_owner;
-                            }
+                                let mut owner = false;
+                                if let Some(&Bson::Boolean(is_owner)) = mm_user_bson.get("owner"){
+                                    owner = is_owner;
+                                }
 
-                            user_mods.push(MoneyMapUserModel{
-                                user: Some(user),
-                                owner: owner
-                            });
+                                user_mods.push(MoneyMapUserModel{
+                                    user: Some(user),
+                                    owner: owner
+                                });
+                            },
+                            _ => {}
                         }
                     }
                 }

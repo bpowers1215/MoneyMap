@@ -117,7 +117,7 @@ pub fn get_routes() -> Router<ServerData> {
         JsonEncoder::encode(result)
     });
     router.delete("/money_maps/:id", middleware! { |request, mut response|
-        info!("API Endpoint: POST /money_maps");
+        info!("API Endpoint: DELETE /money_maps");
         let sd: &ServerData = request.server_data();
         let id = request.param("id").unwrap();
         let result = &sd.controller_manager.money_maps_controller.delete(request, id);
