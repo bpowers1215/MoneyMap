@@ -203,10 +203,13 @@ impl MoneyMapDAO{
             Ok(id) => {
                 match ObjectId::with_string(user_id){
                     Ok(user_obj_id) => {
-                        //TODO: Add filter for user - only allow deleting a map owned by current user
+                        
                         let filter = doc! {
                             "_id" => id,
-                            "users.user_id" => user_obj_id
+                            "users" => {
+                                "user_id" => user_obj_id,
+                                "owner" => true
+                            }
                         };
 
                         // Build `$set` document to update document

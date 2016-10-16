@@ -294,7 +294,7 @@ impl MoneyMapsController{
                         if result.acknowledged && result.modified_count > 0 {
                             ApiResult::Success{result:"Successfully deleted money map".to_string()}
                         }else if result.acknowledged && result.matched_count == 0{
-                            ApiResult::Failure{msg:"Unable to find money map"}
+                            ApiResult::Failure{msg:"Unable to delete money map"}
                         }else{
                             ApiResult::Failure{msg:"Unable to delete money map"}
                         }
