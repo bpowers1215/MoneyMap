@@ -8,15 +8,9 @@ extern crate mongodb;
 
 // Import Modules
 // Common Utilities
-use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
-use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
-// Models
-use ::models::money_map_model::{MoneyMapModel};
-use ::models::money_map_user_model::{MoneyMapUserModel};
-use ::models::user_model::{OutUserModel};
 
 // Constants
 static MONEY_MAP_COLLECTION: &'static str = "money_maps";

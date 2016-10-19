@@ -5,7 +5,6 @@
 // Import
 // External
 use ::nickel::{JsonBody, Request};
-use ::bson::{Bson};
 use ::bson::oid::ObjectId;
 // Utilities
 use ::common::api_result::ApiResult;
@@ -142,7 +141,7 @@ impl MoneyMapUsersController{
                                 // END Retrieve DAO -----------------------------------------------
 
                                 match req.json_as::<InMoneyMapUserModel>(){
-                                    Ok(mut money_map_user) => {
+                                    Ok(money_map_user) => {
 
                                         match ObjectId::with_string(&mm_id){
                                             Ok(id) => {
@@ -157,7 +156,7 @@ impl MoneyMapUsersController{
                                                             }
                                                         };
                                                         match mm_dao.find_one(Some(filter), None){
-                                                            Some(mut money_map) => {
+                                                            Some(money_map) => {
 
                                                                 // Standard Validation
                                                                 let mut validation_result = money_map_user.validate();

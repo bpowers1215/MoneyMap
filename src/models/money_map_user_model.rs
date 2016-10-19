@@ -3,16 +3,11 @@
 /// Money Map User Model
 
 // Import Modules
-// External
-use ::bson::oid::ObjectId;
 // Utilities
 use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
 // Models
-use ::models::money_map_model::{MoneyMapModel};
-use ::models::user_model::{UserModel, OutUserModel};
-// DAO
-use ::dao::dao_manager::DAOManager;
+use ::models::user_model::{OutUserModel};
 
 /// Money Map User
 #[derive(Clone, RustcDecodable, RustcEncodable)]
