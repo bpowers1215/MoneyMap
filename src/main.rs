@@ -35,6 +35,7 @@ use money_map::dao::dao_manager::{DAOManager};
 //Controllers
 use money_map::controllers::controller_manager::ControllerManager;
 use money_map::controllers::test_controller::TestController;
+use money_map::controllers::accounts_controller::AccountsController;
 use money_map::controllers::money_maps_controller::MoneyMapsController;
 use money_map::controllers::money_map_users_controller::MoneyMapUsersController;
 use money_map::controllers::users_controller::UsersController;
@@ -62,6 +63,7 @@ fn main() {
     //Initialize Controllers
     let controller_manager = ControllerManager{
         test_controller: TestController::new(dao_manager.clone()),
+        accounts_controller: AccountsController::new(dao_manager.clone(), configuration.clone()),
         money_maps_controller: MoneyMapsController::new(dao_manager.clone(), configuration.clone()),
         money_map_users_controller: MoneyMapUsersController::new(dao_manager.clone(), configuration.clone()),
         users_controller: UsersController::new(dao_manager.clone(), configuration.clone())

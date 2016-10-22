@@ -6,6 +6,7 @@
 // Import Modules
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::database::DB;
+use super::account_dao::AccountDAO;
 use super::user_dao::UserDAO;
 use super::money_map_dao::MoneyMapDAO;
 use super::money_map_user_dao::MoneyMapUserDAO;
@@ -69,6 +70,20 @@ impl DAOManager{
     pub fn get_money_map_user_dao(&self) -> MMResult<MoneyMapUserDAO>{
         match self.db.get_database(){
             Some(db) => Ok(MoneyMapUserDAO::new(db)),
+            None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
+        }
+    }
+
+    /// Get a AccountDAO
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// `MMResult<AccountDAO>` MMResult wrapping the AccountDAO
+    pub fn get_account_dao(&self) -> MMResult<AccountDAO>{
+        match self.db.get_database(){
+            Some(db) => Ok(AccountDAO::new(db)),
             None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
     }
