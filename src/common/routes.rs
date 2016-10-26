@@ -156,6 +156,17 @@ pub fn get_routes() -> Router<ServerData> {
         JsonEncoder::encode(result)
     });
 
+    // Accounts
+    router.post("/money_maps/:mm_id/accounts", middleware! { |request, mut response|
+        info!("API Endpoint: POST /money_maps/:mm_id/accounts");
+        let sd: &ServerData = request.server_data();
+        let mm_id = request.param("mm_id").unwrap().to_owned();
+        let result = &sd.controller_manager.accounts_controller.create(request, mm_id);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
+
     // Return router
     router
 }

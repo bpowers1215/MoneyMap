@@ -125,10 +125,10 @@ impl MoneyMapsController{
                                 // Validate
                                 let validation_result = money_map.validate();
                                 if validation_result.is_valid(){
-                                    // Save User
+                                    // Save Money Map
                                     match dao.create(&money_map, &user_id){
                                         Ok(result) => {
-                                            // Set user ID
+                                            // Set money map ID
                                             match result.inserted_id{
                                                 Some(id_wrapper) => {
                                                     match id_wrapper{

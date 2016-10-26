@@ -10,16 +10,25 @@ use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
 
 /// Account
-#[derive(RustcDecodable, RustcEncodable)]
+#[derive(Clone, RustcDecodable, RustcEncodable)]
 pub struct AccountModel {
     pub id: Option<ObjectId>,
     pub name: Option<String>,
     pub account_type: Option<String>,
-    pub created: Option<String>
+    pub created: Option<i64>
 }
 
 // Account Model Methods
 impl AccountModel{
+
+    /// Get ID
+    ///
+    /// # Arguments
+    /// &self
+    /// Option<ObjectId>
+    pub fn set_id(&mut self, id: Option<ObjectId>){
+        self.id = id;
+    }
 
     /// Get ID
     ///
@@ -54,6 +63,15 @@ impl AccountModel{
         self.account_type.clone()
     }
 
+    /// Set Created Date
+    ///
+    /// # Arguments
+    /// &self
+    /// Option<i64> Timestamp
+    pub fn set_created(&mut self, timestamp: Option<i64>){
+        self.created = timestamp
+    }
+
     /// Validate Account
     ///
     /// # Arguments
@@ -63,7 +81,7 @@ impl AccountModel{
     /// 'ValidationResult' - validation result
     pub fn validate(&self) -> ValidationResult{
 
-        //validate user
+        // Validate
         let mut validation_result = ValidationResult::new();
         if !Validators::not_empty_string(self.name.clone()){
             validation_result.add_error("name".to_string(), "Name is required.".to_string());
