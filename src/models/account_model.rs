@@ -5,6 +5,7 @@
 // Import Modules
 // External
 use ::bson::oid::ObjectId;
+use ::chrono::{UTC, Local, DateTime, TimeZone};
 // Utilities
 use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
@@ -16,6 +17,14 @@ pub struct AccountModel {
     pub name: Option<String>,
     pub account_type: Option<String>,
     pub created: Option<i64>
+}
+
+#[derive(Clone, RustcDecodable, RustcEncodable)]
+pub struct OutAccountModel {
+    pub id: Option<ObjectId>,
+    pub name: Option<String>,
+    pub account_type: Option<String>,
+    pub created: Option<String>
 }
 
 // Account Model Methods
@@ -63,6 +72,17 @@ impl AccountModel{
         self.account_type.clone()
     }
 
+    /// Get Created Date
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// Option<i64> Timestamp
+    pub fn get_created(&mut self) -> Option<i64>{
+        self.created
+    }
+
     /// Set Created Date
     ///
     /// # Arguments
@@ -92,4 +112,30 @@ impl AccountModel{
 
         validation_result
     }//end validate
+}
+
+
+// Out Account Model Methods
+impl OutAccountModel{
+
+    /// Create OutAccountModel from AccountModel
+    ///
+    /// # Arguments
+    /// account - AccountModel 
+    ///
+    /// # Returns
+    /// 'ValidationResult' - validation result
+    pub fn new(mut account: AccountModel) -> OutAccountModel{
+        OutAccountModel{
+            id: account.get_id(),
+            name: account.get_name(),
+            account_type: account.get_account_type(),
+            created:match account.get_created(){
+                Some(timestamp) => {
+                    Some(Local.timestamp(timestamp.clone(), 0).to_rfc2822())
+                },
+                None => None
+            }
+        }
+    }
 }
