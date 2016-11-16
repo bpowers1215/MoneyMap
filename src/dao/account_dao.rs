@@ -138,6 +138,65 @@ impl AccountDAO{
         }
     }// end create
 
+    /// Update an existing acount
+    ///
+    /// # Arguments
+    /// self
+    /// mm_id ObjectId The Money Map ID
+    /// user_id ObjectId The Money Map ID
+    /// &account - AccountModel
+    ///
+    /// # Returns
+    /// `MMResult<AccountModel>` The updated money map if successful, None otherwise
+    pub fn update(&self, mm_id: ObjectId, user_id: ObjectId, account: &AccountModel) -> MMResult<AccountModel>{
+        let coll = self.db.collection(MONEY_MAP_COLLECTION);
+
+        let filter = doc! {
+            //Money Map Information
+            "_id" => mm_id,
+            "users" => {
+                "$elemMatch" => {
+                    "user_id" => user_id
+                }
+            },
+            "deleted" => {
+                "$ne" => true
+            },
+            //Account Information
+            "accounts._id" => ( account.get_id().unwrap() )
+        };
+
+        // Build `$set` document to update document
+        let mut set_doc = doc!{};
+        if let Some(name) = account.get_name(){
+            set_doc.insert_bson("accounts.$.name".to_string(), Bson::String(name));
+        }
+        let update_doc = doc! {"$set" => set_doc};
+
+        // Update the money map
+        match coll.update_one(filter.clone(), update_doc.clone(), None){
+            Ok(result) => {
+                if result.matched_count <= 0 {
+                    Err(MMError::new("Unable to find account", MMErrorKind::DAO))
+                }else if result.modified_count == 1 {
+                    //Ok(self.find_one(Some(filter), None).unwrap())
+                    // TODO Fetch and return updated account
+                    Ok(AccountModel{
+                        id:None,
+                        name:None,
+                        account_type:None,
+                        created:None
+                    })
+                }else{
+                    Err(MMError::new("Unable to save account", MMErrorKind::DAO))
+                }
+            },
+            Err(e) => {
+                error!("{}", e);
+                Err(MMError::new("Failed to update money map.", MMErrorKind::DAO))
+            }
+        }
+    }// end update
 }
 
 /// Create OutAccountModel from Document

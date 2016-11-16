@@ -157,6 +157,15 @@ pub fn get_routes() -> Router<ServerData> {
     });
 
     // Accounts
+    router.get("/money_maps/:mm_id/accounts", middleware! { |request, mut response|
+        info!("API Endpoint: GET /money_maps/:mm_id/accounts");
+        let sd: &ServerData = request.server_data();
+        let mm_id = request.param("mm_id").unwrap().to_owned();
+        let result = &sd.controller_manager.accounts_controller.find(request, mm_id);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
     router.post("/money_maps/:mm_id/accounts", middleware! { |request, mut response|
         info!("API Endpoint: POST /money_maps/:mm_id/accounts");
         let sd: &ServerData = request.server_data();
@@ -166,11 +175,11 @@ pub fn get_routes() -> Router<ServerData> {
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
     });
-    router.get("/money_maps/:mm_id/accounts", middleware! { |request, mut response|
-        info!("API Endpoint: GET /money_maps/:mm_id/accounts");
+    router.patch("/money_maps/:mm_id/accounts", middleware! { |request, mut response|
+        info!("API Endpoint: PATCH /money_maps/:mm_id/accounts");
         let sd: &ServerData = request.server_data();
         let mm_id = request.param("mm_id").unwrap().to_owned();
-        let result = &sd.controller_manager.accounts_controller.find(request, mm_id);
+        let result = &sd.controller_manager.accounts_controller.modify(request, mm_id);
 
         response.set(MediaType::Json);
         JsonEncoder::encode(result)

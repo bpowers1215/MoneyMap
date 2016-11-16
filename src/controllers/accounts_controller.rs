@@ -37,7 +37,7 @@ impl AccountsController{
     /// # Arguments
     /// &self
     /// req - nickel::Request
-    /// mm_id - String
+    /// mm_id - String Money Map ID
     ///
     /// # Returns
     /// `ApiResult<OutAccountModel, AccountModel>` - ApiResult including the created account
@@ -140,7 +140,7 @@ impl AccountsController{
     /// # Arguments
     /// &self
     /// req - nickel::Request
-    /// mm_id - String
+    /// mm_id - String Money Map ID
     ///
     /// # Returns
     /// `ApiResult<Vec<MoneyMapModel>>` - ApiResult including a vector of money maps
@@ -155,52 +155,44 @@ impl AccountsController{
         };
 
         // START Retrieve DAO ---------------------------------------------------------------------
-        match self.dao_manager.get_money_map_dao(){
-            Ok(mm_dao) => {
-                match self.dao_manager.get_account_dao(){
-                    Ok(account_dao) => {
-                        // END Retrieve DAO -------------------------------------------------------
+        match self.dao_manager.get_account_dao(){
+            Ok(account_dao) => {
+                // END Retrieve DAO ---------------------------------------------------------------
 
-                        match ObjectId::with_string(&mm_id){
-                            Ok(mm_obj_id) => {
-                                match ObjectId::with_string(&user_id){
-                                    Ok(user_obj_id) => {
+                match ObjectId::with_string(&mm_id){
+                    Ok(mm_obj_id) => {
+                        match ObjectId::with_string(&user_id){
+                            Ok(user_obj_id) => {
 
-                                        // Get list of accounts for money map
-                                        let filter = doc!{
-                                            "_id" => (mm_obj_id.clone()),
-                                            "users.user_id" => user_obj_id,
-                                            "deleted" => {
-                                                "$ne" => true
-                                            }
-                                        };
-                                        match account_dao.find(Some(filter)){
-                                            Some(accounts) => {
-                                                ApiResult::Success{result:accounts}
-                                            },
-                                            None => {
-                                                ApiResult::Failure{msg:"Unable to find money map."}
-                                            }
-                                        }
+                                // Get list of accounts for money map
+                                let filter = doc!{
+                                    "_id" => (mm_obj_id.clone()),
+                                    "users.user_id" => user_obj_id,
+                                    "deleted" => {
+                                        "$ne" => true
+                                    }
+                                };
+                                match account_dao.find(Some(filter)){
+                                    Some(accounts) => {
+                                        ApiResult::Success{result:accounts}
                                     },
-                                    Err(e) => {
-                                        error!("{}", e);
-                                        ApiResult::Failure{msg:"Failed to find money map. Invalid user ID."}
+                                    None => {
+                                        ApiResult::Failure{msg:"Unable to find money map."}
                                     }
                                 }
                             },
                             Err(e) => {
                                 error!("{}", e);
-                                ApiResult::Failure{msg:"Failed to find money map. Invalid ID."}
+                                ApiResult::Failure{msg:"Failed to find money map. Invalid user ID."}
                             }
                         }
-                        // START Retrieve DAO Error Handling --------------------------------------
                     },
                     Err(e) => {
-                        error!("{}",e.get_message().to_string());
-                        ApiResult::Failure{msg:"Unable to interact with database"}
+                        error!("{}", e);
+                        ApiResult::Failure{msg:"Failed to find money map. Invalid ID."}
                     }
                 }
+                // START Retrieve DAO Error Handling ----------------------------------------------
             },
             Err(e) => {
                 error!("{}",e.get_message().to_string());
@@ -209,5 +201,79 @@ impl AccountsController{
         }
         // END Retrieve DAO Error Handling --------------------------------------------------------
     }// end find_all
+
+    /// Modify Account
+    ///
+    /// # Arguments
+    /// &self
+    /// req - nickel::Request
+    /// mm_id - String Money Map ID
+    /// acc_id - String Account ID
+    ///
+    /// # Returns
+    /// `ApiResult<AccountModel, AccountModel>` - ApiResult including the modified Account
+    pub fn modify(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<AccountModel, AccountModel>{
+
+        let user_id = match Session::get_session_id(req){
+            Ok(id) => id,
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                return ApiResult::Failure{msg:"Unable to retrieve session data."};
+            }
+        };
+
+        // START Retrieve DAO ---------------------------------------------------------------------
+        match self.dao_manager.get_account_dao(){
+            Ok(account_dao) => {
+                // END Retrieve DAO ---------------------------------------------------------------
+
+                match ObjectId::with_string(&user_id){
+                    Ok(user_obj_id) => {
+                        match ObjectId::with_string(&mm_id){
+                            Ok(mm_obj_id) => {
+
+                                // Parse body to AccountModel
+                                match req.json_as::<AccountModel>(){
+                                    Ok(mut account) => {
+
+                                        //TODO Validate account prior to save
+
+                                        //Save the account
+                                        match account_dao.update(mm_obj_id, user_obj_id, &account){
+                                            Ok(mut updated_account) => {
+                                                ApiResult::Success{result:updated_account}
+                                            },
+                                            Err(e) => {
+                                                ApiResult::Failure{msg:e.get_message()}
+                                            }
+                                        }
+
+                                    },
+                                    Err(e) => {
+                                        error!("{}",e);
+                                        ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
+                                    }
+                                }
+                            },
+                            Err(e) => {
+                                error!("{}", e);
+                                ApiResult::Failure{msg:"Failed to find money map. Invalid money map ID."}
+                            }
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}", e);
+                        ApiResult::Failure{msg:"Failed to find money map. Invalid user ID."}
+                    }
+                }
+                // START Retrieve DAO Error Handling ----------------------------------------------
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+        // END Retrieve DAO Error Handling --------------------------------------------------------
+    }// end modify
 
 }
