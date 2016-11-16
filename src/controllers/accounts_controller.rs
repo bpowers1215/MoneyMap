@@ -63,7 +63,6 @@ impl AccountsController{
                                 match ObjectId::with_string(&user_id){
                                     Ok(user_obj_id) => {
 
-                                        // TODO Verify Money Map / User membership
                                         let filter = doc!{
                                             "_id" => (mm_obj_id.clone()),
                                             "users.user_id" => user_obj_id,
