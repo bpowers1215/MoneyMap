@@ -92,14 +92,14 @@ impl AccountModel{
         self.created = timestamp
     }
 
-    /// Validate Account
+    /// Validate new Account
     ///
     /// # Arguments
     /// self
     ///
     /// # Returns
     /// 'ValidationResult' - validation result
-    pub fn validate(&self) -> ValidationResult{
+    pub fn validate_new(&self) -> ValidationResult{
 
         // Validate
         let mut validation_result = ValidationResult::new();
@@ -111,7 +111,31 @@ impl AccountModel{
         }
 
         validation_result
-    }//end validate
+    }//end validate_new
+
+    /// Validate Existing Account
+    ///
+    /// # Arguments
+    /// self
+    ///
+    /// # Returns
+    /// 'ValidationResult' - validation result
+    pub fn validate_existing(&self) -> ValidationResult{
+
+        //validate user
+        let mut validation_result = ValidationResult::new();
+        if !Validators::empty(&self.name){
+            if !Validators::not_empty_string(self.name.clone()){
+                validation_result.add_error("name".to_string(), "Name is required.".to_string());
+            }
+        }
+        if !Validators::empty(&self.account_type){
+            if !Validators::not_empty_string(self.account_type.clone()){
+                validation_result.add_error("account_type".to_string(), "Account Type is required.".to_string());
+            }
+        }
+        validation_result
+    }
 }
 
 
@@ -121,7 +145,7 @@ impl OutAccountModel{
     /// Create OutAccountModel from AccountModel
     ///
     /// # Arguments
-    /// account - AccountModel 
+    /// account - AccountModel
     ///
     /// # Returns
     /// 'ValidationResult' - validation result

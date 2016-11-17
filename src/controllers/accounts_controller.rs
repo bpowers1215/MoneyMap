@@ -78,7 +78,7 @@ impl AccountsController{
                                                     Ok(mut account) => {
 
                                                         // Validate
-                                                        let validation_result = account.validate();
+                                                        let validation_result = account.validate_new();
                                                         if validation_result.is_valid(){
                                                             // Save Account
                                                             match account_dao.create(mm_obj_id, &account){
@@ -236,16 +236,20 @@ impl AccountsController{
                                 match req.json_as::<AccountModel>(){
                                     Ok(mut account) => {
 
-                                        //TODO Validate account prior to save
-
-                                        //Save the account
-                                        match account_dao.update(mm_obj_id, user_obj_id, &account){
-                                            Ok(mut updated_account) => {
-                                                ApiResult::Success{result:updated_account}
-                                            },
-                                            Err(e) => {
-                                                ApiResult::Failure{msg:e.get_message()}
+                                        //Validate
+                                        let validation_result = account.validate_existing();
+                                        if validation_result.is_valid(){
+                                            //Save the account
+                                            match account_dao.update(mm_obj_id, user_obj_id, &account){
+                                                Ok(mut updated_account) => {
+                                                    ApiResult::Success{result:updated_account}
+                                                },
+                                                Err(e) => {
+                                                    ApiResult::Failure{msg:e.get_message()}
+                                                }
                                             }
+                                        }else{
+                                            ApiResult::Invalid{validation:validation_result, request:account}
                                         }
 
                                     },
