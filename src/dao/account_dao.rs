@@ -171,6 +171,9 @@ impl AccountDAO{
         if let Some(name) = account.get_name(){
             set_doc.insert_bson("accounts.$.name".to_string(), Bson::String(name));
         }
+        if let Some(account_type) = account.get_account_type(){
+            set_doc.insert_bson("accounts.$.account_type".to_string(), Bson::String(account_type));
+        }
         let update_doc = doc! {"$set" => set_doc};
 
         // Update the money map
