@@ -5,7 +5,7 @@
 // Import Modules
 // External
 use ::bson::oid::ObjectId;
-use ::chrono::{UTC, Local, DateTime, TimeZone};
+use ::chrono::{Local, TimeZone};
 // Utilities
 use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};

@@ -10,12 +10,12 @@ extern crate mongodb;
 // Common Utilities
 use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
-use chrono::{UTC, Local, DateTime, TimeZone};
+use ::chrono::{Local};
 use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 // Models
-use ::models::account_model::{AccountModel, OutAccountModel};
+use ::models::account_model::{AccountModel};
 
 // Constants
 static MONEY_MAP_COLLECTION: &'static str = "money_maps";
@@ -47,8 +47,8 @@ impl AccountDAO{
     /// filter - Option<Document> The find filter
     ///
     /// # Returns
-    /// `Option<Vec<OutAccountModel>>`
-    pub fn find(self, filter: Option<Document>) -> Option<Vec<OutAccountModel>>{
+    /// `Option<Vec<AccountModel>>`
+    pub fn find(self, filter: Option<Document>) -> Option<Vec<AccountModel>>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
         let mut accounts = Vec::new();
 
@@ -95,8 +95,8 @@ impl AccountDAO{
     /// filter - Option<Document> The find filter
     ///
     /// # Returns
-    /// `Option<OutAccountModel>`
-    pub fn find_one(&self, filter: Option<Document>) -> Option<OutAccountModel>{
+    /// `Option<AccountModel>`
+    pub fn find_one(&self, filter: Option<Document>) -> Option<AccountModel>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
 
         let mut find_options = FindOptions::new();
@@ -193,7 +193,7 @@ impl AccountDAO{
     ///
     /// # Returns
     /// `MMResult<AccountModel>` The updated money map if successful, None otherwise
-    pub fn update(&self, mm_id: ObjectId, user_id: ObjectId, account: &AccountModel) -> MMResult<OutAccountModel>{
+    pub fn update(&self, mm_id: ObjectId, user_id: ObjectId, account: &AccountModel) -> MMResult<AccountModel>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
 
         let filter = doc! {
@@ -258,16 +258,16 @@ impl AccountDAO{
     }// end update
 }
 
-/// Create OutAccountModel from Document
+/// Create AccountModel from Document
 ///
 /// # Arguments
 /// self
 /// doc - Document
 ///
 /// # Returns
-/// `OutAccountModel`
-fn document_to_model(doc: &Document) -> OutAccountModel{
-    OutAccountModel{
+/// `AccountModel`
+fn document_to_model(doc: &Document) -> AccountModel{
+    AccountModel{
         id: match doc.get("_id"){
             Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
             _ => None
@@ -281,9 +281,7 @@ fn document_to_model(doc: &Document) -> OutAccountModel{
             _ => None
         },
         created: match doc.get("created"){
-            Some(&Bson::TimeStamp(ref timestamp)) => {
-                Some(Local.timestamp(timestamp.clone(), 0).to_rfc2822())
-            },
+            Some(&Bson::TimeStamp(ref timestamp)) => Some(timestamp.clone()),
             _ => None
         }
     }

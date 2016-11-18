@@ -71,11 +71,11 @@ impl AccountsController{
                                             }
                                         };
                                         match mm_dao.find_one(Some(filter), None){
-                                            Some(money_map) => {
+                                            Some(_) => {
 
                                                 // Parse body to AccountModel
                                                 match req.json_as::<AccountModel>(){
-                                                    Ok(mut account) => {
+                                                    Ok(account) => {
 
                                                         // Validate
                                                         let validation_result = account.validate_new();
@@ -174,7 +174,9 @@ impl AccountsController{
                                 };
                                 match account_dao.find(Some(filter)){
                                     Some(accounts) => {
-                                        ApiResult::Success{result:accounts}
+                                        ApiResult::Success{
+                                            result:accounts.into_iter().map(|x| OutAccountModel::new(x)).collect()
+                                        }
                                     },
                                     None => {
                                         ApiResult::Failure{msg:"Unable to find money map."}
@@ -234,15 +236,15 @@ impl AccountsController{
 
                                 // Parse body to AccountModel
                                 match req.json_as::<AccountModel>(){
-                                    Ok(mut account) => {
+                                    Ok(account) => {
 
                                         //Validate
                                         let validation_result = account.validate_existing();
                                         if validation_result.is_valid(){
                                             //Save the account
                                             match account_dao.update(mm_obj_id, user_obj_id, &account){
-                                                Ok(mut updated_account) => {
-                                                    ApiResult::Success{result:updated_account}
+                                                Ok(updated_account) => {
+                                                    ApiResult::Success{result:OutAccountModel::new(updated_account)}
                                                 },
                                                 Err(e) => {
                                                     ApiResult::Failure{msg:e.get_message()}
