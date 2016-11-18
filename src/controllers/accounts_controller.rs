@@ -212,7 +212,7 @@ impl AccountsController{
     ///
     /// # Returns
     /// `ApiResult<AccountModel, AccountModel>` - ApiResult including the modified Account
-    pub fn modify(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<AccountModel, AccountModel>{
+    pub fn modify(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<OutAccountModel, AccountModel>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,

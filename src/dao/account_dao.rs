@@ -88,6 +88,51 @@ impl AccountDAO{
         Some(accounts)
     }// end find
 
+    /// Find One Account
+    ///
+    /// # Arguments
+    /// self
+    /// filter - Option<Document> The find filter
+    ///
+    /// # Returns
+    /// `Option<OutAccountModel>`
+    pub fn find_one(&self, filter: Option<Document>) -> Option<OutAccountModel>{
+        let coll = self.db.collection(MONEY_MAP_COLLECTION);
+
+        let mut find_options = FindOptions::new();
+        find_options.projection = Some(doc!{
+            "_id" => 0,
+            "accounts.$" => 1
+        });
+
+        match coll.find_one(filter, Some(find_options)){
+            Ok(result) => {
+                match result{
+                    Some(document) => {
+                        if let Some(raw_accounts) = document.get("accounts"){
+                            if let &Bson::Array(ref raw_accounts_arr) = raw_accounts{
+                                if raw_accounts_arr.len() == 1 {
+                                    if let Bson::Document(ref acc_doc) = raw_accounts_arr[0]{
+                                        return Some(document_to_model(acc_doc));
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    None => {
+                        //Could not find money map for user
+                        return None
+                    }
+                }
+            },
+            Err(e) => {
+                error!("Find All accounts failed: {}", e);
+                return None;
+            }
+        }
+        None
+    }// end find_one
+
     /// Create Account
     /// Save account in specified money map
     ///
@@ -148,7 +193,7 @@ impl AccountDAO{
     ///
     /// # Returns
     /// `MMResult<AccountModel>` The updated money map if successful, None otherwise
-    pub fn update(&self, mm_id: ObjectId, user_id: ObjectId, account: &AccountModel) -> MMResult<AccountModel>{
+    pub fn update(&self, mm_id: ObjectId, user_id: ObjectId, account: &AccountModel) -> MMResult<OutAccountModel>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
 
         let filter = doc! {
@@ -168,31 +213,42 @@ impl AccountDAO{
 
         // Build `$set` document to update document
         let mut set_doc = doc!{};
+        let mut update = false;
         if let Some(name) = account.get_name(){
+            update = true;
             set_doc.insert_bson("accounts.$.name".to_string(), Bson::String(name));
         }
         if let Some(account_type) = account.get_account_type(){
+            update = true;
             set_doc.insert_bson("accounts.$.account_type".to_string(), Bson::String(account_type));
         }
-        let update_doc = doc! {"$set" => set_doc};
+        let update_doc = if update {
+            doc! {"$set" => set_doc}
+        }else{
+            // No updates to account, return existing account details if found
+            return match self.find_one(Some(filter)){
+                Some(result) => Ok(result),
+                None => Err(MMError::new("Unable to find account", MMErrorKind::DAO))
+            };
+        };
 
         // Update the money map
         match coll.update_one(filter.clone(), update_doc.clone(), None){
             Ok(result) => {
-                if result.matched_count <= 0 {
-                    Err(MMError::new("Unable to find account", MMErrorKind::DAO))
-                }else if result.modified_count == 1 {
-                    //Ok(self.find_one(Some(filter), None).unwrap())
-                    // TODO Fetch and return updated account
-                    Ok(AccountModel{
-                        id:None,
-                        name:None,
-                        account_type:None,
-                        created:None
-                    })
-                }else{
-                    Err(MMError::new("Unable to save account", MMErrorKind::DAO))
+                match result.write_exception{
+                    None => {
+                        if result.matched_count > 0{
+                            // Account found and updated
+                            Ok(self.find_one(Some(filter)).unwrap())
+                        }else{
+                            Err(MMError::new("Unable to find account", MMErrorKind::DAO))
+                        }
+                    },
+                    Some(_) => {
+                        Err(MMError::new("Unable to save account", MMErrorKind::DAO))
+                    }
                 }
+
             },
             Err(e) => {
                 error!("{}", e);
