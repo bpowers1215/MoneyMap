@@ -165,14 +165,7 @@ impl AccountsController{
                             Ok(user_obj_id) => {
 
                                 // Get list of accounts for money map
-                                let filter = doc!{
-                                    "_id" => (mm_obj_id.clone()),
-                                    "users.user_id" => user_obj_id,
-                                    "deleted" => {
-                                        "$ne" => true
-                                    }
-                                };
-                                match account_dao.find(Some(filter)){
+                                match account_dao.find(user_obj_id, mm_obj_id){
                                     Some(accounts) => {
                                         ApiResult::Success{
                                             result:accounts.into_iter().map(|x| OutAccountModel::new(x)).collect()
@@ -210,7 +203,6 @@ impl AccountsController{
     /// &self
     /// req - nickel::Request
     /// mm_id - String Money Map ID
-    /// acc_id - String Account ID
     ///
     /// # Returns
     /// `ApiResult<AccountModel, AccountModel>` - ApiResult including the modified Account
@@ -281,5 +273,76 @@ impl AccountsController{
         }
         // END Retrieve DAO Error Handling --------------------------------------------------------
     }// end modify
+
+    /// Delete an Account
+    ///
+    /// # Arguments
+    /// &self
+    /// req - &nickel::Request
+    /// mm_id - String Money Map ID
+    /// acc_id - String Account ID
+    ///
+    /// # Returns
+    /// `ApiResult<String>` - ApiResult
+    pub fn delete(&self, req: &Request<ServerData>, mm_id: String, acc_id: String) -> ApiResult<String, ()>{
+
+        let user_id = match Session::get_session_id(req){
+            Ok(id) => id,
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                return ApiResult::Failure{msg:"Unable to retrieve session data."};
+            }
+        };
+
+        match self.dao_manager.get_account_dao(){
+            Ok(dao) => {
+
+                match ObjectId::with_string(&user_id){
+                    Ok(user_obj_id) => {
+                        match ObjectId::with_string(&mm_id){
+                            Ok(mm_obj_id) => {
+                                match ObjectId::with_string(&acc_id){
+                                    Ok(acc_obj_id) => {
+
+                                        match dao.delete(user_obj_id, mm_obj_id, acc_obj_id){
+                                            Ok(result) => {
+                                                if result.modified_count > 0 {
+                                                    ApiResult::Success{result:"Successfully deleted account".to_string()}
+                                                }else if result.acknowledged && result.matched_count == 0{
+                                                    ApiResult::Failure{msg:"Unable to delete account"}
+                                                }else{
+                                                    ApiResult::Failure{msg:"Unable to delete account"}
+                                                }
+                                            },
+                                            Err(e) => {
+                                                error!("{}",e);
+                                                ApiResult::Failure{msg:"Malformed ID"}
+                                            }
+                                        }
+                                    },
+                                    Err(e) => {
+                                        error!("{}", e);
+                                        ApiResult::Failure{msg:"Failed to delete account. Invalid account ID."}
+                                    }
+                                }
+                            },
+                            Err(e) => {
+                                error!("{}", e);
+                                ApiResult::Failure{msg:"Failed to delete account. Invalid money map ID."}
+                            }
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}", e);
+                        ApiResult::Failure{msg:"Failed to delete account. Invalid user ID."}
+                    }
+                }
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+    }// end delete
 
 }

@@ -44,39 +44,52 @@ impl AccountDAO{
     ///
     /// # Arguments
     /// self
-    /// filter - Option<Document> The find filter
+    /// user_id - ObjectId User ID
+    /// mm_id - ObjectId Money Map ID
     ///
     /// # Returns
     /// `Option<Vec<AccountModel>>`
-    pub fn find(self, filter: Option<Document>) -> Option<Vec<AccountModel>>{
+    pub fn find(self, user_id: ObjectId, mm_id: ObjectId) -> Option<Vec<AccountModel>>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
         let mut accounts = Vec::new();
 
-        let mut find_options = FindOptions::new();
-        find_options.projection = Some(doc!{
-            "_id" => 0,
-            "name" => 0,
-            "users" => 0,
-            "deleted" => 0
-        });
+        let pipeline = vec![
+            doc!{
+                // Filter Money Map
+                "$match" => {
+                    "_id" => mm_id,
+                    "users.user_id" => user_id,
+                    "deleted" => {
+                        "$ne" => true
+                    }
+                }
+            },
+            doc!{
+                "$unwind" => "$accounts"
+            },
+            doc!{
+                // Exclude deleted accounts
+                "$match" => {
+                    "accounts.deleted" => {
+                        "$ne" => true
+                    }
+                }
+            },
+            doc!{
+                "$project" => {
+                    "_id" => "$accounts._id",
+                    "name" => "$accounts.name",
+                    "account_type" => "$accounts.account_type",
+                    "created" => "$accounts.created"
+                }
+            }
+        ];
 
-        match coll.find_one(filter, Some(find_options)){
-            Ok(result) => {
-                match result{
-                    Some(document) => {
-                        if let Some(raw_accounts) = document.get("accounts"){
-                            if let &Bson::Array(ref raw_accounts_arr) = raw_accounts{
-                                for acc in raw_accounts_arr {
-                                    if let &Bson::Document(ref acc_doc) = acc{
-                                        accounts.push(document_to_model(acc_doc));
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    None => {
-                        //Could not find money map for user
-                        return None
+        match coll.aggregate(pipeline, None){
+            Ok(cursor) => {
+                for result in cursor {
+                    if let Ok(acc_doc) = result {
+                        accounts.push(document_to_model(&acc_doc));
                     }
                 }
             },
@@ -199,16 +212,23 @@ impl AccountDAO{
         let filter = doc! {
             //Money Map Information
             "_id" => mm_id,
+            "deleted" => {
+                "$ne" => true
+            },
             "users" => {
                 "$elemMatch" => {
                     "user_id" => user_id
                 }
             },
-            "deleted" => {
-                "$ne" => true
-            },
             //Account Information
-            "accounts._id" => ( account.get_id().unwrap() )
+            "accounts" => {
+                "accounts._id" => ( account.get_id().unwrap() ),
+                "$elemMatch" => {
+                    "deleted" => {
+                        "$ne" => true
+                    }
+                }
+            }
         };
 
         // Build `$set` document to update document
@@ -256,6 +276,58 @@ impl AccountDAO{
             }
         }
     }// end update
+
+    /// Delete an Account
+    /// Only allow deleting an account owned by the current user
+    ///
+    /// # Arguments
+    /// self
+    /// user_id - ObjectId User ID
+    /// mm_id - ObjectId Money Map ID
+    /// acc_id - ObjectId Money Map ID
+    ///
+    /// # Returns
+    /// `MMResult<()>`
+    pub fn delete(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId) -> MMResult<mongodb::coll::results::UpdateResult>{
+        let coll = self.db.collection(MONEY_MAP_COLLECTION);
+
+        let filter = doc! {
+            //Money Map Information
+            "_id" => mm_id,
+            "deleted" => {
+                "$ne" => true
+            },
+            "users" => {
+                "$elemMatch" => {
+                    "user_id" => user_id
+                }
+            },
+            "accounts" => {
+                "$elemMatch" => {
+                    "deleted" => {
+                        "$ne" => true
+                    }
+                }
+            },
+            //Account Information
+            "accounts._id" => acc_id
+        };
+
+        let update_doc = doc!{
+            "$set" => {
+                "accounts.$.deleted" => true
+            }
+        };
+
+        // Soft delete money map
+        match coll.update_one(filter.clone(), update_doc.clone(), None){
+            Ok(result) => Ok(result),
+            Err(e) => {
+                error!("{}", e);
+                Err(MMError::new("Failed to delete account.", MMErrorKind::DAO))
+            }
+        }
+    }// end delete
 }
 
 /// Create AccountModel from Document

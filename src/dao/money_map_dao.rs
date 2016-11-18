@@ -203,7 +203,7 @@ impl MoneyMapDAO{
             Ok(id) => {
                 match ObjectId::with_string(user_id){
                     Ok(user_obj_id) => {
-                        
+
                         let filter = doc! {
                             "_id" => id,
                             "users" => {
