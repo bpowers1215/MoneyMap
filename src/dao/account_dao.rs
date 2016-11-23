@@ -201,12 +201,11 @@ impl AccountDAO{
     /// # Arguments
     /// self
     /// mm_id ObjectId The Money Map ID
-    /// user_id ObjectId The Money Map ID
     /// &account - AccountModel
     ///
     /// # Returns
     /// `MMResult<AccountModel>` The updated money map if successful, None otherwise
-    pub fn update(&self, mm_id: ObjectId, user_id: ObjectId, account: &AccountModel) -> MMResult<AccountModel>{
+    pub fn update(&self, mm_id: ObjectId, account: &AccountModel) -> MMResult<AccountModel>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
 
         let filter = doc! {
@@ -215,15 +214,10 @@ impl AccountDAO{
             "deleted" => {
                 "$ne" => true
             },
-            "users" => {
-                "$elemMatch" => {
-                    "user_id" => user_id
-                }
-            },
             //Account Information
             "accounts" => {
-                "accounts._id" => ( account.get_id().unwrap() ),
                 "$elemMatch" => {
+                    "_id" => ( account.get_id().unwrap() ),
                     "deleted" => {
                         "$ne" => true
                     }
