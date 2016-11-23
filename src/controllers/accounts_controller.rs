@@ -309,7 +309,7 @@ impl AccountsController{
                                                 if result.modified_count > 0 {
                                                     ApiResult::Success{result:"Successfully deleted account".to_string()}
                                                 }else if result.acknowledged && result.matched_count == 0{
-                                                    ApiResult::Failure{msg:"Unable to delete account"}
+                                                    ApiResult::Failure{msg:"Unable to find account"}
                                                 }else{
                                                     ApiResult::Failure{msg:"Unable to delete account"}
                                                 }
