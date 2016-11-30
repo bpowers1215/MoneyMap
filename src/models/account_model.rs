@@ -148,7 +148,7 @@ impl OutAccountModel{
     /// account - AccountModel
     ///
     /// # Returns
-    /// 'ValidationResult' - validation result
+    /// 'OutAccountModel'
     pub fn new(mut account: AccountModel) -> OutAccountModel{
         OutAccountModel{
             id: account.get_id(),
