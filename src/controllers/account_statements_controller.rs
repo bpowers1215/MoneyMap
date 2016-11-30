@@ -65,7 +65,7 @@ impl AccountStatementsController{
                                     Ok(acc_obj_id) => {
 
                                         // Get list of accounts for money map
-                                        match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id){
+                                        match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id, -1){
                                             Some(accounts) => {
                                                 ApiResult::Success{
                                                     result:accounts.into_iter().map(|x| OutAccountStatementModel::new(x)).collect()

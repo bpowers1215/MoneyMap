@@ -50,7 +50,7 @@ impl AccountStatementDAO{
     ///
     /// # Returns
     /// `Option<Vec<AccountModel>>`
-    pub fn find(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId) -> Option<Vec<AccountStatementModel>>{
+    pub fn find(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId, sort: i32) -> Option<Vec<AccountStatementModel>>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
         let mut accounts = Vec::new();
 
@@ -79,13 +79,18 @@ impl AccountStatementDAO{
             },
             doc!{
                 "$project" => {
-        			"_id" => false,
-        			"statement_date" => "$accounts.statements.statement_date",
-        			"ending_balance" => "$accounts.statements.ending_balance"
-        		}
+                    "_id" => false,
+                    "statement_date" => "$accounts.statements.statement_date",
+                    "ending_balance" => "$accounts.statements.ending_balance"
+                }
+            },
+            doc!{
+                "$sort" => {
+                    "statement_date" => sort
+                }
             }
         ];
-        
+
         match coll.aggregate(pipeline, None){
             Ok(cursor) => {
                 for result in cursor {
