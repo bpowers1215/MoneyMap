@@ -21,6 +21,8 @@ pub struct SortParam{
 ///
 /// # Returns
 /// A Vector of `SortParam`s
+///
+/// TODO: Add documentation test
 pub fn get_sort_params(sort: &str) -> Vec<SortParam>{
     let mut sort_params = Vec::new();
     let re = Regex::new(r"(?P<direction>[\+-]?)(?P<field>[^\|]+)").unwrap();
