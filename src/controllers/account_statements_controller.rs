@@ -4,7 +4,7 @@
 
 // Import
 // External
-use ::nickel::{JsonBody, Request};
+use ::nickel::{JsonBody, QueryString, Request};
 use ::bson::{Bson};
 use ::bson::oid::ObjectId;
 // Utilities
@@ -12,6 +12,7 @@ use ::common::api_result::ApiResult;
 use ::common::config::Config;
 use ::common::data_access::ServerData;
 use ::common::session as Session;
+use ::common::utilities as Utilities;
 // Models
 use ::models::account_statement_model::{AccountStatementModel, OutAccountStatementModel};
 // DAO
@@ -52,6 +53,11 @@ impl AccountStatementsController{
             }
         };
 
+        // Get sort param from query string. Default sort statement_date descending
+        let sort_prop = req.query().get("sort").unwrap_or("-statement_date");
+        let sort = Utilities::url::get_sort_params(sort_prop);
+        debug!("{:?}", sort);
+
         // START Retrieve DAO ---------------------------------------------------------------------
         match self.dao_manager.get_account_statement_dao(){
             Ok(account_statement_dao) => {
@@ -65,7 +71,7 @@ impl AccountStatementsController{
                                     Ok(acc_obj_id) => {
 
                                         // Get list of accounts for money map
-                                        match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id, -1){
+                                        match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id, sort){
                                             Some(accounts) => {
                                                 ApiResult::Success{
                                                     result:accounts.into_iter().map(|x| OutAccountStatementModel::new(x)).collect()

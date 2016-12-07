@@ -14,6 +14,7 @@ use ::chrono::{Local};
 use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
+use ::common::utilities as Utilities;
 // Models
 use ::models::account_statement_model::{AccountStatementModel};
 
@@ -43,18 +44,19 @@ impl AccountStatementDAO{
     /// Find All Account Statement
     ///
     /// # Arguments
-    /// self
-    /// user_id - ObjectId User ID
-    /// mm_id - ObjectId Money Map ID
-    /// acc_id - ObjectId Money Map ID
+    /// `self`
+    /// `user_id` - ObjectId User ID
+    /// `mm_id` - ObjectId Money Map ID
+    /// `acc_id` - ObjectId Money Map ID
+    /// `sort` - A Vector of SortParams
     ///
     /// # Returns
     /// `Option<Vec<AccountModel>>`
-    pub fn find(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId, sort: i32) -> Option<Vec<AccountStatementModel>>{
+    pub fn find(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId, sort: Vec<Utilities::url::SortParam>) -> Option<Vec<AccountStatementModel>>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
         let mut accounts = Vec::new();
 
-        let pipeline = vec![
+        let mut pipeline = vec![
             doc!{
                 // Match Money Map
                 "$match" => {
@@ -83,13 +85,21 @@ impl AccountStatementDAO{
                     "statement_date" => "$accounts.statements.statement_date",
                     "ending_balance" => "$accounts.statements.ending_balance"
                 }
-            },
-            doc!{
-                "$sort" => {
-                    "statement_date" => sort
-                }
             }
         ];
+
+        // Add sort phase to pipeline
+        if !sort.is_empty() {
+            let mut sort_doc = doc!{};
+            for ref x in sort.iter() {
+                sort_doc.insert_bson(x.field.clone(), Bson::I32(x.direction));
+            }
+            pipeline.push(
+                doc!{
+                    "$sort" => sort_doc
+                }
+            );
+        }
 
         match coll.aggregate(pipeline, None){
             Ok(cursor) => {

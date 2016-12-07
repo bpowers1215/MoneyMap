@@ -6,3 +6,4 @@ pub mod mm_result;
 pub mod routes;
 pub mod session;
 pub mod validation;
+pub mod utilities;

@@ -17,3 +17,4 @@ extern crate mongodb;
 extern crate nickel;
 extern crate rustc_serialize;
 extern crate sodiumoxide;
+extern crate regex;
