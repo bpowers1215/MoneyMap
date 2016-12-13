@@ -5,15 +5,16 @@
 // Import Modules
 // External
 use ::bson::oid::ObjectId;
-use ::chrono::{Local, TimeZone};
+use ::chrono::{DateTime, Duration, Local, TimeZone};
+use ::chrono::offset::utc::UTC;
 // Utilities
 use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
 
 /// Account Statement
-#[derive(Clone, RustcDecodable, RustcEncodable)]
+#[derive(Clone)]
 pub struct AccountStatementModel {
-    pub statement_date: Option<i64>,
+    pub statement_date: Option<DateTime<UTC>>,
     pub ending_balance: Option<f64>
 }
 
@@ -33,7 +34,7 @@ impl AccountStatementModel{
     ///
     /// # Returns
     /// Option<i64> Timestamp
-    pub fn get_statement_date(&mut self) -> Option<i64>{
+    pub fn get_statement_date(&mut self) -> Option<DateTime<UTC>>{
         self.statement_date
     }
 
@@ -63,7 +64,7 @@ impl OutAccountStatementModel{
         OutAccountStatementModel{
             statement_date:match account.get_statement_date(){
                 Some(timestamp) => {
-                    Some(Local.timestamp(timestamp.clone(), 0).to_rfc2822())
+                    Some(timestamp.to_string())
                 },
                 None => None
             },

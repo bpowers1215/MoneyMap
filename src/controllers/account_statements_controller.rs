@@ -7,6 +7,8 @@
 use ::nickel::{JsonBody, QueryString, Request};
 use ::bson::{Bson};
 use ::bson::oid::ObjectId;
+use ::chrono::{DateTime, Duration, Local, TimeZone};
+use ::chrono::offset::utc::UTC;
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
@@ -53,10 +55,26 @@ impl AccountStatementsController{
             }
         };
 
-        // Get sort param from query string. Default sort statement_date descending
-        let sort_prop = req.query().get("sort").unwrap_or("-statement_date");
+        // Get Query Params
+        let query = req.query();
+        // Sort: Default statement_date descending
+        let sort_prop = query.get("sort").unwrap_or("-statement_date");
         let sort = Utilities::url::get_sort_params(sort_prop);
-        debug!("{:?}", sort);
+        // Start/End Dates
+        let start_date_prop = query.get("start_date");
+        let end_date_prop = query.get("end_date");
+        let start_date = if let Some(date) = start_date_prop{
+            match UTC.datetime_from_str(date, ""){
+                Ok(datetime) => Some(datetime),
+                Err(e) => {
+                    error!("{}",e);
+                    return ApiResult::Failure{msg:"Unable to parse start date."};
+                }
+            }
+        }else{
+            None
+        };
+        debug!("Start Date: {:?}", start_date);
 
         // START Retrieve DAO ---------------------------------------------------------------------
         match self.dao_manager.get_account_statement_dao(){
@@ -71,7 +89,7 @@ impl AccountStatementsController{
                                     Ok(acc_obj_id) => {
 
                                         // Get list of accounts for money map
-                                        match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id, sort){
+                                        match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id, sort, None, None){
                                             Some(accounts) => {
                                                 ApiResult::Success{
                                                     result:accounts.into_iter().map(|x| OutAccountStatementModel::new(x)).collect()

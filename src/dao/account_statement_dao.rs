@@ -52,7 +52,7 @@ impl AccountStatementDAO{
     ///
     /// # Returns
     /// `Option<Vec<AccountModel>>`
-    pub fn find(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId, sort: Vec<Utilities::url::SortParam>) -> Option<Vec<AccountStatementModel>>{
+    pub fn find(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId, sort: Vec<Utilities::url::SortParam>, start_date: Option<&str>, end_date: Option<&str>) -> Option<Vec<AccountStatementModel>>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
         let mut accounts = Vec::new();
 
@@ -129,7 +129,7 @@ impl AccountStatementDAO{
 fn document_to_model(doc: &Document) -> AccountStatementModel{
     AccountStatementModel{
         statement_date: match doc.get("statement_date"){
-            Some(&Bson::TimeStamp(ref statement_date)) => Some(statement_date.clone()),
+            Some(&Bson::UtcDatetime(ref statement_date)) => Some(statement_date.clone()),
             _ => None
         },
         ending_balance: match doc.get("ending_balance"){
