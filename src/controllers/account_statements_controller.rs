@@ -46,6 +46,8 @@ impl AccountStatementsController{
     /// # Returns
     /// `ApiResult<Vec<OutAccountStatementModel>>` - ApiResult including a vector of account statements
     pub fn find(&self, req: &mut Request<ServerData>, mm_id: String, acc_id: String) -> ApiResult<Vec<OutAccountStatementModel>, ()>{
+        let START_TIME = "00:00:00";
+        let END_TIME = "23:59:59";
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -60,11 +62,12 @@ impl AccountStatementsController{
         // Sort: Default statement_date descending
         let sort_prop = query.get("sort").unwrap_or("-statement_date");
         let sort = Utilities::url::get_sort_params(sort_prop);
-        // Start/End Dates
+
+        // Start Date
         let start_date_prop = query.get("start_date");
-        let end_date_prop = query.get("end_date");
         let start_date = if let Some(date) = start_date_prop{
-            match UTC.datetime_from_str(date, ""){
+            let sd = [date, START_TIME].concat();
+            match UTC.datetime_from_str(&sd, "%Y%m%d%T"){
                 Ok(datetime) => Some(datetime),
                 Err(e) => {
                     error!("{}",e);
@@ -74,7 +77,21 @@ impl AccountStatementsController{
         }else{
             None
         };
-        debug!("Start Date: {:?}", start_date);
+
+        // End Date
+        let end_date_prop = query.get("end_date");
+        let end_date = if let Some(date) = end_date_prop{
+            let edt = [date, END_TIME].concat();
+            match UTC.datetime_from_str(&edt, "%Y%m%d%T"){
+                Ok(datetime) => Some(datetime),
+                Err(e) => {
+                    error!("{}",e);
+                    return ApiResult::Failure{msg:"Unable to parse end date."};
+                }
+            }
+        }else{
+            None
+        };
 
         // START Retrieve DAO ---------------------------------------------------------------------
         match self.dao_manager.get_account_statement_dao(){
@@ -89,7 +106,7 @@ impl AccountStatementsController{
                                     Ok(acc_obj_id) => {
 
                                         // Get list of accounts for money map
-                                        match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id, sort, None, None){
+                                        match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id, sort, start_date, end_date){
                                             Some(accounts) => {
                                                 ApiResult::Success{
                                                     result:accounts.into_iter().map(|x| OutAccountStatementModel::new(x)).collect()

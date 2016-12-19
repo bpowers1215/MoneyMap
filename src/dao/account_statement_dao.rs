@@ -7,12 +7,14 @@
 extern crate mongodb;
 
 // Import Modules
-// Common Utilities
+// External
 use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
-use ::chrono::{Local};
 use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
+use ::chrono::{DateTime};
+use ::chrono::offset::utc::UTC;
+// Common Utilities
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::utilities as Utilities;
 // Models
@@ -49,10 +51,12 @@ impl AccountStatementDAO{
     /// `mm_id` - ObjectId Money Map ID
     /// `acc_id` - ObjectId Money Map ID
     /// `sort` - A Vector of SortParams
+    /// `start_date` - Start DateTime
+    /// `end_date` - End DateTime
     ///
     /// # Returns
     /// `Option<Vec<AccountModel>>`
-    pub fn find(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId, sort: Vec<Utilities::url::SortParam>, start_date: Option<&str>, end_date: Option<&str>) -> Option<Vec<AccountStatementModel>>{
+    pub fn find(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId, sort: Vec<Utilities::url::SortParam>, start_date: Option<DateTime<UTC>>, end_date: Option<DateTime<UTC>>) -> Option<Vec<AccountStatementModel>>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
         let mut accounts = Vec::new();
 
@@ -87,6 +91,32 @@ impl AccountStatementDAO{
                 }
             }
         ];
+
+        // Add Start Date match to pipeline
+        if let Some(sd) = start_date{
+            pipeline.push(
+                doc!{
+                    "$match" => {
+                        "statement_date" => {
+                            "$gte" => sd
+                        }
+                    }
+                }
+            );
+        }
+
+        // Add End Date match to pipeline
+        if let Some(ed) = end_date{
+            pipeline.push(
+                doc!{
+                    "$match" => {
+                        "statement_date" => {
+                            "$lte" => ed
+                        }
+                    }
+                }
+            );
+        }
 
         // Add sort phase to pipeline
         if !sort.is_empty() {
