@@ -76,7 +76,56 @@ impl TransactionsController{
             }
         };
 
-        ApiResult::Failure{msg:"Method not implemented"}
+        // START Retrieve DAO ---------------------------------------------------------------------
+        match self.dao_manager.get_transaction_dao(){
+            Ok(transaction_dao) => {
+                // END Retrieve DAO ---------------------------------------------------------------
+
+                match ObjectId::with_string(&user_id){
+                    Ok(user_obj_id) => {
+                        match ObjectId::with_string(&mm_id){
+                            Ok(mm_obj_id) => {
+                                match ObjectId::with_string(&acc_id){
+                                    Ok(acc_obj_id) => {
+
+                                        // Verify Account is valid to receive transactions and user has permission
+                                        if transaction_dao.is_valid_account(user_obj_id, mm_obj_id, acc_obj_id){
+                                            ApiResult::Failure{msg:"Account Validated"}
+
+                                            // Validate Transaction
+                                            // Save Transaction
+
+                                        }else{
+                                            ApiResult::Failure{msg:"Account Not Validated"}
+                                        }
+
+                                    },
+                                    Err(e) => {
+                                        error!("{}", e);
+                                        ApiResult::Failure{msg:"Failed to create transaction. Invalid account ID."}
+                                    }
+                                }
+                            },
+                            Err(e) => {
+                                error!("{}", e);
+                                ApiResult::Failure{msg:"Failed to create transaction. Invalid money map ID."}
+                            }
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}", e);
+                        ApiResult::Failure{msg:"Failed to create transaction. Invalid user ID."}
+                    }
+                }
+
+                // START Retrieve DAO Error Handling ----------------------------------------------
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+        // END Retrieve DAO Error Handling --------------------------------------------------------
     }// end create
 
     /// Modify TransactionModel

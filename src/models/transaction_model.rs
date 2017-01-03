@@ -339,6 +339,12 @@ impl PubTransactionModel{
         if !Validators::not_empty_string(self.payee.clone()){
             validation_result.add_error("payee".to_string(), "Payee is required.".to_string());
         }
+        if !Validators::not_empty(self.amount.clone()){
+            validation_result.add_error("amount".to_string(), "Amount is required.".to_string());
+        }
+        if !Validators::not_empty_string(self.transaction_type.clone()){
+            validation_result.add_error("transaction_type".to_string(), "Transaction Type is required.".to_string());
+        }
 
         validation_result
     }//end validate
