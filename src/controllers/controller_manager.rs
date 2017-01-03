@@ -9,6 +9,7 @@ use super::accounts_controller::AccountsController;
 use super::account_statements_controller::AccountStatementsController;
 use super::money_maps_controller::MoneyMapsController;
 use super::money_map_users_controller::MoneyMapUsersController;
+use super::transactions_controller::TransactionsController;
 use super::users_controller::UsersController;
 
 /// Controller Manager
@@ -19,5 +20,6 @@ pub struct ControllerManager {
     pub account_statements_controller: AccountStatementsController,
     pub money_maps_controller: MoneyMapsController,
     pub money_map_users_controller: MoneyMapUsersController,
+    pub transactions_controller: TransactionsController,
     pub users_controller: UsersController
 }

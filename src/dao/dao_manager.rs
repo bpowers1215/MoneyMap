@@ -11,6 +11,7 @@ use super::account_statement_dao::AccountStatementDAO;
 use super::user_dao::UserDAO;
 use super::money_map_dao::MoneyMapDAO;
 use super::money_map_user_dao::MoneyMapUserDAO;
+use super::transaction_dao::TransactionDAO;
 
 /// DAO Manager
 #[derive(Clone)]
@@ -99,6 +100,20 @@ impl DAOManager{
     pub fn get_account_statement_dao(&self) -> MMResult<AccountStatementDAO>{
         match self.db.get_database(){
             Some(db) => Ok(AccountStatementDAO::new(db)),
+            None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
+        }
+    }
+
+    /// Get a TransactionDAO
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// `MMResult<TransactionDAO>` MMResult wrapping the TransactionDAO
+    pub fn get_transaction_dao(&self) -> MMResult<TransactionDAO>{
+        match self.db.get_database(){
+            Some(db) => Ok(TransactionDAO::new(db)),
             None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
     }

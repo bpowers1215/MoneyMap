@@ -39,6 +39,7 @@ use money_map::controllers::accounts_controller::AccountsController;
 use money_map::controllers::account_statements_controller::AccountStatementsController;
 use money_map::controllers::money_maps_controller::MoneyMapsController;
 use money_map::controllers::money_map_users_controller::MoneyMapUsersController;
+use money_map::controllers::transactions_controller::TransactionsController;
 use money_map::controllers::users_controller::UsersController;
 
 fn main() {
@@ -68,6 +69,7 @@ fn main() {
         account_statements_controller: AccountStatementsController::new(dao_manager.clone(), configuration.clone()),
         money_maps_controller: MoneyMapsController::new(dao_manager.clone(), configuration.clone()),
         money_map_users_controller: MoneyMapUsersController::new(dao_manager.clone(), configuration.clone()),
+        transactions_controller: TransactionsController::new(dao_manager.clone(), configuration.clone()),
         users_controller: UsersController::new(dao_manager.clone(), configuration.clone())
     };
 
