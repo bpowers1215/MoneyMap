@@ -89,14 +89,40 @@ impl TransactionsController{
                                     Ok(acc_obj_id) => {
 
                                         // Verify Account is valid to receive transactions and user has permission
-                                        if transaction_dao.is_valid_account(user_obj_id, mm_obj_id, acc_obj_id){
-                                            ApiResult::Failure{msg:"Account Validated"}
+                                        if transaction_dao.is_valid_account(user_obj_id, mm_obj_id.clone(), acc_obj_id.clone()){
 
-                                            // Validate Transaction
-                                            // Save Transaction
+                                            // Parse body to PubTransactionModel
+                                            match req.json_as::<PubTransactionModel>(){
+                                                Ok(mut pub_transaction) => {
+
+                                                    pub_transaction.set_money_map_id(Some(mm_obj_id));
+                                                    pub_transaction.set_account_id(Some(acc_obj_id));
+
+                                                    // Validate
+                                                    let validation_result = pub_transaction.validate();
+                                                    if validation_result.is_valid(){
+                                                        // Save Transaction
+                                                        match transaction_dao.create(&pub_transaction){
+                                                            Ok(new_transaction) => {
+                                                                ApiResult::Success{result:PubTransactionModel::new(new_transaction)}
+                                                            },
+                                                            Err(e) => {
+                                                                error!("{}",e);
+                                                                ApiResult::Failure{msg:"Unable to create account"}
+                                                            }
+                                                        }
+                                                    }else{
+                                                        ApiResult::Invalid{validation:validation_result, request:pub_transaction}
+                                                    }
+                                                },
+                                                Err(e) => {
+                                                    error!("{}",e);
+                                                    ApiResult::Failure{msg:"Invalid format. Unable to parse body."}
+                                                }
+                                            }
 
                                         }else{
-                                            ApiResult::Failure{msg:"Account Not Validated"}
+                                            ApiResult::Failure{msg:"Failed to create transaction. Invalid account."}
                                         }
 
                                     },

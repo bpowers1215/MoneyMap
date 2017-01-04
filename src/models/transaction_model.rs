@@ -46,11 +46,11 @@ impl TransactionModel{
     /// Create TransactionModel from PubTransactionModel
     ///
     /// # Arguments
-    /// account - PubTransactionModel
+    /// `account` - PubTransactionModel
     ///
     /// # Returns
-    /// 'TransactionModel'
-    pub fn new(mut transaction: PubTransactionModel) -> TransactionModel{
+    /// `TransactionModel`
+    pub fn new(transaction: &PubTransactionModel) -> TransactionModel{
         TransactionModel{
             id: transaction.get_id(),
             money_map_id: transaction.get_money_map_id(),
@@ -68,10 +68,10 @@ impl TransactionModel{
     /// Get ID
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<ObjectId>' - ID
+    /// `Option<ObjectId>` - ID
     pub fn get_id(&self) -> Option<ObjectId>{
         self.id.clone()
     }
@@ -79,7 +79,7 @@ impl TransactionModel{
     /// Set ID
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     pub fn set_id(&mut self, id: ObjectId) {
         self.id = Some(id);
     }
@@ -87,21 +87,21 @@ impl TransactionModel{
     /// Get Money Map ID
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<ObjectId>' - Money Map ID
-    pub fn get_money_map_id(&self) -> Option<ObjectId>{
+    /// `Option<ObjectId>` - Money Map ID
+    pub fn get_money_map_id(&mut self) -> Option<ObjectId>{
         self.money_map_id.clone()
     }
 
     /// Get Account ID
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<ObjectId>' - Account ID
+    /// `Option<ObjectId>` - Account ID
     pub fn get_account_id(&self) -> Option<ObjectId>{
         self.account_id.clone()
     }
@@ -109,21 +109,30 @@ impl TransactionModel{
     /// Get Datetime
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<DateTime<UTC>>' - Datetime
+    /// `Option<DateTime<UTC>>` - Datetime
     pub fn get_datetime(&self) -> Option<DateTime<UTC>>{
         self.datetime.clone()
+    }
+
+    /// Set Datetime
+    ///
+    /// # Arguments
+    /// `self`
+    /// `datetime`
+    pub fn set_datetime(&mut self, datetime: Option<DateTime<UTC>>){
+        self.datetime = datetime;
     }
 
     /// Get Payee
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<String>' - Entity
+    /// `Option<String>` - Entity
     pub fn get_payee(&self) -> Option<String>{
         self.payee.clone()
     }
@@ -131,10 +140,10 @@ impl TransactionModel{
     /// Get Description
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<String>' - description
+    /// `Option<String>` - description
     pub fn get_description(&self) -> Option<String>{
         self.description.clone()
     }
@@ -142,10 +151,10 @@ impl TransactionModel{
     /// Get Category ID
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<ObjectId>' - Category ID
+    /// `Option<ObjectId>` - Category ID
     pub fn get_category_id(&self) -> Option<ObjectId>{
         self.category_id.clone()
     }
@@ -153,10 +162,10 @@ impl TransactionModel{
     /// Get Amount
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<f64>' - Amount
+    /// `Option<f64>` - Amount
     pub fn get_amount(&self) -> Option<f64>{
         self.amount.clone()
     }
@@ -164,10 +173,10 @@ impl TransactionModel{
     /// Get Transaction Type
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<String>' - Transaction Type
+    /// `Option<String>` - Transaction Type
     pub fn get_transaction_type(&self) -> Option<String>{
         self.transaction_type.clone()
     }
@@ -175,12 +184,21 @@ impl TransactionModel{
     /// Get Status
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<String>' - Status
+    /// `Option<String>` - Status
     pub fn get_status(&self) -> Option<String>{
         self.status.clone()
+    }
+
+    /// Set Status
+    ///
+    /// # Arguments
+    /// `self`
+    /// `status` The Status
+    pub fn set_status(&mut self, status: Option<String>){
+        self.status = status;
     }
 }
 
@@ -191,7 +209,7 @@ impl PubTransactionModel{
     /// Create PubTransactionModel from TransactionModel
     ///
     /// # Arguments
-    /// account - TransactionModel
+    /// `account` - TransactionModel
     ///
     /// # Returns
     /// 'PubTransactionModel'
@@ -218,7 +236,7 @@ impl PubTransactionModel{
     /// Get ID
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
     /// 'Option<ObjectId>' - ID
@@ -229,32 +247,50 @@ impl PubTransactionModel{
     /// Get Money Map ID
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<ObjectId>' - Money Map ID
+    /// `Option<ObjectId>` - Money Map ID
     pub fn get_money_map_id(&self) -> Option<ObjectId>{
         self.money_map_id.clone()
+    }
+
+    /// Set Money Map ID
+    ///
+    /// # Arguments
+    /// `self`
+    /// `mm_id` Money Map ID
+    pub fn set_money_map_id(&mut self, mm_id: Option<ObjectId>){
+        self.money_map_id = mm_id
     }
 
     /// Get Account ID
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<ObjectId>' - Account ID
+    /// `Option<ObjectId>` - Account ID
     pub fn get_account_id(&self) -> Option<ObjectId>{
         self.account_id.clone()
+    }
+
+    /// Set Account ID
+    ///
+    /// # Arguments
+    /// `self`
+    /// `acc_id` Account ID
+    pub fn set_account_id(&mut self, acc_id: Option<ObjectId>){
+        self.account_id = acc_id
     }
 
     /// Get Datetime
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<String>' - Datetime
+    /// `Option<String>` - Datetime
     pub fn get_datetime(&self) -> Option<String>{
         self.datetime.clone()
     }
@@ -262,10 +298,10 @@ impl PubTransactionModel{
     /// Get Payee
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<String>' - Entity
+    /// `Option<String>` - Entity
     pub fn get_payee(&self) -> Option<String>{
         self.payee.clone()
     }
@@ -273,10 +309,10 @@ impl PubTransactionModel{
     /// Get Description
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<String>' - description
+    /// `Option<String>` - description
     pub fn get_description(&self) -> Option<String>{
         self.description.clone()
     }
@@ -284,10 +320,10 @@ impl PubTransactionModel{
     /// Get Category ID
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<ObjectId>' - Category ID
+    /// `Option<ObjectId>` - Category ID
     pub fn get_category_id(&self) -> Option<ObjectId>{
         self.category_id.clone()
     }
@@ -295,10 +331,10 @@ impl PubTransactionModel{
     /// Get Amount
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<f64>' - Amount
+    /// `Option<f64>` - Amount
     pub fn get_amount(&self) -> Option<f64>{
         self.amount.clone()
     }
@@ -306,10 +342,10 @@ impl PubTransactionModel{
     /// Get Transaction Type
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<String>' - Transaction Type
+    /// `Option<String>` - Transaction Type
     pub fn get_transaction_type(&self) -> Option<String>{
         self.transaction_type.clone()
     }
@@ -317,10 +353,10 @@ impl PubTransactionModel{
     /// Get Status
     ///
     /// # Arguments
-    /// &self
+    /// `self`
     ///
     /// # Returns
-    /// 'Option<String>' - Status
+    /// `Option<String>` - Status
     pub fn get_status(&self) -> Option<String>{
         self.status.clone()
     }
@@ -328,10 +364,10 @@ impl PubTransactionModel{
     /// Validate Transaction
     ///
     /// # Arguments
-    /// self
+    /// `self`
     ///
     /// # Returns
-    /// 'ValidationResult' - validation result
+    /// `ValidationResult` - validation result
     pub fn validate(&self) -> ValidationResult{
 
         //validate Transaction
@@ -342,9 +378,11 @@ impl PubTransactionModel{
         if !Validators::not_empty(self.amount.clone()){
             validation_result.add_error("amount".to_string(), "Amount is required.".to_string());
         }
+        // TODO: Validate amount, must be numeric
         if !Validators::not_empty_string(self.transaction_type.clone()){
             validation_result.add_error("transaction_type".to_string(), "Transaction Type is required.".to_string());
         }
+        // TODO: Validate Transaction Type: "credit" | "debit"
 
         validation_result
     }//end validate

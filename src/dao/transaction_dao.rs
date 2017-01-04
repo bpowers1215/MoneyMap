@@ -7,6 +7,8 @@
 extern crate mongodb;
 
 // Import Modules
+// External
+use ::chrono::offset::utc::UTC;
 // Common Utilities
 use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
@@ -14,7 +16,7 @@ use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 // Models
-use ::models::transaction_model::{TransactionModel};
+use ::models::transaction_model::{PubTransactionModel, TransactionModel};
 
 // Constants
 static TRANSACTION_COLLECTION: &'static str = "transactions";
@@ -39,6 +41,61 @@ impl TransactionDAO{
             db: db
         }
     }
+
+    /// Create Transaction
+    ///
+    /// # Arguments
+    /// `self`
+    /// `pub_transaction` - &PubTransactionModel The transaction
+    ///
+    /// # Returns
+    /// `MMResult<TransactionModel>`
+    pub fn create(self, pub_transaction: &PubTransactionModel) -> MMResult<TransactionModel>{
+        let coll = self.db.collection(TRANSACTION_COLLECTION);
+
+        let mut transaction = TransactionModel::new(pub_transaction);
+        transaction.set_status(Some(String::from("active")));
+        transaction.set_datetime(Some(UTC::now()));
+        let mut doc = doc!{
+            "datetime" => (transaction.get_datetime().unwrap()),
+            "payee" => (match transaction.get_payee(){Some(val) => val, None => "".to_string()}),
+            "description" => (match transaction.get_description(){Some(val) => val, None => "".to_string()}),
+            "amount" => (match transaction.get_amount(){Some(val) => val, None => 0.0}),
+            "transaction_type" => (match transaction.get_transaction_type(){Some(val) => val, None => "".to_string()}),
+            "status" => (transaction.get_status().unwrap())
+        };
+        // Set Money Map ID
+        if let Some(val) = transaction.get_money_map_id(){
+            doc.insert_bson("money_map_id".to_string(), Bson::ObjectId(val));
+        }else{
+            doc.insert_bson("money_map_id".to_string(), Bson::Null);
+        }
+        // Set Account ID
+        if let Some(val) = transaction.get_account_id(){
+            doc.insert_bson("account_id".to_string(), Bson::ObjectId(val));
+        }else{
+            doc.insert_bson("account_id".to_string(), Bson::Null);
+        }
+
+        // Insert document into `transactions` collection
+        match coll.insert_one(doc.clone(), None){
+            Ok(result) => {
+                if result.acknowledged{
+                    if let Some(transaction_id) = result.inserted_id{
+                        if let Bson::ObjectId(id) = transaction_id{
+                            transaction.set_id(id);
+                            return Ok(transaction);
+                        }
+                    }
+                }
+                Err(MMError::new("Failed to insert transaction", MMErrorKind::DAO))
+            },
+            Err(e) => {
+                warn!("{}", e);
+                Err(MMError::new("Failed to insert transaction", MMErrorKind::DAO))
+            }
+        }
+    }// end create
 
     /// Check if an account is valid to receive transactions
     /// Factors:
