@@ -4,9 +4,11 @@
 
 // Import
 // External
-use ::nickel::{JsonBody, Request};
+use ::nickel::{JsonBody, QueryString, Request};
 use ::bson::{Bson};
 use ::bson::oid::ObjectId;
+use ::chrono::{DateTime, Duration, Local, TimeZone};
+use ::chrono::offset::utc::UTC;
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
@@ -44,6 +46,8 @@ impl TransactionsController{
     /// # Returns
     /// `ApiResult<Vec<PubTransactionModel>>` - ApiResult including a vector of transactions
     pub fn find(&self, req: &mut Request<ServerData>, mm_id: String, acc_id: String) -> ApiResult<Vec<PubTransactionModel>, ()>{
+        let START_TIME = "00:00:00";
+        let END_TIME = "23:59:59";
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -53,7 +57,91 @@ impl TransactionsController{
             }
         };
 
-        ApiResult::Failure{msg:"Method not implemented"}
+        // Get Query Params
+        let query = req.query();
+
+        // Start Date
+        let start_date_prop = query.get("start_date");
+        let start_date = if let Some(date) = start_date_prop{
+            let sd = [date, START_TIME].concat();
+            match UTC.datetime_from_str(&sd, "%Y%m%d%T"){
+                Ok(datetime) => Some(datetime),
+                Err(e) => {
+                    error!("{}",e);
+                    return ApiResult::Failure{msg:"Unable to parse start date."};
+                }
+            }
+        }else{
+            None
+        };
+
+        // End Date
+        let end_date_prop = query.get("end_date");
+        let end_date = if let Some(date) = end_date_prop{
+            let edt = [date, END_TIME].concat();
+            match UTC.datetime_from_str(&edt, "%Y%m%d%T"){
+                Ok(datetime) => Some(datetime),
+                Err(e) => {
+                    error!("{}",e);
+                    return ApiResult::Failure{msg:"Unable to parse end date."};
+                }
+            }
+        }else{
+            None
+        };
+
+
+        // START Retrieve DAO ---------------------------------------------------------------------
+        match self.dao_manager.get_transaction_dao(){
+            Ok(transaction_dao) => {
+                // END Retrieve DAO ---------------------------------------------------------------
+
+                match ObjectId::with_string(&user_id){
+                    Ok(user_obj_id) => {
+                        match ObjectId::with_string(&mm_id){
+                            Ok(mm_obj_id) => {
+                                match ObjectId::with_string(&acc_id){
+                                    Ok(acc_obj_id) => {
+
+                                        // Verify Account is valid and user has permission
+                                        if transaction_dao.is_valid_account(user_obj_id, mm_obj_id.clone(), acc_obj_id.clone()){
+
+                                            // Get list of transactions for account
+                                            let transactions = transaction_dao.find(mm_obj_id, acc_obj_id, start_date, end_date);
+                                            ApiResult::Success{
+                                                result:transactions.into_iter().map(|x| PubTransactionModel::new(x)).collect()
+                                            }
+
+                                        }else{
+                                            ApiResult::Failure{msg:"Failed to find transactions. Invalid account."}
+                                        }
+                                    },
+                                    Err(e) => {
+                                        error!("{}", e);
+                                        ApiResult::Failure{msg:"Failed to find transactions. Invalid account ID."}
+                                    }
+                                }
+                            },
+                            Err(e) => {
+                                error!("{}", e);
+                                ApiResult::Failure{msg:"Failed to find transactions. Invalid money map ID."}
+                            }
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}", e);
+                        ApiResult::Failure{msg:"Failed to find transactions. Invalid user ID."}
+                    }
+                }
+
+                // START Retrieve DAO Error Handling ----------------------------------------------
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+        // END Retrieve DAO Error Handling --------------------------------------------------------
     }// end find_all
 
     /// Create Transaction

@@ -8,6 +8,7 @@ extern crate mongodb;
 
 // Import Modules
 // External
+use ::chrono::{DateTime};
 use ::chrono::offset::utc::UTC;
 // Common Utilities
 use ::bson::{Bson, Document};
@@ -41,6 +42,54 @@ impl TransactionDAO{
             db: db
         }
     }
+
+    /// Find Transactions for Account
+    /// Allow filtering transactions by date
+    /// Sorts transactions by date in descending order
+    ///
+    /// # Arguments
+    /// `self`
+    /// `user_id` - ObjectId User ID
+    /// `mm_id` - ObjectId Money Map ID
+    /// `acc_id` - ObjectId Money Map ID
+    /// `start_date` - Start DateTime
+    /// `end_date` - End DateTime
+    ///
+    /// # Returns
+    /// `Vec<TransactionModel>`
+    pub fn find(self, mm_id: ObjectId, acc_id: ObjectId, start_date: Option<DateTime<UTC>>, end_date: Option<DateTime<UTC>>) -> Vec<TransactionModel>{
+        let coll = self.db.collection(TRANSACTION_COLLECTION);
+        let mut transactions = Vec::new();
+
+        let mut find_options = FindOptions::new();
+        find_options.sort = Some(doc!{
+            "datetime" => (-1)
+        });
+        let mut filter = doc!{
+            "money_map_id" => mm_id,
+            "account_id" => acc_id
+        };
+
+        // TODO: Add Start/End date filtering
+        //if let Some(sd) = start_date{
+            //doc.insert_bson("name".to_string(), Bson::String(name));
+
+
+        match coll.find(Some(filter), Some(find_options)){
+            Ok(cursor) => {
+                for result in cursor {
+                    if let Ok(item) = result {
+                        let transaction = document_to_model(&item);
+                        transactions.push(transaction);
+                    }
+                }
+            },
+            Err(e) => {
+                error!("Find All money_maps failed: {}", e)
+            }
+        }
+        transactions
+    }// end find
 
     /// Create Transaction
     ///
@@ -137,5 +186,58 @@ impl TransactionDAO{
                 false
             }
         }
+    }
+}
+
+/// Create TransactionModel from Document
+///
+/// # Arguments
+/// self
+/// doc - Document
+///
+/// # Returns
+/// `TransactionModel`
+fn document_to_model(doc: &Document) -> TransactionModel{
+    TransactionModel{
+        id: match doc.get("_id"){
+            Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
+            _ => None
+        },
+        money_map_id: match doc.get("money_map_id"){
+            Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
+            _ => None
+        },
+        account_id: match doc.get("account_id"){
+            Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
+            _ => None
+        },
+        datetime: match doc.get("datetime"){
+            Some(&Bson::UtcDatetime(ref statement_date)) => Some(statement_date.clone()),
+            _ => None
+        },
+        payee: match doc.get("payee"){
+            Some(&Bson::String(ref name)) => Some(name.clone()),
+            _ => None
+        },
+        description: match doc.get("description"){
+            Some(&Bson::String(ref name)) => Some(name.clone()),
+            _ => None
+        },
+        category_id: match doc.get("category_id"){
+            Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
+            _ => None
+        },
+        amount: match doc.get("amount"){
+            Some(&Bson::FloatingPoint(ref ending_balance)) => Some(ending_balance.clone()),
+            _ => None
+        },
+        transaction_type: match doc.get("transaction_type"){
+            Some(&Bson::String(ref name)) => Some(name.clone()),
+            _ => None
+        },
+        status: match doc.get("status"){
+            Some(&Bson::String(ref name)) => Some(name.clone()),
+            _ => None
+        },
     }
 }
