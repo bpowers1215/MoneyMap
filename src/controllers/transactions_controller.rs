@@ -50,7 +50,6 @@ impl TransactionsController{
     /// `ApiResult<Vec<PubTransactionModel>>` - ApiResult including a vector of transactions
     pub fn find(&self, req: &mut Request<ServerData>, mm_id: String, acc_id: String) -> ApiResult<Vec<PubTransactionModel>, ()>{
         let START_TIME = "00:00:00";
-        let END_TIME = "23:59:59";
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -81,7 +80,7 @@ impl TransactionsController{
         // End Date
         let end_date_prop = query.get("end_date");
         let mut end_date = if let Some(date) = end_date_prop{
-            let edt = [date, END_TIME].concat();
+            let edt = [date, START_TIME].concat();
             match UTC.datetime_from_str(&edt, "%Y%m%d%T"){
                 Ok(datetime) => Some(datetime),
                 Err(e) => {
