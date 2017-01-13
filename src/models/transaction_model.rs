@@ -369,6 +369,8 @@ impl PubTransactionModel{
     /// # Returns
     /// `ValidationResult` - validation result
     pub fn validate(&self) -> ValidationResult{
+        // Valid Options
+        let transaction_types = vec!["credit".to_string(), "debit".to_string()];
 
         //validate Transaction
         let mut validation_result = ValidationResult::new();
@@ -381,8 +383,13 @@ impl PubTransactionModel{
         // TODO: Validate amount, must be numeric
         if !Validators::not_empty_string(self.transaction_type.clone()){
             validation_result.add_error("transaction_type".to_string(), "Transaction Type is required.".to_string());
+        }else{
+            // Validate transaction_type
+            if !transaction_types.contains(&self.transaction_type.clone().unwrap()){
+                validation_result.add_error("transaction_type".to_string(), "Transaction Type is not valid.".to_string());
+            }
         }
-        // TODO: Validate Transaction Type: "credit" | "debit"
+
 
         validation_result
     }//end validate
