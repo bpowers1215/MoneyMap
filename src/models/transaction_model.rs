@@ -379,8 +379,12 @@ impl PubTransactionModel{
         }
         if !Validators::not_empty(self.amount.clone()){
             validation_result.add_error("amount".to_string(), "Amount is required.".to_string());
+        }else{
+            // Validate transaction_type
+            if self.amount.unwrap() < 0 {
+                validation_result.add_error("amount".to_string(), "Amount must be non-negative.".to_string());
+            }
         }
-        // TODO: Validate amount, must be numeric
         if !Validators::not_empty_string(self.transaction_type.clone()){
             validation_result.add_error("transaction_type".to_string(), "Transaction Type is required.".to_string());
         }else{
