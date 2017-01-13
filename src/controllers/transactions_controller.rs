@@ -7,8 +7,8 @@
 use ::nickel::{JsonBody, QueryString, Request};
 use ::bson::{Bson};
 use ::bson::oid::ObjectId;
-use ::chrono::{DateTime, Duration, Local, TimeZone};
-use ::chrono::offset::utc::UTC;
+use ::chrono::{Datelike, DateTime, Duration, Local, Timelike, TimeZone, UTC};
+use ::chrono::{NaiveDate, NaiveDateTime};
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
@@ -36,12 +36,15 @@ impl TransactionsController{
 
     /// Find All Transactions belonging to a money map account
     /// Utilize query params to filter results. Defaults to transactions for current month.
+    /// Query params:
+    ///     start_date - inclusive
+    ///     end_date - exclusive
     ///
     /// # Arguments
-    /// &self
-    /// req - nickel::Request
-    /// mm_id - String Money Map ID
-    /// acc_id - String Account ID
+    /// `self`
+    /// `req` - nickel::Request
+    /// `mm_id` - String Money Map ID
+    /// `acc_id` - String Account ID
     ///
     /// # Returns
     /// `ApiResult<Vec<PubTransactionModel>>` - ApiResult including a vector of transactions
@@ -62,7 +65,7 @@ impl TransactionsController{
 
         // Start Date
         let start_date_prop = query.get("start_date");
-        let start_date = if let Some(date) = start_date_prop{
+        let mut start_date = if let Some(date) = start_date_prop{
             let sd = [date, START_TIME].concat();
             match UTC.datetime_from_str(&sd, "%Y%m%d%T"){
                 Ok(datetime) => Some(datetime),
@@ -77,7 +80,7 @@ impl TransactionsController{
 
         // End Date
         let end_date_prop = query.get("end_date");
-        let end_date = if let Some(date) = end_date_prop{
+        let mut end_date = if let Some(date) = end_date_prop{
             let edt = [date, END_TIME].concat();
             match UTC.datetime_from_str(&edt, "%Y%m%d%T"){
                 Ok(datetime) => Some(datetime),
@@ -89,6 +92,21 @@ impl TransactionsController{
         }else{
             None
         };
+
+        if let None = start_date{
+            if let None = end_date{
+                // Start and End dates not supplied
+                // Default start/end filter to current month
+                let now = UTC::now();
+
+                // Determine first day of this month
+                start_date = now.with_day(1).unwrap().with_hour(0).unwrap().with_minute(0).unwrap().with_second(0).unwrap().with_nanosecond(0);
+
+                // Determine first day of next month
+                let (y, m) = if now.month() == 12 { (now.year() + 1, 1) } else { (now.year(), now.month() + 1) };
+                end_date = now.with_year(y).unwrap().with_month(m).unwrap().with_day(1).unwrap().with_hour(0).unwrap().with_minute(0).unwrap().with_second(0).unwrap().with_nanosecond(0);
+            }
+        }
 
 
         // START Retrieve DAO ---------------------------------------------------------------------
@@ -147,10 +165,10 @@ impl TransactionsController{
     /// Create Transaction
     ///
     /// # Arguments
-    /// &self
-    /// req - nickel::Request
-    /// mm_id - String Money Map ID
-    /// acc_id - String Account ID
+    /// `self`
+    /// `req` - nickel::Request
+    /// `mm_id` - String Money Map ID
+    /// `acc_id` - String Account ID
     ///
     /// # Returns
     /// `ApiResult<PubTransactionModel>` - ApiResult including the created transaction
@@ -246,8 +264,8 @@ impl TransactionsController{
     /// Transaction Amount and Type (credit/debit) can only be modified during transaction month
     ///
     /// # Arguments
-    /// &self
-    /// req - nickel::Request
+    /// `self`
+    /// `req` - nickel::Request
     ///
     /// # Returns
     /// `ApiResult<PubTransactionModel>` - ApiResult including the modified transaction
@@ -267,8 +285,8 @@ impl TransactionsController{
     /// Delete a Transaction
     ///
     /// # Arguments
-    /// &self
-    /// req - &nickel::Request
+    /// `self`
+    /// `req` - &nickel::Request
     ///
     /// # Returns
     /// `ApiResult<String>` - ApiResult

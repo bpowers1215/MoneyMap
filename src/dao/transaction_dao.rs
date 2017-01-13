@@ -52,8 +52,8 @@ impl TransactionDAO{
     /// `user_id` - ObjectId User ID
     /// `mm_id` - ObjectId Money Map ID
     /// `acc_id` - ObjectId Money Map ID
-    /// `start_date` - Start DateTime
-    /// `end_date` - End DateTime
+    /// `start_date` - Start DateTime - inclusive
+    /// `end_date` - End DateTime - exclusive
     ///
     /// # Returns
     /// `Vec<TransactionModel>`
@@ -70,10 +70,30 @@ impl TransactionDAO{
             "account_id" => acc_id
         };
 
-        // TODO: Add Start/End date filtering
-        //if let Some(sd) = start_date{
-            //doc.insert_bson("name".to_string(), Bson::String(name));
+        let mut date_query = None;
+        // Start Date
+        if let Some(sd) = start_date{
+            let mut date_condition = doc!{};
+            if let Some(dq) = date_query{
+                date_condition = dq;
+            }
+            date_condition.insert_bson("$gte".to_string(), Bson::UtcDatetime(sd));
+            date_query = Some(date_condition);
+        }
+        // End Date
+        if let Some(ed) = end_date{
+            let mut date_condition = doc!{};
+            if let Some(dq) = date_query{
+                date_condition = dq;
+            }
+            date_condition.insert_bson("$lt".to_string(), Bson::UtcDatetime(ed));
+            date_query = Some(date_condition);
+        }
 
+        // Add date query to filter
+        if let Some(dq) = date_query{
+            filter.insert_bson("datetime".to_string(), Bson::Document(dq));
+        }
 
         match coll.find(Some(filter), Some(find_options)){
             Ok(cursor) => {
