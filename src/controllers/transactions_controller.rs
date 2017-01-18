@@ -198,8 +198,9 @@ impl TransactionsController{
 
                                             // Parse body to PubTransactionModel
                                             match req.json_as::<PubTransactionModel>(){
+                                                //TODO Parse error! Floating point numbers are being parsed poorly. Eg. 0.12 -> 0.119999999999999
                                                 Ok(mut pub_transaction) => {
-
+                                                    debug!("AMOUNT SET AS {}", pub_transaction.amount.unwrap());
                                                     pub_transaction.set_money_map_id(Some(mm_obj_id));
                                                     pub_transaction.set_account_id(Some(acc_obj_id));
 

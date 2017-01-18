@@ -2,13 +2,17 @@
 
 /// Validators
 
+// Import Modules
+// External
+use ::regex::Regex;
+
 /// Check that a field is not supplied, or None
 ///
 /// # Arguments
-/// val - Option<T> the Option field
+/// `val` - Option<T> the Option field
 ///
 /// # Returns
-/// 'bool' - True if valid, false otherwise (None)
+/// `bool` - True if valid, false otherwise (None)
 pub fn empty<T>(val: &Option<T>) -> bool{
     match val{
         &Some(_) => false,
@@ -19,10 +23,10 @@ pub fn empty<T>(val: &Option<T>) -> bool{
 /// Check that a field is not empty
 ///
 /// # Arguments
-/// val - Option<T> the Option field
+/// `val` - Option<T> the Option field
 ///
 /// # Returns
-/// 'bool' - True if valid, false otherwise (None)
+/// `bool` - True if valid, false otherwise (None)
 pub fn not_empty<T>(val: Option<T>) -> bool{
     match val{
         Some(_) => true,
@@ -33,10 +37,10 @@ pub fn not_empty<T>(val: Option<T>) -> bool{
 /// Check that a String field is not empty
 ///
 /// # Arguments
-/// val - Option<String> the Option field
+/// `val` - Option<String> the Option field
 ///
 /// # Returns
-/// 'bool' - True if valid, false otherwise (None)
+/// `bool` - True if valid, false otherwise (None)
 pub fn not_empty_string(val: Option<String>) -> bool{
     match val{
         Some(v) => !v.is_empty(),
@@ -47,11 +51,24 @@ pub fn not_empty_string(val: Option<String>) -> bool{
 /// Check that two values are identical
 ///
 /// # Arguments
-/// val1 - Generic type T
-/// val2 - Generic type T
+/// `val1` - Generic type T
+/// `val2` - Generic type T
 ///
 /// # Returns
-/// 'bool' - True if valid, false otherwise (None)
+/// `bool` - True if valid, false otherwise (None)
 pub fn equals<T: PartialEq>(val1: T, val2: T) -> bool{
     val1 == val2
+}
+
+/// Check if a string matches a regular expression
+///
+/// # Arguments
+/// `value`
+/// `regex`
+///
+/// # Returns
+/// `bool` - True if valid, false otherwise (None)
+pub fn matches(value: &str, regex: &str) -> bool{
+    let re = Regex::new(regex).unwrap();
+    re.is_match(value)
 }
