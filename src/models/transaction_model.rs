@@ -388,9 +388,6 @@ impl PubTransactionModel{
                 // Validate number is valid currency amount
                 let amount_s = amount.to_string();
 
-                debug!("THE AMOUNT IS: {}", amount);
-                debug!("THE AMOUNT STRING IS: {}", amount_s);
-                // TODO: Validation Error! Valid amounts are being flagged as invalid (Eg. 0.12)
                 if !Validators::matches(&amount_s, r"^(\d+)(\.\d(\d)?)?$"){
                     validation_result.add_error("amount".to_string(), "Amount is not valid.".to_string());
                 }
