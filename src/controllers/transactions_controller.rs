@@ -37,8 +37,8 @@ impl TransactionsController{
     /// Find All Transactions belonging to a money map account
     /// Utilize query params to filter results. Defaults to transactions for current month.
     /// Query params:
-    ///     start_date - inclusive
-    ///     end_date - exclusive
+    ///     start_date - inclusive (format: YYYYMMDD)
+    ///     end_date - exclusive (format: YYYYMMDD)
     ///
     /// # Arguments
     /// `self`
