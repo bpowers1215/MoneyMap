@@ -100,10 +100,9 @@ impl TransactionsController{
 
                 // Determine first day of this month
                 start_date = now.with_day(1).unwrap().with_hour(0).unwrap().with_minute(0).unwrap().with_second(0).unwrap().with_nanosecond(0);
-
                 // Determine first day of next month
                 let (y, m) = if now.month() == 12 { (now.year() + 1, 1) } else { (now.year(), now.month() + 1) };
-                end_date = now.with_year(y).unwrap().with_month(m).unwrap().with_day(1).unwrap().with_hour(0).unwrap().with_minute(0).unwrap().with_second(0).unwrap().with_nanosecond(0);
+                end_date = now.with_year(y).unwrap().with_day(1).unwrap().with_month(m).unwrap().with_hour(0).unwrap().with_minute(0).unwrap().with_second(0).unwrap().with_nanosecond(0);
             }
         }
 
