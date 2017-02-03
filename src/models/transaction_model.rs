@@ -380,7 +380,7 @@ impl PubTransactionModel{
         if !Validators::not_empty(self.amount.clone()){
             validation_result.add_error("amount".to_string(), "Amount is required.".to_string());
         }else{
-            // Validate transaction_type
+            // Validate amount
             let amount = self.amount.unwrap();
             if amount < 0.0 {
                 validation_result.add_error("amount".to_string(), "Amount must be non-negative.".to_string());
@@ -402,7 +402,61 @@ impl PubTransactionModel{
             }
         }
 
-
         validation_result
     }//end validate
+
+    /// Validate Existing Transaction
+    ///
+    /// # Arguments
+    /// `self`
+    ///
+    /// # Returns
+    /// `ValidationResult` - validation result
+    pub fn validate_existing(&self) -> ValidationResult{
+        // Valid Options
+        let transaction_types = vec!["credit".to_string(), "debit".to_string()];
+
+        //validate Transaction
+        let mut validation_result = ValidationResult::new();
+        if Validators::empty(&self.id){
+            validation_result.add_error("id".to_string(), "Transaction ID is required.".to_string());
+        }
+        if !Validators::empty(&self.payee){
+            if !Validators::not_empty_string(self.payee.clone()){
+                validation_result.add_error("payee".to_string(), "Payee is required.".to_string());
+            }
+        }
+        if Validators::not_empty(self.amount.clone()){
+            // Validate amount
+            let amount = self.amount.unwrap();
+            if amount < 0.0 {
+                validation_result.add_error("amount".to_string(), "Amount must be non-negative.".to_string());
+            }else{
+                // Validate number is valid currency amount
+                let amount_s = amount.to_string();
+
+                if !Validators::matches(&amount_s, r"^(\d+)(\.\d(\d)?)?$"){
+                    validation_result.add_error("amount".to_string(), "Amount is not valid.".to_string());
+                }
+            }
+        }
+        if !Validators::empty(&self.transaction_type){
+            if !Validators::not_empty_string(self.transaction_type.clone()){
+                validation_result.add_error("transaction_type".to_string(), "Transaction Type is required.".to_string());
+            }else{
+                // Validate transaction_type
+                if !transaction_types.contains(&self.transaction_type.clone().unwrap()){
+                    validation_result.add_error("transaction_type".to_string(), "Transaction Type is not valid.".to_string());
+                }
+            }
+        }
+        if !Validators::empty(&self.money_map_id){
+            validation_result.add_error("money_map_id".to_string(), "Money Map ID cannot be modified.".to_string());
+        }
+        if !Validators::empty(&self.account_id){
+            validation_result.add_error("account_id".to_string(), "Account ID cannot be modified.".to_string());
+        }
+
+        validation_result
+    }//end validate_existing
 }

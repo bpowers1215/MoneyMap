@@ -266,10 +266,12 @@ impl TransactionsController{
     /// # Arguments
     /// `self`
     /// `req` - nickel::Request
+    /// `mm_id` - String Money Map ID
+    /// `acc_id` - String Account ID
     ///
     /// # Returns
     /// `ApiResult<PubTransactionModel>` - ApiResult including the modified transaction
-    pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<PubTransactionModel, PubTransactionModel>{
+    pub fn modify(&self, req: &mut Request<ServerData>, mm_id: String, acc_id: String) -> ApiResult<PubTransactionModel, PubTransactionModel>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -279,7 +281,83 @@ impl TransactionsController{
             }
         };
 
-        ApiResult::Failure{msg:"Method not implemented"}
+        // START Retrieve DAO ---------------------------------------------------------------------
+        match self.dao_manager.get_transaction_dao(){
+            Ok(transaction_dao) => {
+                // END Retrieve DAO ---------------------------------------------------------------
+
+                // START Object ID parsing --------------------------------------------------------
+                match ObjectId::with_string(&user_id){
+                    Ok(user_obj_id) => {
+                        match ObjectId::with_string(&mm_id){
+                            Ok(mm_obj_id) => {
+                                match ObjectId::with_string(&acc_id){
+                                    Ok(acc_obj_id) => {
+                                        // END Object ID parsing ----------------------------------
+
+                                        // Verify Account is valid to receive transactions and user has permission
+                                        if transaction_dao.is_valid_account(user_obj_id, mm_obj_id.clone(), acc_obj_id.clone()){
+
+                                            // Parse body to PubTransactionModel
+                                            match req.json_as::<PubTransactionModel>(){
+                                                Ok(transaction) => {
+
+                                                    //Validate
+                                                    let validation_result = transaction.validate_existing();
+                                                    if validation_result.is_valid(){
+                                                        //Save the account
+                                                        match transaction_dao.update(&transaction){
+                                                            Ok(updated_transaction) => {
+                                                                ApiResult::Success{result:PubTransactionModel::new(updated_transaction)}
+                                                            },
+                                                            Err(e) => {
+                                                                ApiResult::Failure{msg:e.get_message()}
+                                                            }
+                                                        }
+
+                                                    }else{
+                                                        ApiResult::Invalid{validation:validation_result, request:transaction}
+                                                    }
+                                                },
+                                                Err(e) => {
+                                                    error!("{}",e);
+                                                    ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
+                                                }
+                                            }
+
+                                        }else{
+                                            ApiResult::Failure{msg:"Failed to update transaction. Invalid account."}
+                                        }
+
+                                        // START Object ID parsing Error Handling -----------------
+                                    },
+                                    Err(e) => {
+                                        error!("{}", e);
+                                        ApiResult::Failure{msg:"Failed to find transaction. Invalid account ID."}
+                                    }
+                                }
+                            },
+                            Err(e) => {
+                                error!("{}", e);
+                                ApiResult::Failure{msg:"Failed to find transaction. Invalid money map ID."}
+                            }
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}", e);
+                        ApiResult::Failure{msg:"Failed to find transaction. Invalid user ID."}
+                    }
+                }
+                // END Object ID parsing Error Handling -------------------------------------------
+
+                // START Retrieve DAO Error Handling ----------------------------------------------
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
+        // END Retrieve DAO Error Handling --------------------------------------------------------
     }// end modify
 
     /// Delete a Transaction

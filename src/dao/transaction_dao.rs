@@ -111,6 +111,36 @@ impl TransactionDAO{
         transactions
     }// end find
 
+    /// Find One Transaction
+    ///
+    /// # Arguments
+    /// self
+    /// filter - Option<Document> The find filter
+    ///
+    /// # Returns
+    /// `Option<TransactionModel>`
+    pub fn find_one(&self, filter: Option<Document>) -> Option<TransactionModel>{
+        let coll = self.db.collection(TRANSACTION_COLLECTION);
+
+        match coll.find_one(filter, None){
+            Ok(result) => {
+                match result{
+                    Some(document) => {
+                        Some(document_to_model(&document))
+                    },
+                    None => {
+                        //Could not find money map for user
+                        None
+                    }
+                }
+            },
+            Err(e) => {
+                error!("Find All accounts failed: {}", e);
+                None
+            }
+        }
+    }// end find_one
+
     /// Create Transaction
     ///
     /// # Arguments
@@ -166,6 +196,83 @@ impl TransactionDAO{
         }
     }// end create
 
+    /// Update an existing transaction
+    ///
+    /// # Arguments
+    /// `self`
+    /// `pub_transaction` - PubTransactionModel
+    ///
+    /// # Returns
+    /// `MMResult<TransactionModel>` The updated transaction if successful, None otherwise
+    pub fn update(&self, pub_transaction: &PubTransactionModel) -> MMResult<TransactionModel>{
+        let coll = self.db.collection(TRANSACTION_COLLECTION);
+
+        let filter = doc! {
+            "_id" => (pub_transaction.get_id().unwrap())
+        };
+
+        // Build `$set` document to update document
+        let mut set_doc = doc!{};
+        let mut update = false;
+        if let Some(payee) = pub_transaction.get_payee(){
+            update = true;
+            set_doc.insert_bson("payee".to_string(), Bson::String(payee));
+        }
+        if let Some(description) = pub_transaction.get_description(){
+            update = true;
+            set_doc.insert_bson("description".to_string(), Bson::String(description));
+        }
+        if let Some(amount) = pub_transaction.get_amount(){
+            update = true;
+            set_doc.insert_bson("amount".to_string(), Bson::FloatingPoint(amount));
+        }
+        if let Some(transaction_type) = pub_transaction.get_transaction_type(){
+            update = true;
+            set_doc.insert_bson("transaction_type".to_string(), Bson::String(transaction_type));
+        }
+        if let Some(category_id) = pub_transaction.get_category_id(){
+            update = true;
+            set_doc.insert_bson("category_id".to_string(), Bson::ObjectId(category_id));
+        }
+        if let Some(status) = pub_transaction.get_status(){
+            update = true;
+            set_doc.insert_bson("status".to_string(), Bson::String(status));
+        }
+        let update_doc = if update {
+            doc! {"$set" => set_doc}
+        }else{
+            // No updates to transaction, return existing transaction if found
+            return match self.find_one(Some(filter)){
+                Some(result) => Ok(result),
+                None => Err(MMError::new("Unable to find transaction", MMErrorKind::DAO))
+            };
+        };
+
+        // Update the transaction
+        match coll.update_one(filter.clone(), update_doc.clone(), None){
+            Ok(result) => {
+                match result.write_exception{
+                    None => {
+                        if result.matched_count > 0{
+                            // Transaction found and updated
+                            Ok(self.find_one(Some(filter)).unwrap())
+                        }else{
+                            Err(MMError::new("Unable to find transaction", MMErrorKind::DAO))
+                        }
+                    },
+                    Some(_) => {
+                        Err(MMError::new("Unable to save transaction", MMErrorKind::DAO))
+                    }
+                }
+
+            },
+            Err(e) => {
+                error!("{}", e);
+                Err(MMError::new("Failed to update transaction.", MMErrorKind::DAO))
+            }
+        }
+    }// end update
+
     /// Check if an account is valid to receive transactions
     /// Factors:
     ///     Valid/active Money Map
@@ -196,7 +303,7 @@ impl TransactionDAO{
                         true
                     },
                     None => {
-                        //Could not find money map for user/account
+                        //Could not find transaction
                         false
                     }
                 }
