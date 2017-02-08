@@ -273,6 +273,40 @@ impl TransactionDAO{
         }
     }// end update
 
+    /// Delete a Transaction
+    ///
+    /// # Arguments
+    /// `self`
+    /// `mm_id` - ObjectId Money Map ID
+    /// `account_id` - ObjectId Account ID
+    /// `tran_id` - ObjectId Transaction ID
+    ///
+    /// # Returns
+    /// `bool` True if transaction deleted, false otherwise
+    pub fn delete(self, mm_id: ObjectId, acc_id: ObjectId, tran_id: ObjectId) -> bool{
+        let coll = self.db.collection(TRANSACTION_COLLECTION);
+
+        let filter = doc! {
+            "_id" => tran_id,
+            "money_map_id" => mm_id,
+            "account_id" => acc_id
+        };
+
+        match coll.delete_one(filter.clone(), None){
+            Ok(result) => {
+                if result.deleted_count > 0 {
+                    true
+                }else{
+                    false
+                }
+            },
+            Err(e) => {
+                error!("{}", e);
+                false
+            }
+        }
+    }// end delete
+
     /// Check if an account is valid to receive transactions
     /// Factors:
     ///     Valid/active Money Map
@@ -325,7 +359,7 @@ impl TransactionDAO{
                 false
             }
         }
-    }
+    }// end is_valid_account
 }
 
 /// Create TransactionModel from Document

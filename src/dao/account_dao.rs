@@ -278,10 +278,10 @@ impl AccountDAO{
     /// self
     /// user_id - ObjectId User ID
     /// mm_id - ObjectId Money Map ID
-    /// acc_id - ObjectId Money Map ID
+    /// acc_id - ObjectId Account ID
     ///
     /// # Returns
-    /// `MMResult<()>`
+    /// `MMResult<UpdateResult>`
     pub fn delete(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId) -> MMResult<mongodb::coll::results::UpdateResult>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
 

@@ -368,7 +368,7 @@ impl TransactionsController{
     ///
     /// # Returns
     /// `ApiResult<String>` - ApiResult
-    pub fn delete(&self, req: &Request<ServerData>) -> ApiResult<String, ()>{
+    pub fn delete(&self, req: &Request<ServerData>, mm_id: String, acc_id: String, tran_id: String) -> ApiResult<String, ()>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -378,6 +378,64 @@ impl TransactionsController{
             }
         };
 
-        ApiResult::Failure{msg:"Method not implemented"}
+        match self.dao_manager.get_transaction_dao(){
+            Ok(dao) => {
+
+                // START Object ID parsing --------------------------------------------------------
+                match ObjectId::with_string(&user_id){
+                    Ok(user_obj_id) => {
+                        match ObjectId::with_string(&mm_id){
+                            Ok(mm_obj_id) => {
+                                match ObjectId::with_string(&acc_id){
+                                    Ok(acc_obj_id) => {
+                                        match ObjectId::with_string(&tran_id){
+                                            Ok(tran_obj_id) => {
+                                                // END Object ID parsing --------------------------
+
+                                                // Verify Account/money map is valid and user has permission
+                                                if dao.is_valid_account(user_obj_id, mm_obj_id.clone(), acc_obj_id.clone()){
+
+                                                    if dao.delete(mm_obj_id, acc_obj_id, tran_obj_id){
+                                                        ApiResult::Success{result:"Successfully deleted transaction".to_string()}
+                                                    }else{
+                                                        ApiResult::Failure{msg:"Failed to delete transaction."}
+                                                    }
+
+                                                }else{
+                                                    ApiResult::Failure{msg:"Failed to delete transaction. Invalid account."}
+                                                }
+
+                                                // START Object ID parsing Error Handling ---------
+                                            },
+                                            Err(e) => {
+                                                error!("{}", e);
+                                                ApiResult::Failure{msg:"Failed to delete transaction. Invalid transaction ID."}
+                                            }
+                                        }
+                                    },
+                                    Err(e) => {
+                                        error!("{}", e);
+                                        ApiResult::Failure{msg:"Failed to delete transaction. Invalid account ID."}
+                                    }
+                                }
+                            },
+                            Err(e) => {
+                                error!("{}", e);
+                                ApiResult::Failure{msg:"Failed to delete transaction. Invalid money map ID."}
+                            }
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}", e);
+                        ApiResult::Failure{msg:"Failed to delete transaction. Invalid user ID."}
+                    }
+                }
+                // END Object ID parsing Error Handling -------------------------------------------
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                ApiResult::Failure{msg:"Unable to interact with database"}
+            }
+        }
     }// end delete
 }
