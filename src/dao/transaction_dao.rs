@@ -293,9 +293,21 @@ impl TransactionDAO{
         let filter = doc!{
             "_id" => money_map_id,
             "users.user_id" => user_id,
-            "accounts._id" => account_id
+            "deleted" => {
+                //Money Map Not Deleted
+                "$ne" => true
+            },
+            "accounts" => {
+                "$elemMatch" => {
+                    "_id" => account_id,
+                    "deleted" => {
+                        //Account not deleted
+                        "$ne" => true
+                    }
+                }
+            }
         };
-
+        debug!("FILTER: {:?}", filter);
         match coll.find_one(Some(filter), None){
             Ok(result) => {
                 match result{
