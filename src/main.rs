@@ -84,5 +84,6 @@ fn main() {
     server.utilize(Session::authenticator);
     server.utilize(Routes::get_routes());
 
-    server.listen("0.0.0.0:6767");
+    let listening = server.listen("0.0.0.0:6767").expect("Failed to launch server");
+    debug!("Listening on: {:?}", listening.socket());
 }
