@@ -10,12 +10,10 @@ extern crate mongodb;
 // External
 use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
-use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
 use ::chrono::{DateTime};
 use ::chrono::offset::utc::UTC;
 // Common Utilities
-use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::utilities as Utilities;
 // Models
 use ::models::account_statement_model::{AccountStatementModel};

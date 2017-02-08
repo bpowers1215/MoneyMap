@@ -4,10 +4,9 @@
 
 // Import
 // External
-use ::nickel::{JsonBody, QueryString, Request};
-use ::bson::{Bson};
+use ::nickel::{QueryString, Request};
 use ::bson::oid::ObjectId;
-use ::chrono::{DateTime, Duration, Local, TimeZone};
+use ::chrono::{TimeZone};
 use ::chrono::offset::utc::UTC;
 // Utilities
 use ::common::api_result::ApiResult;
@@ -16,7 +15,7 @@ use ::common::data_access::ServerData;
 use ::common::session as Session;
 use ::common::utilities as Utilities;
 // Models
-use ::models::account_statement_model::{AccountStatementModel, OutAccountStatementModel};
+use ::models::account_statement_model::{OutAccountStatementModel};
 // DAO
 use ::dao::dao_manager::DAOManager;
 
@@ -46,8 +45,8 @@ impl AccountStatementsController{
     /// # Returns
     /// `ApiResult<Vec<OutAccountStatementModel>>` - ApiResult including a vector of account statements
     pub fn find(&self, req: &mut Request<ServerData>, mm_id: String, acc_id: String) -> ApiResult<Vec<OutAccountStatementModel>, ()>{
-        let START_TIME = "00:00:00";
-        let END_TIME = "23:59:59";
+        let start_time = "00:00:00";
+        let end_time = "23:59:59";
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -66,7 +65,7 @@ impl AccountStatementsController{
         // Start Date
         let start_date_prop = query.get("start_date");
         let start_date = if let Some(date) = start_date_prop{
-            let sd = [date, START_TIME].concat();
+            let sd = [date, start_time].concat();
             match UTC.datetime_from_str(&sd, "%Y%m%d%T"){
                 Ok(datetime) => Some(datetime),
                 Err(e) => {
@@ -81,7 +80,7 @@ impl AccountStatementsController{
         // End Date
         let end_date_prop = query.get("end_date");
         let end_date = if let Some(date) = end_date_prop{
-            let edt = [date, END_TIME].concat();
+            let edt = [date, end_time].concat();
             match UTC.datetime_from_str(&edt, "%Y%m%d%T"){
                 Ok(datetime) => Some(datetime),
                 Err(e) => {

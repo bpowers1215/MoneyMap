@@ -5,7 +5,6 @@
 // Import
 // External
 use ::nickel::{JsonBody, Request};
-use ::bson::{Bson};
 use ::bson::oid::ObjectId;
 // Utilities
 use ::common::api_result::ApiResult;

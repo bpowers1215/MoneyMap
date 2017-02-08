@@ -345,7 +345,7 @@ impl TransactionDAO{
         match coll.find_one(Some(filter), None){
             Ok(result) => {
                 match result{
-                    Some(document) => {
+                    Some(_) => {
                         true
                     },
                     None => {

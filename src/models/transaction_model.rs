@@ -213,7 +213,7 @@ impl PubTransactionModel{
     ///
     /// # Returns
     /// 'PubTransactionModel'
-    pub fn new(mut transaction: TransactionModel) -> PubTransactionModel{
+    pub fn new(transaction: TransactionModel) -> PubTransactionModel{
         PubTransactionModel{
             id: transaction.get_id(),
             money_map_id: transaction.get_id(),

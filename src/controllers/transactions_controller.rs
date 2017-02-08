@@ -5,17 +5,15 @@
 // Import
 // External
 use ::nickel::{JsonBody, QueryString, Request};
-use ::bson::{Bson};
 use ::bson::oid::ObjectId;
-use ::chrono::{Datelike, DateTime, Duration, Local, Timelike, TimeZone, UTC};
-use ::chrono::{NaiveDate, NaiveDateTime};
+use ::chrono::{Datelike, Timelike, TimeZone, UTC};
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
 use ::common::data_access::ServerData;
 use ::common::session as Session;
 // Models
-use ::models::transaction_model::{TransactionModel, PubTransactionModel};
+use ::models::transaction_model::{PubTransactionModel};
 // DAO
 use ::dao::dao_manager::DAOManager;
 
@@ -49,7 +47,7 @@ impl TransactionsController{
     /// # Returns
     /// `ApiResult<Vec<PubTransactionModel>>` - ApiResult including a vector of transactions
     pub fn find(&self, req: &mut Request<ServerData>, mm_id: String, acc_id: String) -> ApiResult<Vec<PubTransactionModel>, ()>{
-        let START_TIME = "00:00:00";
+        let start_time = "00:00:00";
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -65,7 +63,7 @@ impl TransactionsController{
         // Start Date
         let start_date_prop = query.get("start_date");
         let mut start_date = if let Some(date) = start_date_prop{
-            let sd = [date, START_TIME].concat();
+            let sd = [date, start_time].concat();
             match UTC.datetime_from_str(&sd, "%Y%m%d%T"){
                 Ok(datetime) => Some(datetime),
                 Err(e) => {
@@ -80,7 +78,7 @@ impl TransactionsController{
         // End Date
         let end_date_prop = query.get("end_date");
         let mut end_date = if let Some(date) = end_date_prop{
-            let edt = [date, START_TIME].concat();
+            let edt = [date, start_time].concat();
             match UTC.datetime_from_str(&edt, "%Y%m%d%T"){
                 Ok(datetime) => Some(datetime),
                 Err(e) => {
