@@ -5,7 +5,7 @@ kind = "console"
 
 [appender.file]
 kind = "file"
-path = "logs/mm.log"
+path = "/logs/api.log"
 pattern = "%d [%t] %l %M:%m"
 
 [root]

@@ -39,7 +39,7 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 EXPOSE 6767 27017
 
-VOLUME ["/source"]
+VOLUME ["/source", "/logs"]
 WORKDIR /source
 
 CMD ["cargo", "run"]
