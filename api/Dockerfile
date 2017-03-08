@@ -17,7 +17,7 @@ RUN apt-get update && \
        -qqy \
        --no-install-recommends
 
-ENV RUST_ARCHIVE=rust-1.14.0-x86_64-unknown-linux-gnu.tar.gz
+ENV RUST_ARCHIVE=rust-1.15.1-x86_64-unknown-linux-gnu.tar.gz
 ENV RUST_DOWNLOAD_URL=https://static.rust-lang.org/dist/$RUST_ARCHIVE
 
 RUN mkdir /rust
@@ -37,9 +37,9 @@ RUN apt-get update && apt-get install -y libsodium-dev
 RUN apt-get remove --purge -y curl && apt-get autoclean && apt-get clean
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-EXPOSE 6767 27017
+VOLUME ["/var/lib/money_map/api", "/logs"]
+WORKDIR /var/lib/money_map/api
 
-VOLUME ["/source", "/logs"]
-WORKDIR /source
+EXPOSE 6767 27017
 
 CMD ["cargo", "run"]
