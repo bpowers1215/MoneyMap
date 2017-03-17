@@ -19,5 +19,7 @@ COPY start-task.sh /bin/start-task.sh
 # Give execution rights on the task script
 RUN chmod 0744 /bin/start-task.sh
 
+WORKDIR /var/lib/money_map/statement_gen
+
 # Run the command on container startup
 CMD cron && tail -f /var/log/cron.log

@@ -19,3 +19,6 @@ docker run -d -p 28017:27017 --volumes-from $DATA_CONTAINER --name money-map-db 
 
 echo "Starting API container..."
 docker run -d -i -p 8080:6767 -v $(pwd)/api:/var/lib/money_map/api -v $(pwd)/logs:/var/lib/money_map/logs --name money-map-api --link money-map-db:money-map-db1 money-map/api
+
+echo "Starting Statement Generation Task container..."
+docker run -d -i -v $(pwd)/api:/var/lib/money_map/api -v $(pwd)/tasks/statement_gen/source:/var/lib/money_map/statement_gen -v $(pwd)/logs:/var/lib/money_map/logs --name money-map-statement-gen --link money-map-db:money-map-db1 money-map/statement-gen

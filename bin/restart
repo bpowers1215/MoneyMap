@@ -3,3 +3,6 @@
 
 echo "Restarting API container..."
 docker restart money-map-api
+
+echo "Restarting Task containers..."
+docker restart money-map-statement-gen

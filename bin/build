@@ -1,11 +1,14 @@
 #!/bin/bash
 
-#Build Docker images
+# Build Docker images
 
-#build API image
+# API
 echo "Building API Docker image..."
 docker build -t money-map/api ./api
 
-#build DB image
+# Database
 echo "Building MongoDB Docker image..."
 docker build -t money-map/db ./mongo
+
+# Tasks
+docker build -t money-map/statement-gen ./tasks/statement_gen/
