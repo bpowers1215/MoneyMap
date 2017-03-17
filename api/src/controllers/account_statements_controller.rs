@@ -143,4 +143,12 @@ impl AccountStatementsController{
         // END Retrieve DAO Error Handling --------------------------------------------------------
     }// end find_all
 
+    /// Generate Account Statements for all active accounts
+    ///
+    /// # Arguments
+    /// &self
+    pub fn generate_statements(&self){
+        debug!("CREATE STATEMENTS");
+    }
+
 }

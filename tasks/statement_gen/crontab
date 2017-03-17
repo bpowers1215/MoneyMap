@@ -1,0 +1,10 @@
+# Proof of concept crontab
+
+SHELL=/bin/bash
+PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin
+
+# Run Task every 5 minutes (*/5)
+* * * * * root /bin/start-task.sh >> /var/log/cron.log 2>&1
+
+
+# An empty line is required at the end of this file for a valid cron file.

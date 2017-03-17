@@ -1,0 +1,11 @@
+[package]
+name = "money_map_statement_gen"
+version = "0.0.1"
+authors = ["Brandon Powers <bpowers1215@gmail.com>"]
+
+[dependencies.money_map]
+path = "../api"
+
+[dependencies]
+log = "0.3"
+log4rs = "0.3.3"

@@ -1,0 +1,11 @@
+[database]
+host = "money-map-db"
+port = 27017
+name = "moneyMap"
+username = "money_map_client"
+password = "ds(9sj@^DFe>D;3kc"
+[auth]
+auth_secret = "B@4GWjJZ6bKHa1o99Bmv@nWMNh7tNR"
+claim_iss = "money_map"
+exp_duration = 1440 #in minutes
+iat_ack = "2016-09-09T00:00:00+00:00" #DateTime before which JWT tokens are invalid
