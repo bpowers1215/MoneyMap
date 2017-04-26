@@ -5,6 +5,7 @@
 // Import
 // External
 use std::ops::Add;
+use std::ops::Sub;
 use std::cmp::PartialEq;
 
 #[derive(Debug)]
@@ -39,7 +40,8 @@ impl Dollars{
 impl Add for Dollars {
 	type Output = Dollars;
 
-	/// Add two dollar amounts. The method for the + operator.
+	/// Calculate the sum of two dollar amounts.
+	/// The method for the + operator.
 	///
 	/// # Arguments
 	/// * `other` - second dollar amount
@@ -49,6 +51,24 @@ impl Add for Dollars {
 	fn add(self, other: Dollars) -> Dollars {
 		Dollars {
 			cents: self.cents + other.cents
+		}
+	}
+}
+
+impl Sub for Dollars {
+	type Output = Dollars;
+
+	/// Calculate the difference of two dollar amounts.
+	/// The method for the - operator.
+	///
+	/// # Arguments
+	/// * `other` - second dollar amount
+	///
+	/// # Returns
+	/// `Dollars`
+	fn sub(self, other: Dollars) -> Dollars {
+		Dollars {
+			cents: self.cents - other.cents
 		}
 	}
 }
@@ -140,5 +160,34 @@ mod test {
 		let dollars1 = Dollars::new(5.54);
 		let dollars2 = Dollars::new(8.94);
 		assert_eq!(dollars1 + dollars2, Dollars::new(14.48));
+
+		// Test 2
+		let dollars1 = Dollars::new(597.45);
+		let dollars2 = Dollars::new(125.00);
+		assert_eq!(dollars1 + dollars2, Dollars::new(722.45));
+
+		// Test 3
+		let dollars1 = Dollars::new(-5483.05);
+		let dollars2 = Dollars::new(846.45);
+		assert_eq!(dollars1 + dollars2, Dollars::new(-4636.60));
+	}
+
+	#[test]
+	fn sub() {
+
+		// Test 1
+		let dollars1 = Dollars::new(5.54);
+		let dollars2 = Dollars::new(8.94);
+		assert_eq!(dollars1 - dollars2, Dollars::new(-3.40));
+
+		// Test 2
+		let dollars1 = Dollars::new(9453.45);
+		let dollars2 = Dollars::new(189.45);
+		assert_eq!(dollars1 - dollars2, Dollars::new(9264.00));
+
+		// Test 3
+		let dollars1 = Dollars::new(945.10);
+		let dollars2 = Dollars::new(4.56);
+		assert_eq!(dollars1 - dollars2, Dollars::new(940.54));
 	}
 }
