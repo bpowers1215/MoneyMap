@@ -179,24 +179,27 @@ impl AccountStatementsController{
     ///
     /// # Returns
     /// `f64` - ending account balance
-    fn calculate_ending_balance(mut balance: f64, transactions: Vec<TransactionModel>) -> f64 {
+    fn calculate_ending_balance(mut starting_amount: f64, transactions: Vec<TransactionModel>) -> f64 {
+        let mut balance = Utilities::currency::Dollars::new(starting_amount);
         for transaction in &transactions {
             if let Some(t_type) = transaction.get_transaction_type(){
                 if let Some(t_amount) = transaction.get_amount(){
                     println!("Type: {}; Amount: {}", t_type, t_amount);
                     match t_type.as_ref() {
                         "credit" => {
-                            balance += t_amount
+                            balance = balance + Utilities::currency::Dollars::new(t_amount);
+                            println!("Balance so far: {}", balance.to_dollars());
                         },
                         "debit" => {
-                            balance -= t_amount
+                            balance = balance - Utilities::currency::Dollars::new(t_amount);
                         },
                         _ => {}
                     }
                 }
             }
         }
-        balance
+        println!("Balance: {}", balance.to_dollars());
+        balance.to_dollars()
     }
 
     /// Testing: Create Account statement
