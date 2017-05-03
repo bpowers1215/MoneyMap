@@ -17,7 +17,7 @@ use ::common::utilities as Utilities;
 // Models
 use ::models::account_model::{AccountModel};
 use ::models::money_map_model::{MoneyMapModel};
-use ::models::account_statement_model::{OutAccountStatementModel};
+use ::models::account_statement_model::{AccountStatementModel, OutAccountStatementModel};
 use ::models::transaction_model::{TransactionModel};
 // DAO
 use ::dao::dao_manager::DAOManager;
@@ -170,38 +170,6 @@ impl AccountStatementsController{
             }
         }
     }
-    
-    /// Calculate new ending balance from previous ending balance and list of transactions
-    ///
-    /// # Arguments
-    /// balance - f64
-    /// transactions - Vec<TransactionModel>
-    ///
-    /// # Returns
-    /// `f64` - ending account balance
-    fn calculate_ending_balance(mut starting_amount: f64, transactions: Vec<TransactionModel>) -> f64 {
-        let mut balance = Utilities::currency::Dollars::new(starting_amount);
-        for transaction in &transactions {
-            if let Some(t_type) = transaction.get_transaction_type(){
-                if let Some(t_amount) = transaction.get_amount(){
-                    println!("Type: {}; Amount: {}", t_type, t_amount);
-                    match t_type.as_ref() {
-                        "credit" => {
-                            balance = balance + Utilities::currency::Dollars::new(t_amount);
-                            println!("Balance so far: {}", balance.to_dollars());
-                        },
-                        "debit" => {
-                            balance = balance - Utilities::currency::Dollars::new(t_amount);
-                        },
-                        _ => {}
-                    }
-                }
-            }
-        }
-        println!("Balance: {}", balance.to_dollars());
-        balance.to_dollars()
-    }
-
     /// Testing: Create Account statement
     ///
     /// # Arguments
@@ -228,134 +196,29 @@ impl AccountStatementsController{
 
     }// end test_create_account_statement
 
-}
 
-#[cfg(test)]
-mod test {
-    use super::*;
+    /// Generate Account Statements for all active accounts
+    ///
+    /// # Arguments
+    /// &self
+    pub fn generate_statements(&self){
+        debug!("CREATE STATEMENTS");
 
-    #[test]
-    fn calculate_ending_balance() {
+        //For each active money map
+        {
+            //For each active account
+            {
+                //Get the latest statement
+                //IF last months statement has not yet been created:
+                {
+                    //Get last months transactions
+                    //Calculate last months ending account balance
+                        // Last Month's ending bal = prev month's ending bal + (total last months transactions)
 
-        let mut transactions = Vec::new();
-
-        // Test 1
-        transactions.push(TransactionModel{
-            id: None,
-            money_map_id: None,
-            account_id: None,
-            datetime: None,
-            payee: None,
-            description: None,
-            category_id: None,
-            amount: Some(1.00),
-            transaction_type: Some("debit".to_string()),
-            status: None
-        });
-        transactions.push(TransactionModel{
-            id: None,
-            money_map_id: None,
-            account_id: None,
-            datetime: None,
-            payee: None,
-            description: None,
-            category_id: None,
-            amount: Some(2.00),
-            transaction_type: Some("credit".to_string()),
-            status: None
-        });
-        assert_eq!(6.00, AccountStatementsController::calculate_ending_balance(5.00, transactions.clone()));
-
-        // Test 2
-        transactions.clear();
-        transactions.push(TransactionModel{
-            id: None,
-            money_map_id: None,
-            account_id: None,
-            datetime: None,
-            payee: None,
-            description: None,
-            category_id: None,
-            amount: Some(1.0),
-            transaction_type: Some("credit".to_string()),
-            status: None
-        });
-        transactions.push(TransactionModel{
-            id: None,
-            money_map_id: None,
-            account_id: None,
-            datetime: None,
-            payee: None,
-            description: None,
-            category_id: None,
-            amount: Some(2.50),
-            transaction_type: Some("credit".to_string()),
-            status: None
-        });
-        transactions.push(TransactionModel{
-            id: None,
-            money_map_id: None,
-            account_id: None,
-            datetime: None,
-            payee: None,
-            description: None,
-            category_id: None,
-            amount: Some(3.64),
-            transaction_type: Some("credit".to_string()),
-            status: None
-        });
-        assert_eq!(9.29, AccountStatementsController::calculate_ending_balance(2.15, transactions.clone()));
-
-        // Test 3
-        transactions.clear();
-        transactions.push(TransactionModel{
-            id: None,
-            money_map_id: None,
-            account_id: None,
-            datetime: None,
-            payee: None,
-            description: None,
-            category_id: None,
-            amount: Some(150.75),
-            transaction_type: Some("debit".to_string()),
-            status: None
-        });
-        transactions.push(TransactionModel{
-            id: None,
-            money_map_id: None,
-            account_id: None,
-            datetime: None,
-            payee: None,
-            description: None,
-            category_id: None,
-            amount: Some(25.31),
-            transaction_type: Some("credit".to_string()),
-            status: None
-        });
-        transactions.push(TransactionModel{
-            id: None,
-            money_map_id: None,
-            account_id: None,
-            datetime: None,
-            payee: None,
-            description: None,
-            category_id: None,
-            amount: Some(5.63),
-            transaction_type: Some("debit".to_string()),
-            status: None
-        });
-        transactions.push(TransactionModel{
-            id: None,
-            money_map_id: None,
-            account_id: None,
-            datetime: None,
-            payee: None,
-            description: None,
-            category_id: None,
-            amount: Some(150.00),
-            transaction_type: Some("debit".to_string()),
-            status: None
-        });
-        assert_eq!(720.17, AccountStatementsController::calculate_ending_balance(1001.24, transactions.clone()));
+                    //Create account statement for last month from calculated ending balance
+                }
+            }
+        }
     }
+
 }
