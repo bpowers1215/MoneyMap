@@ -8,10 +8,12 @@ use ::nickel::{QueryString, Request};
 use ::bson::oid::ObjectId;
 use ::chrono::{TimeZone};
 use ::chrono::offset::utc::UTC;
+use ::chrono::{Duration};
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
 use ::common::data_access::ServerData;
+use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::session as Session;
 use ::common::utilities as Utilities;
 // Models
@@ -146,30 +148,6 @@ impl AccountStatementsController{
         // END Retrieve DAO Error Handling --------------------------------------------------------
     }// end find_all
 
-
-    /// Generate Account Statements for all active accounts
-    ///
-    /// # Arguments
-    /// &self
-    pub fn generate_statements(&self){
-        debug!("CREATE STATEMENTS");
-
-        //For each active money map
-        {
-            //For each active account
-            {
-                //Get the latest statement
-                //IF last months statement has not yet been created:
-                {
-                    //Get last months transactions
-                    //Calculate last months ending account balance
-                        // Last Month's ending bal = prev month's ending bal + (total last months transactions)
-
-                    //Create account statement for last month from calculated ending balance
-                }
-            }
-        }
-    }
     /// Testing: Create Account statement
     ///
     /// # Arguments
@@ -192,7 +170,44 @@ impl AccountStatementsController{
             }
         };
 
-         return ApiResult::Failure{msg:"Not Implemented"};
+        match ObjectId::with_string(&user_id){
+            Ok(user_obj_id) => {
+                match ObjectId::with_string(&mm_id){
+                    Ok(mm_obj_id) => {
+                        match ObjectId::with_string(&acc_id){
+                            Ok(acc_obj_id) => {
+
+                                match self.generate_account_statement(user_obj_id, mm_obj_id, acc_obj_id, 2017, 3){
+                                    Ok(result) => {
+                                        debug!("RESULT: {:?}", result);
+                                        ApiResult::Success{
+                                            result: vec![OutAccountStatementModel::new(result)]
+                                        }
+                                    },
+                                    Err(e) => {
+                                        error!("{}", e);
+                                        ApiResult::Failure{msg:"Failed to generate account statement."}
+                                    }
+                                }
+
+                            },
+                            Err(e) => {
+                                error!("{}", e);
+                                ApiResult::Failure{msg:"Failed to find money map. Invalid account ID."}
+                            }
+                        }
+                    },
+                    Err(e) => {
+                        error!("{}", e);
+                        ApiResult::Failure{msg:"Failed to find money map. Invalid money map ID."}
+                    }
+                }
+            },
+            Err(e) => {
+                error!("{}", e);
+                ApiResult::Failure{msg:"Failed to find money map. Invalid user ID."}
+            }
+        }
 
     }// end test_create_account_statement
 
@@ -202,7 +217,7 @@ impl AccountStatementsController{
     /// # Arguments
     /// &self
     pub fn generate_statements(&self){
-        debug!("CREATE STATEMENTS");
+        debug!("generate_statements");
 
         //For each active money map
         {
@@ -220,5 +235,77 @@ impl AccountStatementsController{
             }
         }
     }
+
+
+    /// Generate Account Statement for an account
+    /// (An account statement for any given month will contain the previous months ending balance)
+    ///
+    /// # Arguments
+    /// &self
+    /// user_obj_id - ObjectId
+    /// mm_obj_id - ObjectId
+    /// acc_obj_id - ObjectId
+    /// year - f64
+    /// month - f32
+    fn generate_account_statement(&self, user_obj_id: ObjectId, mm_obj_id: ObjectId, acc_obj_id: ObjectId, year: i32, month: i32) -> MMResult<AccountStatementModel>{
+        debug!("generate_account_statement");
+
+        // START Retrieve DAO ---------------------------------------------------------------------
+        match self.dao_manager.get_account_statement_dao(){
+            Ok(account_statement_dao) => {
+                // END Retrieve DAO ---------------------------------------------------------------
+
+                // Get previous months account statement
+                // Determine first day of next month
+                let (prev_year, prev_month) = if month == 1 { (year - 1, 12) } else { (year, month - 1)};
+                let sort = vec![Utilities::url::SortParam{
+                    field: "statement_date".to_string(),
+                    direction: 1
+                }];
+                let start_date_string = &[&prev_year.to_string(), "-", &format!("{:02}", prev_month), "-01 00:00:00"].concat();
+                let start_date = match UTC.datetime_from_str(start_date_string, "%F %T"){
+                    Ok(result) => result,
+                    Err(e) => {
+                        error!("{}", e);
+                        return Err(MMError::new("Could not parse start date", MMErrorKind::Controller));
+                    }
+                };
+                let end_date_string = &[&prev_year.to_string(), "-", &format!("{:02}", month), "-01 00:00:00"].concat();
+                let end_date = match UTC.datetime_from_str(end_date_string, "%F %T"){
+                    Ok(result) => result - Duration::nanoseconds(1),
+                    Err(e) => {
+                        return Err(MMError::new("Could not parse end date", MMErrorKind::Controller));
+                    }
+                };
+
+                match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id, sort, Some(start_date), Some(end_date)){
+                    Some(statements) => {
+                        if statements.len() == 0 {
+                            Err(MMError::new("No account statement found for previous month", MMErrorKind::Controller))
+                        } else if statements.len() > 1 {
+                            Err(MMError::new("Multiple account statements for previous month", MMErrorKind::Controller))
+                        } else {
+                            Ok(statements[0].clone())// previous month's account statement
+
+                            //IF last months account statement does not exist, throw error
+                            //Get last months transactions
+                            //Generate account statement
+                            //Save account statement
+                        }
+                    },
+                    None => {
+                        Err(MMError::new("Error retrieving account statements", MMErrorKind::Controller))
+                    }
+                }
+
+                // START Retrieve DAO Error Handling ----------------------------------------------
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
+                Err(MMError::new("Unable to interact with database", MMErrorKind::Controller))
+            }
+        }
+        // END Retrieve DAO Error Handling --------------------------------------------------------
+    }//end generate_account_statement
 
 }

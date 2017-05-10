@@ -12,7 +12,7 @@ use ::common::utilities as Utilities;
 use ::models::transaction_model::{TransactionModel};
 
 /// Account Statement
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AccountStatementModel {
     pub statement_date: Option<DateTime<UTC>>,
     pub ending_balance: Option<f64>
