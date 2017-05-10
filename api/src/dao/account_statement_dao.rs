@@ -49,8 +49,8 @@ impl AccountStatementDAO{
     /// `mm_id` - ObjectId Money Map ID
     /// `acc_id` - ObjectId Money Map ID
     /// `sort` - A Vector of SortParams
-    /// `start_date` - Start DateTime
-    /// `end_date` - End DateTime
+    /// `start_date` - Start DateTime (inclusive)
+    /// `end_date` - End DateTime (exclusive)
     ///
     /// # Returns
     /// `Option<Vec<AccountModel>>`
@@ -109,7 +109,7 @@ impl AccountStatementDAO{
                 doc!{
                     "$match" => {
                         "statement_date" => {
-                            "$lte" => ed
+                            "$lt" => ed
                         }
                     }
                 }

@@ -8,7 +8,6 @@ use ::nickel::{QueryString, Request};
 use ::bson::oid::ObjectId;
 use ::chrono::{TimeZone};
 use ::chrono::offset::utc::UTC;
-use ::chrono::{Duration};
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
@@ -272,7 +271,7 @@ impl AccountStatementsController{
                 };
                 let end_date_string = &[&prev_year.to_string(), "-", &format!("{:02}", month), "-01 00:00:00"].concat();
                 let end_date = match UTC.datetime_from_str(end_date_string, "%F %T"){
-                    Ok(result) => result - Duration::nanoseconds(1),
+                    Ok(result) => result,
                     Err(e) => {
                         return Err(MMError::new("Could not parse end date", MMErrorKind::Controller));
                     }
@@ -287,7 +286,6 @@ impl AccountStatementsController{
                         } else {
                             Ok(statements[0].clone())// previous month's account statement
 
-                            //IF last months account statement does not exist, throw error
                             //Get last months transactions
                             //Generate account statement
                             //Save account statement
