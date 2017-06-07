@@ -34,7 +34,7 @@ impl AccountStatementModel{
     ///
     /// # Returns
     /// Option<i64> Timestamp
-    pub fn get_statement_date(&mut self) -> Option<DateTime<UTC>>{
+    pub fn get_statement_date(&self) -> Option<DateTime<UTC>>{
         self.statement_date
     }
 
@@ -45,7 +45,7 @@ impl AccountStatementModel{
     ///
     /// # Returns
     /// Option<f64> Ending Balance
-    pub fn get_ending_balance(&mut self) -> Option<f64>{
+    pub fn get_ending_balance(&self) -> Option<f64>{
         self.ending_balance
     }
 
@@ -86,11 +86,9 @@ impl AccountStatementModel{
         for transaction in &transactions {
             if let Some(t_type) = transaction.get_transaction_type(){
                 if let Some(t_amount) = transaction.get_amount(){
-                    println!("Type: {}; Amount: {}", t_type, t_amount);
                     match t_type.as_ref() {
                         "credit" => {
                             balance = balance + Utilities::currency::Dollars::new(t_amount);
-                            println!("Balance so far: {}", balance.to_dollars());
                         },
                         "debit" => {
                             balance = balance - Utilities::currency::Dollars::new(t_amount);
@@ -100,7 +98,6 @@ impl AccountStatementModel{
                 }
             }
         }
-        println!("Balance: {}", balance.to_dollars());
         balance.to_dollars()
     }
 }

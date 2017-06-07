@@ -15,6 +15,7 @@ use ::chrono::{DateTime};
 use ::chrono::offset::utc::UTC;
 // Common Utilities
 use ::common::utilities as Utilities;
+use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 // Models
 use ::models::account_statement_model::{AccountStatementModel};
 
@@ -44,7 +45,7 @@ impl AccountStatementDAO{
     /// Find All Account Statement
     ///
     /// # Arguments
-    /// `self`
+    /// `&self`
     /// `user_id` - ObjectId User ID
     /// `mm_id` - ObjectId Money Map ID
     /// `acc_id` - ObjectId Money Map ID
@@ -54,7 +55,7 @@ impl AccountStatementDAO{
     ///
     /// # Returns
     /// `Option<Vec<AccountModel>>`
-    pub fn find(self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId, sort: Vec<Utilities::url::SortParam>, start_date: Option<DateTime<UTC>>, end_date: Option<DateTime<UTC>>) -> Option<Vec<AccountStatementModel>>{
+    pub fn find(&self, user_id: ObjectId, mm_id: ObjectId, acc_id: ObjectId, sort: Vec<Utilities::url::SortParam>, start_date: Option<DateTime<UTC>>, end_date: Option<DateTime<UTC>>) -> Option<Vec<AccountStatementModel>>{
         let coll = self.db.collection(MONEY_MAP_COLLECTION);
         let mut accounts = Vec::new();
 
@@ -144,6 +145,52 @@ impl AccountStatementDAO{
         }
         Some(accounts)
     }// end find
+
+    /// Create Account Statement
+    ///
+    /// # Arguments
+    /// `&self`
+    /// `statement` - &AccountStatementModel The transaction
+    /// `mm_id` - ObjectId Money Map ID
+    /// `acc_id` - ObjectId Account ID
+    ///
+    /// # Returns
+    /// `MMResult<AccountStatementModel>`
+    pub fn create(&self, statement: &AccountStatementModel, mm_id: ObjectId, acc_id: ObjectId) -> MMResult<AccountStatementModel>{
+        let coll = self.db.collection(MONEY_MAP_COLLECTION);
+
+        let filter = doc! {
+            "_id" => ( mm_id ),
+            "accounts" => {
+                "$elemMatch" => {
+                    "_id" => (acc_id)
+                }
+            }
+        };
+        let update_doc = doc! {
+            "$addToSet" => {
+                "accounts.$.statements" => {
+                    "statement_date" => (statement.get_statement_date().unwrap()),
+                    "ending_balance" => (match statement.get_ending_balance(){Some(val) => val, None => 0.0})
+                }
+            }
+        };
+
+        // Insert document into `transactions` collection
+        match coll.update_one(filter.clone(), update_doc.clone(), None){
+            Ok(result) => {
+                if result.acknowledged && result.modified_count > 0 {
+                    Ok(statement.clone())
+                }else{
+                    Err(MMError::new("Unable to add statement to account.", MMErrorKind::DAO))
+                }
+            },
+            Err(e) => {
+                warn!("{}", e);
+                Err(MMError::new("Failed to insert account statement", MMErrorKind::DAO))
+            }
+        }
+    }// end create
 }
 
 /// Create AccountStatementModel from Document

@@ -207,7 +207,7 @@ pub fn get_routes() -> Router<ServerData> {
         JsonEncoder::encode(result)
     });
     router.get("/money_maps/:mm_id/accounts/:acc_id/statements/gen", middleware! { |request, mut response|
-        info!("API Endpoint: GET /money_maps/:mm_id/accounts/gen");
+        info!("API Endpoint: GET /money_maps/:mm_id/accounts/:acc_id/statements/gen");
         let sd: &ServerData = request.server_data();
         let mm_id = request.param("mm_id").unwrap().to_owned();
         let acc_id = request.param("acc_id").unwrap().to_owned();

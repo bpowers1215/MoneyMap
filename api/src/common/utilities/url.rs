@@ -6,7 +6,7 @@
 // External
 use ::regex::Regex;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SortParam{
     pub field: String,
     pub direction: i32

@@ -176,7 +176,7 @@ impl AccountStatementsController{
                         match ObjectId::with_string(&acc_id){
                             Ok(acc_obj_id) => {
 
-                                match self.generate_account_statement(user_obj_id, mm_obj_id, acc_obj_id, 2017, 3){
+                                match self.generate_account_statement(user_obj_id, mm_obj_id, acc_obj_id, 2017, 6){
                                     Ok(result) => {
                                         debug!("RESULT: {:?}", result);
                                         ApiResult::Success{
@@ -252,51 +252,106 @@ impl AccountStatementsController{
         // START Retrieve DAO ---------------------------------------------------------------------
         match self.dao_manager.get_account_statement_dao(){
             Ok(account_statement_dao) => {
-                // END Retrieve DAO ---------------------------------------------------------------
+                match self.dao_manager.get_transaction_dao(){
+                    Ok(transaction_dao) => {
+                        // END Retrieve DAO ---------------------------------------------------------------
 
-                // Get previous months account statement
-                // Determine first day of next month
-                let (prev_year, prev_month) = if month == 1 { (year - 1, 12) } else { (year, month - 1)};
-                let sort = vec![Utilities::url::SortParam{
-                    field: "statement_date".to_string(),
-                    direction: 1
-                }];
-                let start_date_string = &[&prev_year.to_string(), "-", &format!("{:02}", prev_month), "-01 00:00:00"].concat();
-                let start_date = match UTC.datetime_from_str(start_date_string, "%F %T"){
-                    Ok(result) => result,
-                    Err(e) => {
-                        error!("{}", e);
-                        return Err(MMError::new("Could not parse start date", MMErrorKind::Controller));
-                    }
-                };
-                let end_date_string = &[&prev_year.to_string(), "-", &format!("{:02}", month), "-01 00:00:00"].concat();
-                let end_date = match UTC.datetime_from_str(end_date_string, "%F %T"){
-                    Ok(result) => result,
-                    Err(e) => {
-                        return Err(MMError::new("Could not parse end date", MMErrorKind::Controller));
-                    }
-                };
+                        // Calculate date range for current statement query
+                        let (next_year, next_month) = if month == 12 { (year + 1, 1) } else { (year, month + 1)};
+                        let sort = vec![Utilities::url::SortParam{
+                            field: "statement_date".to_string(),
+                            direction: 1
+                        }];
+                        let start_date_string = &[&year.to_string(), "-", &format!("{:02}", month), "-01 00:00:00"].concat();
+                        let start_date = match UTC.datetime_from_str(start_date_string, "%F %T"){
+                            Ok(result) => result,
+                            Err(e) => {
+                                error!("{}", e);
+                                return Err(MMError::new("Could not parse start date", MMErrorKind::Controller));
+                            }
+                        };
+                        let end_date_string = &[&next_year.to_string(), "-", &format!("{:02}", next_month), "-01 00:00:00"].concat();
+                        let end_date = match UTC.datetime_from_str(end_date_string, "%F %T"){
+                            Ok(result) => result,
+                            Err(e) => {
+                                return Err(MMError::new("Could not parse end date", MMErrorKind::Controller));
+                            }
+                        };
 
-                match account_statement_dao.find(user_obj_id, mm_obj_id, acc_obj_id, sort, Some(start_date), Some(end_date)){
-                    Some(statements) => {
-                        if statements.len() == 0 {
-                            Err(MMError::new("No account statement found for previous month", MMErrorKind::Controller))
-                        } else if statements.len() > 1 {
-                            Err(MMError::new("Multiple account statements for previous month", MMErrorKind::Controller))
-                        } else {
-                            Ok(statements[0].clone())// previous month's account statement
+                        // Check if an account statement already exists for this month
+                        match account_statement_dao.find(user_obj_id.clone(), mm_obj_id.clone(), acc_obj_id.clone(), sort.clone(), Some(start_date), Some(end_date)){
+                            Some(current_month_statements) => {
+                                
+                                if current_month_statements.len() > 0 {
+                                    // Account statement already exists for this month
+                                    Err(MMError::new("Account statement already exists", MMErrorKind::Controller))
+                                } else {
+                                    // No account statements found for this month, continue with statement generation
 
-                            //Get last months transactions
-                            //Generate account statement
-                            //Save account statement
+                                    // Calculate Date range for previous statement query
+                                    let (prev_year, prev_month) = if month == 1 { (year - 1, 12) } else { (year, month - 1)};
+                                    let start_date_string = &[&prev_year.to_string(), "-", &format!("{:02}", prev_month), "-01 00:00:00"].concat();
+                                    let start_date = match UTC.datetime_from_str(start_date_string, "%F %T"){
+                                        Ok(result) => result,
+                                        Err(e) => {
+                                            error!("{}", e);
+                                            return Err(MMError::new("Could not parse start date", MMErrorKind::Controller));
+                                        }
+                                    };
+                                    let end_date_string = &[&year.to_string(), "-", &format!("{:02}", month), "-01 00:00:00"].concat();
+                                    let end_date = match UTC.datetime_from_str(end_date_string, "%F %T"){
+                                        Ok(result) => result,
+                                        Err(e) => {
+                                            return Err(MMError::new("Could not parse end date", MMErrorKind::Controller));
+                                        }
+                                    };
+                                    // Get previous months account statement
+                                    match account_statement_dao.find(user_obj_id.clone(), mm_obj_id.clone(), acc_obj_id.clone(), sort, Some(start_date), Some(end_date)){
+                                        Some(prev_month_statements) => {
+                                            if prev_month_statements.len() == 0 {
+                                                Err(MMError::new("No account statement found for previous month", MMErrorKind::Controller))
+                                            } else if prev_month_statements.len() > 1 {
+                                                Err(MMError::new("Multiple account statements for previous month", MMErrorKind::Controller))
+                                            } else {
+
+                                                //Get last months transactions
+                                                let transactions = transaction_dao.find(mm_obj_id.clone(), acc_obj_id.clone(), Some(start_date), Some(end_date));
+                                                debug!("{:?}", transactions);
+
+                                                let previous_balance = match prev_month_statements[0].get_ending_balance(){
+                                                    Some(bal) => bal,
+                                                    None => 0f64
+                                                };
+                                                let new_account_statement = AccountStatementModel::generate_account_statement(previous_balance, transactions);
+                                                //Generate account statement
+                                                //Save account statement
+                                                match account_statement_dao.create(&new_account_statement, mm_obj_id.clone(), acc_obj_id.clone()) {
+                                                    Ok(result) => Ok(new_account_statement),
+                                                    Err(e) => {
+                                                        error!("{}",e.get_message().to_string());
+                                                        Err(MMError::new("Error saving account statement", MMErrorKind::Controller))
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        None => {
+                                            Err(MMError::new("Error retrieving previous month's account statement", MMErrorKind::Controller))
+                                        }
+                                    }
+                                }
+                            },
+                            None => {
+                                Err(MMError::new("Error retrieving current month's account statements", MMErrorKind::Controller))
+                            }
                         }
+
+                        // START Retrieve DAO Error Handling ----------------------------------------------
                     },
-                    None => {
-                        Err(MMError::new("Error retrieving account statements", MMErrorKind::Controller))
+                    Err(e) => {
+                        error!("{}",e.get_message().to_string());
+                        Err(MMError::new("Unable to interact with database", MMErrorKind::Controller))
                     }
                 }
-
-                // START Retrieve DAO Error Handling ----------------------------------------------
             },
             Err(e) => {
                 error!("{}",e.get_message().to_string());

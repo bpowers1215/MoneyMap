@@ -12,7 +12,7 @@ use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
 
 /// Transaction
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TransactionModel {
     pub id: Option<ObjectId>,
     pub money_map_id: Option<ObjectId>,
