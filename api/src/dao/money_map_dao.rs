@@ -13,10 +13,14 @@ use ::bson::oid::ObjectId;
 use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
+// DAO
+use ::dao::account_dao as AccountDataAccess;
 // Models
 use ::models::money_map_model::{MoneyMapModel};
 use ::models::money_map_user_model::{MoneyMapUserModel};
 use ::models::user_model::{OutUserModel};
+use ::models::account_model::{AccountModel, OutAccountModel};
+
 
 // Constants
 static MONEY_MAP_COLLECTION: &'static str = "money_maps";
@@ -54,11 +58,44 @@ impl MoneyMapDAO{
         let mut money_maps = Vec::new();
 
         let mut find_options = FindOptions::new();
-        find_options.projection = Some(doc!{
-            "deleted" => 0//exclude password
-        });
+        let pipeline = vec![
+            doc!{
+                // Filter Money Map
+                "$match" => (match filter {
+                    Some(f) => f,
+                    None => {
+                        doc!{
+                            "deleted" => {
+                                "$ne" => true
+                            }
+                        }
+                    }
+                })
+            },
+            doc!{
+                "$unwind" => "$accounts"
+            },
+            doc!{
+                // Exclude deleted accounts
+                "$match" => {
+                    "accounts.deleted" => {
+                        "$ne" => true
+                    }
+                }
+            },
+            doc!{
+                "$group" => {
+                    "_id" => "$_id",
+                    "name" => {"$first" => "$name"},
+                    "users" => {"$first" => "$users"},
+                    "accounts" => {
+                        "$push" => "$accounts"
+                    }
+                }
+            }
+        ];
 
-        match coll.find(filter, Some(find_options)){
+        match coll.aggregate(pipeline, None){
             Ok(cursor) => {
                 for result in cursor {
                     if let Ok(item) = result {
@@ -279,6 +316,20 @@ fn document_to_model(doc: Document) -> MoneyMapModel{
                     }
                 }
                 Some(user_mods)
+            },
+            _ => None
+        },
+        accounts: match doc.get("accounts"){
+            Some(&Bson::Array(ref accounts)) => {
+                let mut account_mods = Vec::new();
+                for account in accounts{
+                    if let &Bson::Document(ref account_bson) = account{
+
+                        let temp_account = AccountDataAccess::document_to_model(account_bson);
+                        account_mods.push(OutAccountModel::new(temp_account));
+                    }
+                }
+                Some(account_mods)
             },
             _ => None
         }

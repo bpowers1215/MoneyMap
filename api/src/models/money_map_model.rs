@@ -10,13 +10,15 @@ use ::common::validation::validators as Validators;
 use ::common::validation::validation_result::{ValidationResult};
 // Models
 use ::models::money_map_user_model::{MoneyMapUserModel};
+use ::models::account_model::{OutAccountModel};
 
 /// Money Map
 #[derive(RustcDecodable, RustcEncodable)]
 pub struct MoneyMapModel {
     pub id: Option<ObjectId>,
     pub name: Option<String>,
-    pub users: Option<Vec<MoneyMapUserModel>>
+    pub users: Option<Vec<MoneyMapUserModel>>,
+    pub accounts: Option<Vec<OutAccountModel>>
 }
 
 // Money Map Model Methods
@@ -63,7 +65,7 @@ impl MoneyMapModel{
         self.users.clone()
     }
 
-    /// Get Users
+    /// Set Users
     ///
     /// # Arguments
     /// &self
@@ -72,6 +74,28 @@ impl MoneyMapModel{
     /// 'Option<Vec<MoneyMapUserModel>>' - name
     pub fn set_users(&mut self, users: Option<Vec<MoneyMapUserModel>>){
         self.users = users;
+    }
+
+    /// Get Accounts
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<Vec<OutAccountModel>>' - name
+    pub fn get_accounts(&self) -> Option<Vec<OutAccountModel>>{
+        self.accounts.clone()
+    }
+
+    /// Set Accounts
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<Vec<OutAccountModel>>' - name
+    pub fn set_accounts(&mut self, accounts: Option<Vec<OutAccountModel>>){
+        self.accounts = accounts;
     }
 
     /// Validate Money Map

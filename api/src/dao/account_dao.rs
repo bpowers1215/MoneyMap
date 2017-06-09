@@ -332,7 +332,7 @@ impl AccountDAO{
 ///
 /// # Returns
 /// `AccountModel`
-fn document_to_model(doc: &Document) -> AccountModel{
+pub fn document_to_model(doc: &Document) -> AccountModel{
     AccountModel{
         id: match doc.get("_id"){
             Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
