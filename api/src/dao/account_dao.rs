@@ -7,12 +7,14 @@
 extern crate mongodb;
 
 // Import Modules
-// Common Utilities
+// External
 use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
 use ::chrono::{Local};
+use ::chrono::offset::utc::UTC;
 use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
+// Common Utilities
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 // Models
 use ::models::account_model::{AccountModel};
@@ -166,13 +168,18 @@ impl AccountDAO{
         // Build `$push` document to update money map and add account
         let id = ObjectId::new().unwrap();
         let timestamp = Local::now().timestamp();
+        let initial_statement = doc!{
+            "statement_date" => (Bson::UtcDatetime(UTC::now())),
+            "ending_balance" => 0.0
+        };
         let update_doc = doc! {
             "$push" => {
                 "accounts" => {
                     "_id" => (Bson::ObjectId(id.clone())),
                     "name" => (match account.get_name(){Some(val) => val, None => "".to_string()}),
                     "account_type" => (match account.get_account_type(){Some(val) => val, None => "".to_string()}),
-                    "created" => (Bson::TimeStamp(timestamp.clone()))
+                    "created" => (Bson::TimeStamp(timestamp.clone())),
+                    "statements" => (Bson::Array(vec![ Bson::Document(initial_statement) ]))
                 }
             }
         };
