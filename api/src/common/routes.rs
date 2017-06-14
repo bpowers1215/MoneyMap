@@ -216,6 +216,14 @@ pub fn get_routes() -> Router<ServerData> {
         response.set(MediaType::Json);
         JsonEncoder::encode(result)
     });
+    router.get("/money_maps/:mm_id/accounts/:acc_id/statements/get_money_maps", middleware! { |request, mut response|
+        info!("API Endpoint: GET /money_maps/:mm_id/accounts/:acc_id/statements/get_money_maps");
+        let sd: &ServerData = request.server_data();
+        let result = &sd.controller_manager.account_statements_controller.test_get_all_money_maps(request);
+
+        response.set(MediaType::Json);
+        JsonEncoder::encode(result)
+    });
 
     // Transactions
     router.get("/money_maps/:mm_id/accounts/:acc_id/transactions", middleware! { |request, mut response|

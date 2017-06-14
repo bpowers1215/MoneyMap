@@ -6,7 +6,7 @@
 // External
 use ::nickel::{QueryString, Request};
 use ::bson::oid::ObjectId;
-use ::chrono::{TimeZone};
+use ::chrono::{Datelike, TimeZone};
 use ::chrono::offset::utc::UTC;
 // Utilities
 use ::common::api_result::ApiResult;
@@ -210,6 +210,44 @@ impl AccountStatementsController{
 
     }// end test_create_account_statement
 
+    /// Testing: Get all money maps
+    ///
+    /// # Arguments
+    /// &self
+    /// req - nickel::Request
+    ///
+    /// # Returns
+    /// `ApiResult<Vec<MoneyMapModel>>` - ApiResult including a vector of money maps
+    pub fn test_get_all_money_maps(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<MoneyMapModel>, ()>{
+        // START Retrieve DAO ---------------------------------------------------------------------
+         match self.dao_manager.get_money_map_dao(){
+            Ok(money_map_dao) => {
+
+                self.generate_statements();
+
+                // Get all Active Money Maps/Accounts
+                let money_maps = money_map_dao.find(None);
+                ApiResult::Success{
+                    result: money_maps
+                }
+
+                // For each active money map
+                /*for money_map in money_maps {
+                    // For each active account
+                    {
+                        // Generate Account statement
+                    }
+                }*/
+
+            // START Retrieve DAO Error Handling --------------------------------------------------
+            },
+            Err(e) => {
+                ApiResult::Failure{msg:"Failed to get money maps"}
+            }
+        }
+        // END Retrieve DAO Error Handling --------------------------------------------------------
+    }// end test_get_all_money_maps
+
 
     /// Generate Account Statements for all active accounts
     ///
@@ -218,21 +256,52 @@ impl AccountStatementsController{
     pub fn generate_statements(&self){
         debug!("generate_statements");
 
-        //For each active money map
-        {
-            //For each active account
-            {
-                //Get the latest statement
-                //IF last months statement has not yet been created:
-                {
-                    //Get last months transactions
-                    //Calculate last months ending account balance
-                        // Last Month's ending bal = prev month's ending bal + (total last months transactions)
+         // START Retrieve DAO ---------------------------------------------------------------------
+         match self.dao_manager.get_money_map_dao(){
+            Ok(money_map_dao) => {
 
-                    //Create account statement for last month from calculated ending balance
+                // Get all Active Money Maps/Accounts
+                let money_maps = money_map_dao.find(None);
+
+                // For each active money map
+                for money_map in money_maps {
+                    
+                    // Get money map ID
+                    if let Some(money_map_id) = money_map.get_id(){
+                        // Get a money map user
+                        if let Some(users) = money_map.get_users(){
+                            if users.len() > 0 {
+                                if let Some(user) = users[0].get_user(){
+                                    if let Some(user_id) = user.get_id(){
+
+                                        // For each active account
+                                        if let Some(accounts) = money_map.get_accounts(){
+                                            for account in accounts {
+                                                
+                                                // Get Account ID
+                                                if let Some(account_id) = account.get_id(){
+                                                    let now = UTC::now();
+                                                    // Generate Account statement
+                                                    self.generate_account_statement(user_id.clone(), money_map_id.clone(), account_id.clone(), now.year(), now.month());
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    }
                 }
+
+            // START Retrieve DAO Error Handling --------------------------------------------------
+            },
+            Err(e) => {
+                error!("{}",e.get_message().to_string());
             }
         }
+        // END Retrieve DAO Error Handling --------------------------------------------------------
     }
 
 
@@ -246,7 +315,7 @@ impl AccountStatementsController{
     /// acc_obj_id - ObjectId
     /// year - f64
     /// month - f32
-    fn generate_account_statement(&self, user_obj_id: ObjectId, mm_obj_id: ObjectId, acc_obj_id: ObjectId, year: i32, month: i32) -> MMResult<AccountStatementModel>{
+    fn generate_account_statement(&self, user_obj_id: ObjectId, mm_obj_id: ObjectId, acc_obj_id: ObjectId, year: i32, month: u32) -> MMResult<AccountStatementModel>{
         debug!("generate_account_statement");
 
         // START Retrieve DAO ---------------------------------------------------------------------

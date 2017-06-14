@@ -162,4 +162,26 @@ impl OutAccountModel{
             }
         }
     }
+
+    /// Get ID
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<ObjectId>' - id
+    pub fn get_id(&self) -> Option<ObjectId>{
+        self.id.clone()
+    }
+
+    /// Get Name
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// 'Option<String>' - name
+    pub fn get_name(&self) -> Option<String>{
+        self.name.clone()
+    }
 }
