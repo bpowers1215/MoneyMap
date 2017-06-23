@@ -254,7 +254,6 @@ impl AccountStatementsController{
     /// # Arguments
     /// &self
     pub fn generate_statements(&self){
-        debug!("generate_statements");
 
          // START Retrieve DAO ---------------------------------------------------------------------
          match self.dao_manager.get_money_map_dao(){
@@ -316,7 +315,6 @@ impl AccountStatementsController{
     /// year - f64
     /// month - f32
     fn generate_account_statement(&self, user_obj_id: ObjectId, mm_obj_id: ObjectId, acc_obj_id: ObjectId, year: i32, month: u32) -> MMResult<AccountStatementModel>{
-        debug!("generate_account_statement");
 
         // START Retrieve DAO ---------------------------------------------------------------------
         match self.dao_manager.get_account_statement_dao(){

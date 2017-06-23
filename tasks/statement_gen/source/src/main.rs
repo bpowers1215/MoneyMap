@@ -10,9 +10,9 @@ extern crate log4rs;
 // Common Utilities
 use money_map::common::database::DB;
 use money_map::common::config::Config;
-//DAO
+// DAO
 use money_map::dao::dao_manager::{DAOManager};
-//Controllers
+// Controllers
 use money_map::controllers::controller_manager::ControllerManager;
 use money_map::controllers::test_controller::TestController;
 use money_map::controllers::accounts_controller::AccountsController;
@@ -23,14 +23,14 @@ use money_map::controllers::transactions_controller::TransactionsController;
 use money_map::controllers::users_controller::UsersController;
 
 fn main() {
-	//Setup logging
+	// Setup logging
 	log4rs::init_file("config/log.toml", Default::default()).unwrap();
-	info!("Executing Statement Gen Task");
+	info!("Executing Statement Generation Task...");
 
-	//Load Configuration
+	// Load Configuration
 	let configuration = Config::new();
 
-	//Initialize Database Connection
+	// Initialize Database Connection
 	let db = match DB::new(configuration.clone()){
 		Ok(db) => db,
 		Err(e) => {
@@ -39,10 +39,10 @@ fn main() {
 		}
 	};
 
-	//Initialize DAO Manager
+	// Initialize DAO Manager
 	let dao_manager = DAOManager::new(db);
 
-	//Initialize Controllers
+	// Initialize Controllers
 	let controller_manager = ControllerManager{
 		test_controller: TestController::new(dao_manager.clone()),
 		accounts_controller: AccountsController::new(dao_manager.clone(), configuration.clone()),
@@ -53,5 +53,6 @@ fn main() {
 		users_controller: UsersController::new(dao_manager.clone(), configuration.clone())
 	};
 
+	// Generate Account Statements
 	controller_manager.account_statements_controller.generate_statements();
 }
