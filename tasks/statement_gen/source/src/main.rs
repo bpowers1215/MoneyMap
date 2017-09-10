@@ -5,8 +5,12 @@ extern crate money_map;
 #[macro_use]
 extern crate log;
 extern crate log4rs;
+extern crate schedule;
 
 // Import
+// External
+use schedule::Agenda;
+use std::time::Duration;
 // Common Utilities
 use money_map::common::database::DB;
 use money_map::common::config::Config;
@@ -53,6 +57,19 @@ fn main() {
 		users_controller: UsersController::new(dao_manager.clone(), configuration.clone())
 	};
 
-	// Generate Account Statements
-	controller_manager.account_statements_controller.generate_statements();
+    // Create new, empty agenda
+    let mut scheduled_jobs = schedule::Agenda::new();
+
+    scheduled_jobs.add(|| {
+		// Generate Account Statements
+		controller_manager.account_statements_controller.generate_statements();
+    }).schedule("*/2 * * * * *").unwrap();
+
+    loop {
+        // Execute pending jobs
+        scheduled_jobs.run_pending();
+
+        // Sleep for 500ms
+        std::thread::sleep(std::time::Duration::from_millis(1000));
+    }
 }

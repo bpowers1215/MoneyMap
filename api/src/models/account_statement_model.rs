@@ -5,7 +5,7 @@
 // Import Modules
 // External
 use ::chrono::{DateTime, Datelike};
-use ::chrono::offset::utc::UTC;
+use ::chrono::Utc as UTC;
 // Utilities
 use ::common::utilities as Utilities;
 // Models

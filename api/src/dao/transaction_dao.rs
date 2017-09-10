@@ -9,7 +9,7 @@ extern crate mongodb;
 // Import Modules
 // External
 use ::chrono::{DateTime};
-use ::chrono::offset::utc::UTC;
+use ::chrono::Utc as UTC;
 // Common Utilities
 use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
@@ -145,14 +145,13 @@ impl TransactionDAO{
     ///
     /// # Arguments
     /// `self`
-    /// `pub_transaction` - &PubTransactionModel The transaction
+    /// `transaction` - &TransactionModel The transaction
     ///
     /// # Returns
     /// `MMResult<TransactionModel>`
-    pub fn create(self, pub_transaction: &PubTransactionModel) -> MMResult<TransactionModel>{
+    pub fn create(self, mut transaction: TransactionModel) -> MMResult<TransactionModel>{
         let coll = self.db.collection(TRANSACTION_COLLECTION);
 
-        let mut transaction = TransactionModel::new(pub_transaction);
         transaction.set_status(Some(String::from("active")));
         transaction.set_datetime(Some(UTC::now()));
         let mut doc = doc!{
@@ -200,41 +199,41 @@ impl TransactionDAO{
     ///
     /// # Arguments
     /// `self`
-    /// `pub_transaction` - PubTransactionModel
+    /// `transaction` - TransactionModel
     ///
     /// # Returns
     /// `MMResult<TransactionModel>` The updated transaction if successful, None otherwise
-    pub fn update(&self, pub_transaction: &PubTransactionModel) -> MMResult<TransactionModel>{
+    pub fn update(&self, transaction: &TransactionModel) -> MMResult<TransactionModel>{
         let coll = self.db.collection(TRANSACTION_COLLECTION);
 
         let filter = doc! {
-            "_id" => (pub_transaction.get_id().unwrap())
+            "_id" => (transaction.get_id().unwrap())
         };
 
         // Build `$set` document to update document
         let mut set_doc = doc!{};
         let mut update = false;
-        if let Some(payee) = pub_transaction.get_payee(){
+        if let Some(payee) = transaction.get_payee(){
             update = true;
             set_doc.insert_bson("payee".to_string(), Bson::String(payee));
         }
-        if let Some(description) = pub_transaction.get_description(){
+        if let Some(description) = transaction.get_description(){
             update = true;
             set_doc.insert_bson("description".to_string(), Bson::String(description));
         }
-        if let Some(amount) = pub_transaction.get_amount(){
+        if let Some(amount) = transaction.get_amount(){
             update = true;
             set_doc.insert_bson("amount".to_string(), Bson::FloatingPoint(amount));
         }
-        if let Some(transaction_type) = pub_transaction.get_transaction_type(){
+        if let Some(transaction_type) = transaction.get_transaction_type(){
             update = true;
             set_doc.insert_bson("transaction_type".to_string(), Bson::String(transaction_type));
         }
-        if let Some(category_id) = pub_transaction.get_category_id(){
+        if let Some(category_id) = transaction.get_category_id(){
             update = true;
             set_doc.insert_bson("category_id".to_string(), Bson::ObjectId(category_id));
         }
-        if let Some(status) = pub_transaction.get_status(){
+        if let Some(status) = transaction.get_status(){
             update = true;
             set_doc.insert_bson("status".to_string(), Bson::String(status));
         }

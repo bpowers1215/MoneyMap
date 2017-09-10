@@ -31,33 +31,35 @@ pub fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<
         // The middleware should not be used for OPTIONS, so continue
         response.next_middleware()
     } else {
-        // We do not want to apply the middleware to the login route
-        if request.origin.uri.to_string() == "/account/login".to_string() {
-            response.next_middleware()
-        } else {
-
-            let token = match get_jwt_from_header(request){
-                Ok(jwt_token) => jwt_token,
-                Err(_) => {
-                    return response.error(Forbidden, "Access denied. Unable to parse token.")
-                }
-            };
-
-            if let Some(ref auth_secret) = server_data.config.auth.auth_secret{
-                let secret = auth_secret.as_bytes();
-
-                match validate_token(token, &secret, server_data.config.clone()){
-                    Ok(_) => {
-                        return response.next_middleware();
-                    },
-                    Err(e) => {
-                        return response.error(Forbidden, e.get_message());
+        match request.origin.uri.to_string().as_ref(){
+            // Public routes don't require authentication
+            "/account/login" | "/account" => {
+                response.next_middleware()
+            },
+            _ => {
+                let token = match get_jwt_from_header(request){
+                    Ok(jwt_token) => jwt_token,
+                    Err(_) => {
+                        return response.error(Forbidden, "Access denied. Unable to parse token.")
                     }
+                };
+
+                if let Some(ref auth_secret) = server_data.config.auth.auth_secret{
+                    let secret = auth_secret.as_bytes();
+
+                    match validate_token(token, &secret, server_data.config.clone()){
+                        Ok(_) => {
+                            return response.next_middleware();
+                        },
+                        Err(e) => {
+                            return response.error(Forbidden, e.get_message());
+                        }
+                    }
+                }else{
+                    error!("Authentication failure. Unable to verify JWT Token. No auth_secret key.");
                 }
-            }else{
-                error!("Authentication failure. Unable to verify JWT Token. No auth_secret key.");
+                response.error(Forbidden, "Access denied. Invalid token format.")
             }
-            response.error(Forbidden, "Access denied. Invalid token format.")
         }
     }
 }// end authenticator

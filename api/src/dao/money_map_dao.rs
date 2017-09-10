@@ -19,7 +19,7 @@ use ::dao::account_dao as AccountDataAccess;
 use ::models::money_map_model::{MoneyMapModel};
 use ::models::money_map_user_model::{MoneyMapUserModel};
 use ::models::user_model::{OutUserModel};
-use ::models::account_model::{AccountModel, OutAccountModel};
+use ::models::account_model::{AccountModel, PubAccountModel};
 
 
 // Constants
@@ -295,7 +295,7 @@ fn document_to_model(doc: Document) -> MoneyMapModel{
                         match mm_user_bson.get("user_id"){
                             Some(&Bson::ObjectId(ref user_id)) => {
                                 let user = OutUserModel{
-                                    id: Some(user_id.clone()),
+                                    id: Some(user_id.clone().to_hex()),
                                     first_name:None,
                                     last_name:None,
                                     email:None
@@ -326,7 +326,7 @@ fn document_to_model(doc: Document) -> MoneyMapModel{
                     if let &Bson::Document(ref account_bson) = account{
 
                         let temp_account = AccountDataAccess::document_to_model(account_bson);
-                        account_mods.push(OutAccountModel::new(temp_account));
+                        account_mods.push(PubAccountModel::new(temp_account));
                     }
                 }
                 Some(account_mods)

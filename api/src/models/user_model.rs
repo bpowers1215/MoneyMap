@@ -17,7 +17,6 @@ use ::common::validation::validation_result::{ValidationResult};
 use ::dao::user_dao::UserDAO;
 
 /// User
-#[derive(RustcDecodable, RustcEncodable)]
 pub struct UserModel {
     pub id: Option<ObjectId>,
     pub first_name: Option<String>,
@@ -28,7 +27,7 @@ pub struct UserModel {
 
 #[derive(RustcDecodable, RustcEncodable)]
 pub struct InUserModel {
-    pub id: Option<ObjectId>,
+    pub id: Option<String>,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub email: Option<String>,
@@ -38,7 +37,7 @@ pub struct InUserModel {
 
 #[derive(Clone, RustcDecodable, RustcEncodable)]
 pub struct OutUserModel {
-    pub id: Option<ObjectId>,
+    pub id: Option<String>,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub email: Option<String>
@@ -46,7 +45,7 @@ pub struct OutUserModel {
 
 #[derive(RustcDecodable, RustcEncodable)]
 pub struct LoginUserModel {
-    pub id: Option<ObjectId>,
+    pub id: Option<String>,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub email: Option<String>,
@@ -65,7 +64,10 @@ impl UserModel{
     /// UserModel - The user
     pub fn new(in_user: InUserModel) -> UserModel{
         UserModel{
-            id: in_user.id,
+            id: match in_user.id { 
+                Some(id) => Some(ObjectId::with_string(&id).unwrap()),
+                None => None
+            },
             first_name: in_user.first_name,
             last_name: in_user.last_name,
             email: in_user.email,
@@ -313,7 +315,10 @@ impl OutUserModel{
     /// OutUserModel - The user
     pub fn new(user: UserModel) -> OutUserModel{
         OutUserModel{
-            id:user.id,
+            id: match user.id { 
+                Some(id) => Some(id.to_hex()),
+                None => None
+            },
             first_name:user.first_name,
             last_name:user.last_name,
             email:user.email
@@ -329,7 +334,10 @@ impl OutUserModel{
     /// OutUserModel - The user
     pub fn from_in_user(user: InUserModel) -> OutUserModel{
         OutUserModel{
-            id:user.id,
+            id: match user.id { 
+                Some(id) => Some(id),
+                None => None
+            },
             first_name:user.first_name,
             last_name:user.last_name,
             email:user.email
@@ -342,8 +350,8 @@ impl OutUserModel{
     /// &self
     ///
     /// # Returns
-    /// 'Option<ObjectId>' - id
-    pub fn get_id(&self) -> Option<ObjectId>{
+    /// 'Option<String>' - id
+    pub fn get_id(&self) -> Option<String>{
         self.id.clone()
     }
 
@@ -393,7 +401,10 @@ impl LoginUserModel{
     /// LoginUserModel - The user
     pub fn new(user: UserModel, token: String) -> LoginUserModel{
         LoginUserModel{
-            id:user.id,
+            id: match user.id { 
+                Some(id) => Some(id.to_hex()),
+                None => None
+            },
             first_name:user.first_name,
             last_name:user.last_name,
             email:user.email,

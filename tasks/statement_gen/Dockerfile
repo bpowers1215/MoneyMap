@@ -22,4 +22,5 @@ RUN chmod 0744 /bin/start-task.sh
 WORKDIR /var/lib/money_map/statement_gen
 
 # Run the command on container startup
-CMD cron && tail -f /var/log/cron.log
+#CMD cron && tail -f /var/log/cron.log
+CMD ["cargo", "run"]

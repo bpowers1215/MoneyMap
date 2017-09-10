@@ -6,8 +6,9 @@
 // External
 use ::nickel::{QueryString, Request};
 use ::bson::oid::ObjectId;
+use ::std::error::Error;
 use ::chrono::{Datelike, TimeZone};
-use ::chrono::offset::utc::UTC;
+use ::chrono::Utc as UTC;
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
@@ -17,7 +18,7 @@ use ::common::session as Session;
 use ::common::utilities as Utilities;
 // Models
 use ::models::account_model::{AccountModel};
-use ::models::money_map_model::{MoneyMapModel};
+use ::models::money_map_model::{MoneyMapModel, PubMoneyMapModel};
 use ::models::account_statement_model::{AccountStatementModel, OutAccountStatementModel};
 use ::models::transaction_model::{TransactionModel};
 // DAO
@@ -218,7 +219,7 @@ impl AccountStatementsController{
     ///
     /// # Returns
     /// `ApiResult<Vec<MoneyMapModel>>` - ApiResult including a vector of money maps
-    pub fn test_get_all_money_maps(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<MoneyMapModel>, ()>{
+    pub fn test_get_all_money_maps(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<PubMoneyMapModel>, ()>{
         // START Retrieve DAO ---------------------------------------------------------------------
          match self.dao_manager.get_money_map_dao(){
             Ok(money_map_dao) => {
@@ -227,8 +228,15 @@ impl AccountStatementsController{
 
                 // Get all Active Money Maps/Accounts
                 let money_maps = money_map_dao.find(None);
+                let mut pub_money_maps = Vec::new();
+
+                // Convert to public money maps
+                for i in 0..money_maps.len(){
+                    pub_money_maps.push(PubMoneyMapModel::new(money_maps[i].clone()))
+                }
+
                 ApiResult::Success{
-                    result: money_maps
+                    result: pub_money_maps
                 }
 
                 // For each active money map
@@ -281,7 +289,7 @@ impl AccountStatementsController{
                                                 if let Some(account_id) = account.get_id(){
                                                     let now = UTC::now();
                                                     // Generate Account statement
-                                                    self.generate_account_statement(user_id.clone(), money_map_id.clone(), account_id.clone(), now.year(), now.month());
+                                                    self.generate_account_statement( ObjectId::with_string(&user_id.clone()).unwrap(),  money_map_id.clone(),  ObjectId::with_string(&account_id.clone()).unwrap(), now.year(), now.month());
                                                 }
 
                                             }

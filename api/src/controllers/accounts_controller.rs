@@ -12,7 +12,7 @@ use ::common::config::Config;
 use ::common::data_access::ServerData;
 use ::common::session as Session;
 // Models
-use ::models::account_model::{AccountModel, OutAccountModel};
+use ::models::account_model::{AccountModel, PubAccountModel};
 // DAO
 use ::dao::dao_manager::DAOManager;
 
@@ -39,8 +39,8 @@ impl AccountsController{
     /// mm_id - String Money Map ID
     ///
     /// # Returns
-    /// `ApiResult<OutAccountModel, AccountModel>` - ApiResult including the created account
-    pub fn create(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<OutAccountModel, AccountModel>{
+    /// `ApiResult<PubAccountModel, PubAccountModel>` - ApiResult including the created account
+    pub fn create(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<PubAccountModel, PubAccountModel>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -73,8 +73,9 @@ impl AccountsController{
                                             Some(_) => {
 
                                                 // Parse body to AccountModel
-                                                match req.json_as::<AccountModel>(){
-                                                    Ok(account) => {
+                                                match req.json_as::<PubAccountModel>(){
+                                                    Ok(pub_account) => {
+                                                        let account = AccountModel::new(pub_account.clone());
 
                                                         // Validate
                                                         let validation_result = account.validate_new();
@@ -83,7 +84,7 @@ impl AccountsController{
                                                             match account_dao.create(mm_obj_id, &account){
                                                                 Ok(new_account) => {
 
-                                                                    ApiResult::Success{result:OutAccountModel::new(new_account)}
+                                                                    ApiResult::Success{result:PubAccountModel::new(new_account)}
                                                                 },
                                                                 Err(e) => {
                                                                     error!("{}",e);
@@ -91,7 +92,7 @@ impl AccountsController{
                                                                 }
                                                             }
                                                         }else{
-                                                            ApiResult::Invalid{validation:validation_result, request:account}
+                                                            ApiResult::Invalid{validation:validation_result, request:pub_account}
                                                         }
 
                                                     },
@@ -143,7 +144,7 @@ impl AccountsController{
     ///
     /// # Returns
     /// `ApiResult<Vec<MoneyMapModel>>` - ApiResult including a vector of money maps
-    pub fn find(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<Vec<OutAccountModel>, ()>{
+    pub fn find(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<Vec<PubAccountModel>, ()>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -167,7 +168,7 @@ impl AccountsController{
                                 match account_dao.find(user_obj_id, mm_obj_id){
                                     Some(accounts) => {
                                         ApiResult::Success{
-                                            result:accounts.into_iter().map(|x| OutAccountModel::new(x)).collect()
+                                            result:accounts.into_iter().map(|x| PubAccountModel::new(x)).collect()
                                         }
                                     },
                                     None => {
@@ -204,8 +205,8 @@ impl AccountsController{
     /// mm_id - String Money Map ID
     ///
     /// # Returns
-    /// `ApiResult<AccountModel, AccountModel>` - ApiResult including the modified Account
-    pub fn modify(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<OutAccountModel, AccountModel>{
+    /// `ApiResult<PubAccountModel, PubAccountModel>` - ApiResult including the modified Account
+    pub fn modify(&self, req: &mut Request<ServerData>, mm_id: String) -> ApiResult<PubAccountModel, PubAccountModel>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -238,9 +239,10 @@ impl AccountsController{
                                         match mm_dao.find_one(Some(filter), None){
                                             Some(_) => {
 
-                                                // Parse body to AccountModel
-                                                match req.json_as::<AccountModel>(){
-                                                    Ok(account) => {
+                                                // Parse body to PubAccountModel
+                                                match req.json_as::<PubAccountModel>(){
+                                                    Ok(pub_account) => {
+                                                        let account = AccountModel::new(pub_account.clone());
 
                                                         //Validate
                                                         let validation_result = account.validate_existing();
@@ -248,14 +250,14 @@ impl AccountsController{
                                                             //Save the account
                                                             match account_dao.update(mm_obj_id, &account){
                                                                 Ok(updated_account) => {
-                                                                    ApiResult::Success{result:OutAccountModel::new(updated_account)}
+                                                                    ApiResult::Success{result:PubAccountModel::new(updated_account)}
                                                                 },
                                                                 Err(e) => {
                                                                     ApiResult::Failure{msg:e.get_message()}
                                                                 }
                                                             }
                                                         }else{
-                                                            ApiResult::Invalid{validation:validation_result, request:account}
+                                                            ApiResult::Invalid{validation:validation_result, request:pub_account}
                                                         }
 
                                                     },

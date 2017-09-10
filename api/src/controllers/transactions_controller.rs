@@ -6,14 +6,15 @@
 // External
 use ::nickel::{JsonBody, QueryString, Request};
 use ::bson::oid::ObjectId;
-use ::chrono::{Datelike, Timelike, TimeZone, UTC};
+use ::chrono::{Datelike, Timelike, TimeZone};
+use ::chrono::Utc as UTC;
 // Utilities
 use ::common::api_result::ApiResult;
 use ::common::config::Config;
 use ::common::data_access::ServerData;
 use ::common::session as Session;
 // Models
-use ::models::transaction_model::{PubTransactionModel};
+use ::models::transaction_model::{TransactionModel, PubTransactionModel};
 // DAO
 use ::dao::dao_manager::DAOManager;
 
@@ -199,14 +200,15 @@ impl TransactionsController{
                                                 // This only occurs when the decimal is sent in the request body json as a number, not as a string.
                                                 // Temporary workaround: require transaction amount to be passed as a string
                                                 Ok(mut pub_transaction) => {
-                                                    pub_transaction.set_money_map_id(Some(mm_obj_id));
-                                                    pub_transaction.set_account_id(Some(acc_obj_id));
+                                                    let mut transaction = TransactionModel::new(&pub_transaction);
+                                                    transaction.set_money_map_id(Some(mm_obj_id));
+                                                    transaction.set_account_id(Some(acc_obj_id));
 
                                                     // Validate
-                                                    let validation_result = pub_transaction.validate();
+                                                    let validation_result = transaction.validate();
                                                     if validation_result.is_valid(){
                                                         // Save Transaction
-                                                        match transaction_dao.create(&pub_transaction){
+                                                        match transaction_dao.create(transaction){
                                                             Ok(new_transaction) => {
                                                                 ApiResult::Success{result:PubTransactionModel::new(new_transaction)}
                                                             },
@@ -298,8 +300,8 @@ impl TransactionsController{
 
                                             // Parse body to PubTransactionModel
                                             match req.json_as::<PubTransactionModel>(){
-                                                Ok(transaction) => {
-
+                                                Ok(pub_transaction) => {
+                                                    let mut transaction = TransactionModel::new(&pub_transaction);
                                                     //Validate
                                                     let validation_result = transaction.validate_existing();
                                                     if validation_result.is_valid(){
@@ -314,7 +316,7 @@ impl TransactionsController{
                                                         }
 
                                                     }else{
-                                                        ApiResult::Invalid{validation:validation_result, request:transaction}
+                                                        ApiResult::Invalid{validation:validation_result, request:pub_transaction}
                                                     }
                                                 },
                                                 Err(e) => {

@@ -12,7 +12,7 @@ use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
 use ::mongodb::db::ThreadedDatabase;
 use ::chrono::{DateTime};
-use ::chrono::offset::utc::UTC;
+use ::chrono::Utc as UTC;
 // Common Utilities
 use ::common::utilities as Utilities;
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};

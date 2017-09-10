@@ -16,7 +16,7 @@ use ::common::session as Session;
 use ::controllers::money_map_users_controller::{MoneyMapUsersController};
 // Models
 use ::models::user_model::{OutUserModel};
-use ::models::money_map_model::{MoneyMapModel};
+use ::models::money_map_model::{MoneyMapModel, PubMoneyMapModel};
 use ::models::money_map_user_model::{MoneyMapUserModel};
 // DAO
 use ::dao::dao_manager::DAOManager;
@@ -43,8 +43,8 @@ impl MoneyMapsController{
     /// req - nickel::Request
     ///
     /// # Returns
-    /// `ApiResult<Vec<MoneyMapModel>>` - ApiResult including a vector of money maps
-    pub fn find(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<MoneyMapModel>, ()>{
+    /// `ApiResult<Vec<PubMoneyMapModel>>` - ApiResult including a vector of money maps
+    pub fn find(&self, req: &mut Request<ServerData>) -> ApiResult<Vec<PubMoneyMapModel>, ()>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -66,6 +66,7 @@ impl MoneyMapsController{
                                 "$ne" => true
                             }
                         }));
+                        let mut pub_money_maps = Vec::new();
 
 
                         // Get list of user details for each money map
@@ -79,10 +80,11 @@ impl MoneyMapsController{
                                     return ApiResult::Failure{msg:e.get_message()};
                                 }
                             }
+                            pub_money_maps.push(PubMoneyMapModel::new(money_maps[i].clone()))
                         }
 
                         // Return the list of money maps
-                        ApiResult::Success{result:money_maps}
+                        ApiResult::Success{result:pub_money_maps}
                     },
                     Err(e) => {
                         warn!("{}", e);
@@ -104,8 +106,8 @@ impl MoneyMapsController{
     /// req - nickel::Request
     ///
     /// # Returns
-    /// `ApiResult<MoneyMapModel>` - ApiResult including the create money map
-    pub fn create(&self, req: &mut Request<ServerData>) -> ApiResult<MoneyMapModel, MoneyMapModel>{
+    /// `ApiResult<PubMoneyMapModel, PubMoneyMapModel>` - ApiResult including the create money map
+    pub fn create(&self, req: &mut Request<ServerData>) -> ApiResult<PubMoneyMapModel, PubMoneyMapModel>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -120,8 +122,9 @@ impl MoneyMapsController{
                 match self.dao_manager.get_user_dao(){
                     Ok(user_dao) => {
 
-                        match req.json_as::<MoneyMapModel>(){
-                            Ok(mut money_map) => {
+                        match req.json_as::<PubMoneyMapModel>(){
+                            Ok(mut pub_money_map) => {
+                                let mut money_map = MoneyMapModel::new(&pub_money_map);
                                 // Validate
                                 let validation_result = money_map.validate();
                                 if validation_result.is_valid(){
@@ -149,7 +152,7 @@ impl MoneyMapsController{
                                                 }
                                             }
 
-                                            ApiResult::Success{result:money_map}
+                                            ApiResult::Success{result:PubMoneyMapModel::new(money_map)}
                                         },
                                         Err(e) => {
                                             error!("{}",e);
@@ -157,7 +160,7 @@ impl MoneyMapsController{
                                         }
                                     }
                                 }else{
-                                    ApiResult::Invalid{validation:validation_result, request:money_map}
+                                    ApiResult::Invalid{validation:validation_result, request:pub_money_map}
                                 }
                             },
                             Err(e) => {
@@ -187,7 +190,7 @@ impl MoneyMapsController{
     ///
     /// # Returns
     /// `ApiResult<MoneyMapModel>` - ApiResult including the modified user
-    pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<MoneyMapModel, MoneyMapModel>{
+    pub fn modify(&self, req: &mut Request<ServerData>) -> ApiResult<PubMoneyMapModel, PubMoneyMapModel>{
 
         let user_id = match Session::get_session_id(req){
             Ok(id) => id,
@@ -200,8 +203,9 @@ impl MoneyMapsController{
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
 
-                match req.json_as::<MoneyMapModel>(){
-                    Ok(edit_money_map) => {
+                match req.json_as::<PubMoneyMapModel>(){
+                    Ok(pub_edit_money_map) => {
+                        let edit_money_map = MoneyMapModel::new(&pub_edit_money_map);
 
                         match ObjectId::with_string(&user_id){
                             Ok(user_obj_id) => {
@@ -225,11 +229,11 @@ impl MoneyMapsController{
                                                         Ok(users_list) => {
                                                             // Add the new list of user details to the money map
                                                             updated_mm.set_users(Some(users_list));
-                                                            ApiResult::Success{result:updated_mm}
+                                                            ApiResult::Success{result:PubMoneyMapModel::new(updated_mm)}
                                                         },
                                                         Err(e) => {
                                                             warn!("{}",e);
-                                                            ApiResult::Success{result:updated_mm}
+                                                            ApiResult::Success{result:PubMoneyMapModel::new(updated_mm)}
                                                         }
                                                     }
                                                 },
@@ -238,7 +242,7 @@ impl MoneyMapsController{
                                                 }
                                             }
                                         }else{
-                                            ApiResult::Invalid{validation:validation_result, request:edit_money_map}
+                                            ApiResult::Invalid{validation:validation_result, request:pub_edit_money_map}
                                         }
 
                                     }else{

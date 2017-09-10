@@ -11,7 +11,7 @@ extern crate mongodb;
 use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
 use ::chrono::{Local};
-use ::chrono::offset::utc::UTC;
+use ::chrono::Utc as UTC;
 use ::mongodb::coll::options::FindOptions;
 use ::mongodb::db::ThreadedDatabase;
 // Common Utilities

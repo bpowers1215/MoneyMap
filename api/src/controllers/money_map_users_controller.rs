@@ -172,7 +172,7 @@ impl MoneyMapUsersController{
                                                                         let user_id = user.get_id().unwrap();
                                                                         if let Some(mm_users) = money_map.get_users(){
                                                                             for mm_user in mm_users{
-                                                                                if mm_user.get_user().unwrap().get_id().unwrap() == user_id {
+                                                                                if mm_user.get_user().unwrap().get_id().unwrap() == user_id.to_hex() {
                                                                                     // User already member of money map validation
                                                                                     validation_result.add_error("email".to_string(), "User already a member of this money map".to_string());
                                                                                     return ApiResult::Invalid{validation:validation_result, request:money_map_user};
@@ -302,7 +302,7 @@ impl MoneyMapUsersController{
                                                         let mut deletee_found = false;
                                                         let mm_users = money_map.get_users().unwrap();
                                                         for mm_user in mm_users{
-                                                            if mm_user.get_user().unwrap().id.unwrap() == deletee_obj_id{
+                                                            if mm_user.get_user().unwrap().id.unwrap() == deletee_obj_id.to_hex(){
 
                                                                 // Verify the member is not the owner (owners should not be removed at this point in time)
                                                                 if mm_user.is_owner(){

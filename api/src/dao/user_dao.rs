@@ -63,7 +63,7 @@ impl UserDAO{
                     if let Ok(item) = result {
                         let user = OutUserModel{
                             id: match item.get("_id"){
-                                Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone()), _ => None},
+                                Some(obj_id) => match obj_id{ &Bson::ObjectId(ref id) => Some(id.clone().to_hex()), _ => None},
                                 _ => None
                             },
                             first_name: match item.get("first_name"){
