@@ -73,13 +73,47 @@ impl MoneyMapDAO{
                 })
             },
             doc!{
-                "$unwind" => "$accounts"
+                "$project" => {
+                    "name" => "$name",
+                    "users" => "$users",
+                    "the_accounts" => {
+                        "$ifNull" => [
+                            "$accounts",
+                            [
+                                {
+                                    "placeholder" => true,
+                                    "deleted" => false
+                                }
+                            ]
+                        ]
+                    }
+                }
+            },
+            doc!{
+                "$unwind" => "$the_accounts"
             },
             doc!{
                 // Exclude deleted accounts
                 "$match" => {
-                    "accounts.deleted" => {
+                    "the_accounts.deleted" => {
                         "$ne" => true
+                    }
+                }
+            },
+            doc!{
+                "$project" => {
+                    "name" => "$name",
+                    "the_accounts" => {
+                        "$cond" => {
+                            "if" => {
+                                "$eq" => [
+                                    "$the_accounts.placeholder",
+                                    true
+                                ]
+                            },
+                            "then" => (Bson::Null),
+                            "else" => "$the_accounts"
+                        }
                     }
                 }
             },
@@ -89,7 +123,7 @@ impl MoneyMapDAO{
                     "name" => {"$first" => "$name"},
                     "users" => {"$first" => "$users"},
                     "accounts" => {
-                        "$push" => "$accounts"
+                        "$push" => "$the_accounts"
                     }
                 }
             }
@@ -99,6 +133,7 @@ impl MoneyMapDAO{
             Ok(cursor) => {
                 for result in cursor {
                     if let Ok(item) = result {
+                        debug!("ITEM: {}", item);
                         let money_map = document_to_model(item);
                         money_maps.push(money_map);
                     }
@@ -157,7 +192,7 @@ impl MoneyMapDAO{
             "deleted" => false
         };*/
         // Build the document
-        let mut doc = doc!{ "deleted" => false};
+        let mut doc = doc!{ "deleted" => false };
         if let Some(name) = money_map.get_name(){
             doc.insert_bson("name".to_string(), Bson::String(name));
         }

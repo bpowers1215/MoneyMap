@@ -53,7 +53,7 @@ impl MoneyMapsController{
                 return ApiResult::Failure{msg:"Unable to retrieve session data."};
             }
         };
-
+        debug!("FIND MONEY MAPS. USER ID: {}", user_id);
         match self.dao_manager.get_money_map_dao(){
             Ok(dao) => {
 
@@ -66,11 +66,13 @@ impl MoneyMapsController{
                                 "$ne" => true
                             }
                         }));
+                        debug!("# OF MONEY MAPS: {:?}",money_maps.len());
                         let mut pub_money_maps = Vec::new();
 
 
                         // Get list of user details for each money map
                         for i in 0..money_maps.len(){
+                            debug!("MONEY MAP ID: {:?}",money_maps[i].get_id());
                             match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &money_maps[i]){
                                 Ok(users_list) => {
                                     // Add the new list of user details to the money map
