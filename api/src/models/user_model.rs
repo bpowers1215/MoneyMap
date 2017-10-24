@@ -17,6 +17,7 @@ use ::common::validation::validation_result::{ValidationResult};
 use ::dao::user_dao::UserDAO;
 
 /// User
+#[derive(Debug)]
 pub struct UserModel {
     pub id: Option<ObjectId>,
     pub first_name: Option<String>,
@@ -35,7 +36,7 @@ pub struct InUserModel {
     pub confirm_password: Option<String>
 }
 
-#[derive(Clone, RustcDecodable, RustcEncodable)]
+#[derive(Clone, Debug, RustcDecodable, RustcEncodable)]
 pub struct OutUserModel {
     pub id: Option<String>,
     pub first_name: Option<String>,

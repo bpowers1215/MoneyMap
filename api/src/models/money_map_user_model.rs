@@ -10,7 +10,7 @@ use ::common::validation::validation_result::{ValidationResult};
 use ::models::user_model::{OutUserModel};
 
 /// Money Map User
-#[derive(Clone, RustcDecodable, RustcEncodable)]
+#[derive(Clone, Debug, RustcDecodable, RustcEncodable)]
 pub struct MoneyMapUserModel {
     pub user: Option<OutUserModel>,
     pub owner: bool

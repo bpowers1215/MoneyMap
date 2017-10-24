@@ -5,6 +5,7 @@
 // Import
 // External
 use ::nickel::{JsonBody, Request};
+use ::bson::{Bson, Document};
 use ::bson::oid::ObjectId;
 // Utilities
 use ::common::api_result::ApiResult;
@@ -391,14 +392,16 @@ impl MoneyMapUsersController{
 
                         // Fetch the user's details
                         let user_id = mm_user.user.unwrap().id.unwrap();
-                        let found_user = user_dao.find_one(Some(doc!{
-                            "_id" => user_id
-                        }), None);
-                        if let Some(user) = found_user{
-                            // Add the user details to the list
-                            users_list.push(
-                                MoneyMapUserModel::new(OutUserModel::new(user), mm_user.owner)
-                            );
+                        if let Ok(id) = ObjectId::with_string(&user_id){
+                            let found_user = user_dao.find_one(Some(doc!{
+                                "_id" => id
+                            }), None);
+                            if let Some(user) = found_user{
+                                // Add the user details to the list
+                                users_list.push(
+                                    MoneyMapUserModel::new(OutUserModel::new(user), mm_user.owner)
+                                );
+                            }
                         }
                     },
                     Err(e) => {

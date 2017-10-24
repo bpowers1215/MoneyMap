@@ -103,6 +103,7 @@ impl MoneyMapDAO{
             doc!{
                 "$project" => {
                     "name" => "$name",
+                    "users" => "$users",
                     "the_accounts" => {
                         "$cond" => {
                             "if" => {

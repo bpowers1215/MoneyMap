@@ -20,7 +20,7 @@ pub struct AccountModel {
     pub created: Option<i64>
 }
 
-#[derive(Clone, RustcDecodable, RustcEncodable)]
+#[derive(Clone, Debug, RustcDecodable, RustcEncodable)]
 pub struct PubAccountModel {
     pub id: Option<String>,
     pub name: Option<String>,

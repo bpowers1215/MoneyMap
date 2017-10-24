@@ -13,7 +13,7 @@ use ::models::money_map_user_model::{MoneyMapUserModel};
 use ::models::account_model::{PubAccountModel};
 
 /// Money Map
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MoneyMapModel {
     pub id: Option<ObjectId>,
     pub name: Option<String>,
@@ -21,7 +21,7 @@ pub struct MoneyMapModel {
     pub accounts: Option<Vec<PubAccountModel>>
 }
 
-#[derive(Clone, RustcDecodable, RustcEncodable)]
+#[derive(Clone, Debug, RustcDecodable, RustcEncodable)]
 pub struct PubMoneyMapModel {
     pub id: Option<String>,
     pub name: Option<String>,
