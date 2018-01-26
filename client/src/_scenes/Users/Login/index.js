@@ -1,26 +1,26 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import LoginForm from './components/LoginForm';
 import LoginFeedback from './components/LoginFeedback';
 import './styles.scss';
 
-class Login extends Component {
+const mapStateToProps = state => ({
+});
+
+class ConnectedLogin extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
-	
-		this.loginSubmit = this.loginSubmit.bind(this);
-	}
-	loginSubmit(login) {
-		this.setState(login);
 	}
 	render() {
 		return (
 			<div>
-				<LoginForm loginSubmit={this.loginSubmit} />
-				<LoginFeedback data={this.state} />
+				<LoginForm />
+				<LoginFeedback />
 			</div>
 		);
 	}
 }
 
+const Login = connect(mapStateToProps)(ConnectedLogin);
 export default Login;
