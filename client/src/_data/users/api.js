@@ -19,7 +19,12 @@ class UsersApi {
 				body: JSON.stringify(body)
 			}
 		).then(response => {
-			return response.json();
+			switch (response.status) {
+				case 200:
+					return response.json();
+				default:
+					return new Error('failed to login')
+			}
 		}).catch(error => {
 			return error;
 		});

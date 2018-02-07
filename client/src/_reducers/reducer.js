@@ -1,8 +1,10 @@
 import { combineReducers } from 'redux'
-import data from '~/_data/reducer';
-import scenes from '~/_scenes/reducer';
+import dataReducer from '~/_data/reducer';
+import scenesReducer from '~/_scenes/reducer';
+import alertsReducer from './alerts.reducer';
 
 export default combineReducers({
-	data,
-	scenes
+	data: dataReducer,
+	scenes: scenesReducer,
+	alerts: alertsReducer
 })

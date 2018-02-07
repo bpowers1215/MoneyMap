@@ -1,4 +1,5 @@
-import { userConstants } from '~/_constants';
+import { globalConstants, userConstants } from '~/_constants';
+import { batchActions } from 'redux-batched-actions';
 import UsersApi from './api';
 
 const login = (email, password) => {
@@ -9,16 +10,20 @@ const login = (email, password) => {
 			.then(
 				res => {
 					dispatch(success(res.data));
-				},
-				err => {
-					dispatch(failure(err.error));
 				}
-			);
+			).catch(err => {
+				dispatch(failure(err.error));
+			})
 	};
 
 	function request() { return { type: userConstants.LOGIN_REQUEST } }
 	function success(user) { return { type: userConstants.LOGIN_SUCCESS, user } }
-	function failure(error) { return { type: userConstants.LOGIN_FAILURE, error } }
+	function failure(user) { 
+		return batchActions([
+			{ type: userConstants.LOGIN_FAILURE, user },
+			{ type: globalConstants.ADD_ALERT, alert: { text: 'ADD_ALERT MESSAGE'} }
+		]);
+	}
 }
 
 const userActions = {

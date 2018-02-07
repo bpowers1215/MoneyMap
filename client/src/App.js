@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import Login from './_scenes/Users/Login';
+import Alerts from './_components/alerts';
 import './App.css';
 
 class App extends Component {
@@ -11,6 +12,7 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to Money Map</h1>
         </header>
+        <Alerts />
         <Login />
       </div>
     );
