@@ -17,11 +17,16 @@ const login = (email, password) => {
 	};
 
 	function request() { return { type: userConstants.LOGIN_REQUEST } }
-	function success(user) { return { type: userConstants.LOGIN_SUCCESS, user } }
+	function success(user) {
+		return batchActions([
+			{ type: userConstants.LOGIN_SUCCESS, user },
+			{ type: globalConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.ALERT_SUCCESS, message: 'Welcome!'} }
+		]);
+	}
 	function failure(user) { 
 		return batchActions([
 			{ type: userConstants.LOGIN_FAILURE, user },
-			{ type: globalConstants.ADD_ALERT, alert: { text: 'ADD_ALERT MESSAGE'} }
+			{ type: globalConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.ALERT_DANGER, message: 'Username or password did not match.'} }
 		]);
 	}
 }

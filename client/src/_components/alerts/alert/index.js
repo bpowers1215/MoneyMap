@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { globalConstants } from '~/_constants';
 
 class Alert extends Component {
 	constructor(props) {
@@ -8,8 +9,11 @@ class Alert extends Component {
 	render() {
 		return (
 			<div className="container">
-				<div className="alert alert-danger" role="alert">
-					<strong>Oh snap!</strong> {this.props.message}
+				<div className={"alert " + this.props.className} role="alert">
+					{this.props.className == globalConstants.STYLES.ALERT_DANGER &&
+						<strong>Oops! </strong>
+					}
+					{this.props.message}
 				</div>
 			</div>
 		);

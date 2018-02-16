@@ -18,7 +18,7 @@ class ConnectedAlerts extends Component {
 			let alerts = [];
 			for ( let alert in this.props.alerts) {
 				alerts.push (
-					<Alert key={alert} message={this.props.alerts[alert].text} />
+					<Alert key={alert} className={this.props.alerts[alert].className} message={this.props.alerts[alert].message} />
 				);
 			}
 			return alerts;
