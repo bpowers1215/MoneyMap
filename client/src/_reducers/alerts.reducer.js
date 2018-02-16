@@ -13,6 +13,12 @@ const alertReducer = (state = initialState, action) => {
 				alerts: [...state.alerts, action.alert]
 			}
 		}
+		case globalConstants.CLEAR_ALERTS: {
+			return {
+				...state,
+				alerts: []
+			}
+		}
 		default:
 			return state;
 	}

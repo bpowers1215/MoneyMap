@@ -16,7 +16,12 @@ const login = (email, password) => {
 			})
 	};
 
-	function request() { return { type: userConstants.LOGIN_REQUEST } }
+	function request() { 
+		return batchActions([
+			{ type: userConstants.LOGIN_REQUEST },
+			{ type: globalConstants.CLEAR_ALERTS }
+		]);
+	}
 	function success(user) {
 		return batchActions([
 			{ type: userConstants.LOGIN_SUCCESS, user },
