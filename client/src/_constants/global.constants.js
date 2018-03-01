@@ -1,6 +1,7 @@
 export const globalConstants = {
 	ADD_ALERT: 'ADD_ALERT',
 	CLEAR_ALERTS: 'CLEAR_ALERTS',
+	AUTH_TOKEN_COOKIE: 'moneyMapAuthToken',
 	STYLES: {
 		'ALERT_SECONDARY': 'alert-secondary',
 		'ALERT_SUCCESS': 'alert-success',
