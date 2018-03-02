@@ -9,7 +9,7 @@ const mapStateToProps = state => ({
 		token: state.data.users.auth.token
 });
 
-class ConnectedLoginFeedback extends Component {
+class ConnectedAccountInfo extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
@@ -27,5 +27,5 @@ class ConnectedLoginFeedback extends Component {
 	}
 }
 
-const LoginFeedback = connect(mapStateToProps)(ConnectedLoginFeedback);
-export default LoginFeedback;
+const AccountInfo = connect(mapStateToProps)(ConnectedAccountInfo);
+export default AccountInfo;
