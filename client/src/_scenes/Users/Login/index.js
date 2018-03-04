@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import LoginForm from './components/LoginForm';
+import Alerts from '~/_components/alerts';
 import './styles.scss';
 
 const mapStateToProps = state => ({
@@ -14,6 +15,7 @@ class ConnectedLogin extends Component {
 	render() {
 		return (
 			<div>
+				<Alerts />
 				<LoginForm />
 			</div>
 		);

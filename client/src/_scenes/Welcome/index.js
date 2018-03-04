@@ -13,10 +13,13 @@ class ConnectedWelcome extends Component {
 	}
 	render() {
 		return (
-			<div className="container">
-				<h2 className="form-signin-heading">Welcome. Learn all about Money Map here.</h2>
-				Ready to <Link to={'/login'} >Login</Link>?
-			</div>
+			<section className="section">
+				<div className="container">
+					<h2 className="title is-2">Welcome.</h2>
+					<p>Learn all about Money Map here.</p>
+					Ready to <Link to={'/login'} >Login</Link>?
+				</div>
+			</section>
 		);
 	}
 }
