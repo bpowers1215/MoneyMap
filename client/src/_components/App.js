@@ -29,9 +29,9 @@ class App extends Component {
 							<div className="navbar-item">
 								<div className="field">
 									<p className="control">
-										<a className="button is-outlined is-primary" href="login">
+										<Link className="button is-outlined is-primary" to="login">
 											<span>Login</span>
-										</a>
+										</Link>
 									</p>
 								</div>
 							</div>
@@ -39,21 +39,19 @@ class App extends Component {
 					</div>
 				</nav>
 
-				<section className="hero is-primary is-medium">
-					<div className="hero-body">
-						<div className="container">
-						<h1 className="title">
-							Money Map
-						</h1>
-						<h2 className="subtitle">
-							a finance management solution
-						</h2>
-						</div>
-					</div>
-				</section>
 				<Route exact={true} path="/" component={Welcome} />
 				<Route exact={true} path="/login" component={Login} />
 				<Route exact={true} path="/account" component={Account} />
+
+				<footer class="footer">
+					<div class="container">
+						<div class="content has-text-centered">
+						<p>
+							<strong>Money Map</strong> by <a href="https://github.com/bpowers1215">Brandon Powers</a>. The source code is licensed under the <a href="https://opensource.org/licenses/Apache-2.0">Apache License 2.0</a>.
+						</p>
+						</div>
+					</div>
+				</footer>
 			</div>
 		);
 	}

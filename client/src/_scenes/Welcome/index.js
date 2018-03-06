@@ -13,13 +13,27 @@ class ConnectedWelcome extends Component {
 	}
 	render() {
 		return (
-			<section className="section">
-				<div className="container">
-					<h2 className="title is-2">Welcome.</h2>
-					<p>Learn all about Money Map here.</p>
-					Ready to <Link to={'/login'} >Login</Link>?
-				</div>
-			</section>
+			<div>
+				<section className="hero is-primary is-medium">
+					<div className="hero-body">
+						<div className="container">
+							<h1 className="title">
+								Money Map
+							</h1>
+							<h2 className="subtitle">
+								a finance management solution
+							</h2>
+						</div>
+					</div>
+				</section>
+				<section className="section">
+					<div className="container">
+						<h2 className="title is-2">Welcome.</h2>
+						<p>Learn all about Money Map here.</p>
+						Ready to <Link to={'/login'} >Login</Link>?
+					</div>
+				</section>
+			</div>
 		);
 	}
 }
