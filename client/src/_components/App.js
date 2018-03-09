@@ -15,7 +15,7 @@ class App extends Component {
 						<a className="navbar-item" href="https://bulma.io">
 							<img src="https://bulma.io/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" width="112" height="28"/>
 						</a>
-						<div class="navbar-burger burger" data-target="navbarExampleTransparentExample">
+						<div className="navbar-burger burger" data-target="navbarExampleTransparentExample">
 							<span></span>
 							<span></span>
 							<span></span>
@@ -43,9 +43,9 @@ class App extends Component {
 				<Route exact={true} path="/login" component={Login} />
 				<Route exact={true} path="/account" component={Account} />
 
-				<footer class="footer">
-					<div class="container">
-						<div class="content has-text-centered">
+				<footer className="footer">
+					<div className="container">
+						<div className="content has-text-centered">
 						<p>
 							<strong>Money Map</strong> by <a href="https://github.com/bpowers1215">Brandon Powers</a>. The source code is licensed under the <a href="https://opensource.org/licenses/Apache-2.0">Apache License 2.0</a>.
 						</p>

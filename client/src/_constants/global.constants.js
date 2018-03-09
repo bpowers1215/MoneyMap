@@ -1,15 +1,11 @@
 export const globalConstants = {
-	ADD_ALERT: 'ADD_ALERT',
-	CLEAR_ALERTS: 'CLEAR_ALERTS',
 	AUTH_TOKEN_COOKIE: 'moneyMapAuthToken',
 	STYLES: {
-		'ALERT_SECONDARY': 'alert-secondary',
-		'ALERT_SUCCESS': 'alert-success',
-		'ALERT_DANGER': 'alert-danger',
-		'ALERT_WARNING': 'alert-warning',
-		'ALERT_INFO': 'alert-info',
-		'ALERT_LIGHT': 'alert-light',
-		'ALERT_DARK': 'alert-dark',
-		
+		'IS_PRIMARY': 'is-primary',
+		'IS_LINK': 'is-link',
+		'IS_INFO': 'is-info',
+		'IS_SUCCESS': 'is-success',
+		'IS_WARNING': 'is-warning',
+		'IS_DANGER': 'is-danger'
 	}
 }

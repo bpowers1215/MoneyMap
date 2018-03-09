@@ -1,4 +1,4 @@
-import { globalConstants } from '~/_constants';
+import { alertConstants } from '~/_constants';
 
 const initialState = {
 	alerts: []
@@ -7,16 +7,25 @@ const initialState = {
 const alertReducer = (state = initialState, action) => {
 	
 	switch (action.type) {
-		case globalConstants.ADD_ALERT: {
+		case alertConstants.ADD_ALERT: {
 			return {
 				...state,
 				alerts: [...state.alerts, action.alert]
 			}
 		}
-		case globalConstants.CLEAR_ALERTS: {
+		case alertConstants.CLEAR_ALERTS: {
 			return {
 				...state,
 				alerts: []
+			}
+		}
+		case alertConstants.REMOVE_ALERT: {
+			return {
+				...state,
+				alerts: [
+					...state.alerts.slice(0, action.id),
+					...state.alerts.slice(action.id+1)
+				]
 			}
 		}
 		default:

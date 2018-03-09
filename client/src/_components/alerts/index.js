@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Alert from './alert';
+import './styles.scss';
 
 const mapStateToProps = state => {
 	return ({
@@ -18,10 +19,14 @@ class ConnectedAlerts extends Component {
 			let alerts = [];
 			for ( let alert in this.props.alerts) {
 				alerts.push (
-					<Alert key={alert} className={this.props.alerts[alert].className} message={this.props.alerts[alert].message} />
+					<Alert key={alert} id={alert} className={this.props.alerts[alert].className} message={this.props.alerts[alert].message} />
 				);
 			}
-			return alerts;
+			return (
+				<div className="container" id="notifications">
+					{alerts}
+				</div>
+			);
 		} else {
 			return null;
 		}

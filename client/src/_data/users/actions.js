@@ -1,4 +1,4 @@
-import { globalConstants, userConstants } from '~/_constants';
+import { globalConstants, userConstants, alertConstants } from '~/_constants';
 import { batchActions } from 'redux-batched-actions';
 import { setCookie } from 'redux-cookie';
 import UsersApi from './api';
@@ -21,14 +21,14 @@ const login = (email, password) => {
 	function request() { 
 		return batchActions([
 			{ type: userConstants.LOGIN_REQUEST },
-			{ type: globalConstants.CLEAR_ALERTS }
+			{ type: alertConstants.CLEAR_ALERTS }
 		]);
 	}
 	
 	function success(user) {
 		return batchActions([
 			{ type: userConstants.LOGIN_SUCCESS, user },
-			{ type: globalConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.ALERT_SUCCESS, message: 'Welcome!'} }
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_SUCCESS, message: 'Welcome!'} }
 		]);
 	}
 
@@ -46,7 +46,7 @@ const login = (email, password) => {
 	function failure(user) {
 		return batchActions([
 			{ type: userConstants.LOGIN_FAILURE, user },
-			{ type: globalConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.ALERT_DANGER, message: 'Username or password did not match.'} }
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_DANGER, message: 'Username or password did not match.'} }
 		]);
 	}
 }
