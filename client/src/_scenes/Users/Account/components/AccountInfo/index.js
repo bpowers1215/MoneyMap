@@ -14,14 +14,17 @@ class ConnectedAccountInfo extends Component {
 		super(props);
 		this.state = {};
 	}
+	componentWillMount(){
+
+	}
 	render() {
 		return (
-			<div className="container">
-			<div>id: {this.props.id}</div>
-			<div>email: {this.props.email}</div>
-			<div>first name: {this.props.firstName}</div>
-			<div>last name: {this.props.lastName}</div>
-			<div>token: {this.props.token}</div>
+			<div>
+				<div>id: {this.props.id}</div>
+				<div>email: {this.props.email}</div>
+				<div>first name: {this.props.firstName}</div>
+				<div>last name: {this.props.lastName}</div>
+				<div>token: {this.props.token}</div>
 			</div>
 		);
 	}

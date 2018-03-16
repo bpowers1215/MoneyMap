@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import Alerts from '~/_components/alerts';
 import AccountInfo from './components/AccountInfo';
 import './styles.scss';
 
@@ -13,8 +14,17 @@ class ConnectedAccount extends Component {
 	}
 	render() {
 		return (
-			<div className="container">
-				<h2>Account</h2>
+			<div>
+				<section className="hero is-primary">
+					<div className="hero-body">
+						<div className="container">
+							<h1 className="title">
+								Account
+							</h1>
+						</div>
+					</div>
+				</section>
+				<Alerts />
 				<AccountInfo />
 			</div>
 		);

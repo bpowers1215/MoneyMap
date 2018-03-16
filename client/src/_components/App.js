@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import PrivateRoute from '~/_components/router/privateRoute'
 import Welcome from '~/_scenes/Welcome';
 import Login from '~/_scenes/Users/Login';
 import Account from '~/_scenes/Users/Account';
@@ -39,9 +40,11 @@ class App extends Component {
 					</div>
 				</nav>
 
-				<Route exact={true} path="/" component={Welcome} />
-				<Route exact={true} path="/login" component={Login} />
-				<Route exact={true} path="/account" component={Account} />
+				<Switch>
+					<Route exact={true} path="/" component={Welcome} />
+					<Route exact={true} path="/login" component={Login} />
+					<PrivateRoute exact={true} path="/account" component={Account} />
+				</Switch>
 
 				<footer className="footer">
 					<div className="container">
