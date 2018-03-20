@@ -19,13 +19,13 @@ class ConnectedAccountInfo extends Component {
 	}
 	render() {
 		return (
-			<div>
+			<React.Fragment>
 				<div>id: {this.props.id}</div>
 				<div>email: {this.props.email}</div>
 				<div>first name: {this.props.firstName}</div>
 				<div>last name: {this.props.lastName}</div>
 				<div>token: {this.props.token}</div>
-			</div>
+			</React.Fragment>
 		);
 	}
 }

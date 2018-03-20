@@ -2,20 +2,22 @@ import { globalConstants, userConstants, alertConstants } from '~/_constants';
 import { batchActions } from 'redux-batched-actions';
 import { setCookie } from 'redux-cookie';
 import UsersApi from './api';
+import { history } from '~/_helpers/history';
 
 const login = (email, password) => {
 	return dispatch => {
 		dispatch(request({ email }));
 
 		UsersApi.login(email, password)
-			.then(
-				res => {
+			.then(res => {
+					if (res.status !== 'success')
+						throw(res);
 					dispatch(success(res.data));
 					dispatch(setAuthCookie(res.data));
-				}
-			).catch(err => {
+					history.push('/account');
+			}).catch(err => {
 				dispatch(failure(err.error));
-			})
+			});
 	};
 
 	function request() { 
