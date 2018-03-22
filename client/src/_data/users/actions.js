@@ -4,6 +4,14 @@ import { setCookie } from 'redux-cookie';
 import UsersApi from './api';
 import { history } from '~/_helpers/history';
 
+/*
+* login
+* Authenticate a user
+* On Success, set authentication cookie and redirect user
+* On Error, display error messaging
+* @param {string} email
+* @param {string} password
+*/
 const login = (email, password) => {
 	return dispatch => {
 		dispatch(request({ email }));
@@ -53,8 +61,42 @@ const login = (email, password) => {
 	}
 }
 
+/*
+* getAccount
+* Get the account for the authenticated user 
+*/
+
+const getAccount = () => {
+	return dispatch => {
+
+		UsersApi.getAccount()
+			.then(res => {
+				console.log(res);
+				if (res.status !== 'success')
+					throw(res);
+				dispatch(success(res.data));
+			}).catch(err => {
+				dispatch(failure(err.error));
+			});
+	};
+	
+	function success(user) {
+		return batchActions([
+			{ type: userConstants.LOGIN_SUCCESS, user }
+		]);
+	}
+
+	function failure(user) {
+		return batchActions([
+			{ type: userConstants.LOGIN_FAILURE, user },
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_DANGER, message: 'Username or password did not match.'} }
+		]);
+	}
+}
+
 const userActions = {
-	login
+	login,
+	getAccount
 }
 
 export default userActions;

@@ -10,12 +10,13 @@ const mapStateToProps = state => ({
 class ConnectedAccount extends Component {
 	constructor(props) {
 		super(props);
+		console.log(props);
 		this.state = {};
 	}
 	render() {
 		return (
 			<div>
-				<section className="hero is-primary">
+				<div className="hero is-primary">
 					<div className="hero-body">
 						<div className="container">
 							<h1 className="title">
@@ -23,9 +24,11 @@ class ConnectedAccount extends Component {
 							</h1>
 						</div>
 					</div>
-				</section>
+				</div>
 				<Alerts />
-				<AccountInfo />
+				<div className="container is-fluid container-content">
+					<AccountInfo />
+				</div>
 			</div>
 		);
 	}

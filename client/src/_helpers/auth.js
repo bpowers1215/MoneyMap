@@ -10,8 +10,23 @@ const isAuthenticated = () => {
 	return !!cookie;
 }
 
+/* 
+* Get Authentication Header for API requests
+*/
+const getAuthHeader = () => {
+	return "Bearer " + getAuthToken();
+}
+
+/* 
+* Get Auth token from cookie
+*/
+const getAuthToken = () => {
+	return Cookies.get(globalConstants.AUTH_TOKEN_COOKIE);
+}
+
 const auth = {
-	isAuthenticated
+	isAuthenticated,
+	getAuthHeader
 }
 
 export default auth;

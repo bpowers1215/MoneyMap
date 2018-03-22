@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import UserActions from '~/_data/users/actions';
 
 const mapStateToProps = state => ({
 		email: state.data.users.auth.email,
@@ -12,19 +13,34 @@ const mapStateToProps = state => ({
 class ConnectedAccountInfo extends Component {
 	constructor(props) {
 		super(props);
+		console.log(props);
 		this.state = {};
 	}
 	componentWillMount(){
-
+		this.props.dispatch(UserActions.getAccount());
 	}
 	render() {
 		return (
 			<React.Fragment>
-				<div>id: {this.props.id}</div>
-				<div>email: {this.props.email}</div>
-				<div>first name: {this.props.firstName}</div>
-				<div>last name: {this.props.lastName}</div>
-				<div>token: {this.props.token}</div>
+				<h4 className="subtitle is-5">Your account information.</h4>
+				<div className="field">
+					<label className="label label-static">First Name</label>
+					<div className="control">
+						<p>{this.props.firstName}</p>
+					</div>
+				</div>
+				<div className="field">
+					<label className="label label-static">Last Name</label>
+					<div className="control">
+						<p>{this.props.lastName}</p>
+					</div>
+				</div>
+				<div className="field">
+					<label className="label label-static">Email</label>
+					<div className="control">
+						<p>{this.props.email}</p>
+					</div>
+				</div>
 			</React.Fragment>
 		);
 	}
