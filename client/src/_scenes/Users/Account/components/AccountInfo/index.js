@@ -22,7 +22,7 @@ class ConnectedAccountInfo extends Component {
 	render() {
 		return (
 			<React.Fragment>
-				<h4 className="subtitle is-5">Your account information.</h4>
+				<h4 className="subtitle is-5">Your Account Information</h4>
 				<div className="field">
 					<label className="label label-static">First Name</label>
 					<div className="control">
