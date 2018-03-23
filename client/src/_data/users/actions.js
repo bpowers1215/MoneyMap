@@ -71,7 +71,6 @@ const getAccount = () => {
 
 		UsersApi.getAccount()
 			.then(res => {
-				console.log(res);
 				if (res.status !== 'success')
 					throw(res);
 				dispatch(success(res.data));

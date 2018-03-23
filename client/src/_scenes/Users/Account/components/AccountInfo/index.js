@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { EditableField, StaticField } from '~/_components/form';
 import UserActions from '~/_data/users/actions';
 
 const mapStateToProps = state => ({
@@ -13,7 +14,6 @@ const mapStateToProps = state => ({
 class ConnectedAccountInfo extends Component {
 	constructor(props) {
 		super(props);
-		console.log(props);
 		this.state = {};
 	}
 	componentWillMount(){
@@ -23,24 +23,26 @@ class ConnectedAccountInfo extends Component {
 		return (
 			<React.Fragment>
 				<h4 className="subtitle is-5">Your Account Information</h4>
-				<div className="field">
-					<label className="label label-static">First Name</label>
-					<div className="control">
-						<p>{this.props.firstName}</p>
-					</div>
-				</div>
-				<div className="field">
-					<label className="label label-static">Last Name</label>
-					<div className="control">
-						<p>{this.props.lastName}</p>
-					</div>
-				</div>
-				<div className="field">
-					<label className="label label-static">Email</label>
-					<div className="control">
-						<p>{this.props.email}</p>
-					</div>
-				</div>
+				<EditableField
+					type="input"
+					name="firstName"
+					fieldId="accountFirstName"
+					label="First Name"
+					placeholder="First Name"
+					value={this.props.firstName}>
+				</EditableField>
+				<EditableField
+					type="input"
+					name="lastName"
+					fieldId="accountLastName"
+					label="Last Name"
+					placeholder="Last Name"
+					value={this.props.lastName}>
+				</EditableField>
+				<StaticField
+					label="First Name"
+					value={this.props.firstName}>
+				</StaticField>
 			</React.Fragment>
 		);
 	}

@@ -1,0 +1,17 @@
+.field.static-field.editable {
+	.control {
+		border:1px solid transparent;
+		cursor:text;
+		.icon {
+			margin-left:5px;
+			font-size: 0.85em;
+			opacity: 0.5;
+		}
+		&:hover{
+			border:1px dashed #999;
+			.icon {
+				opacity: 1;
+			}
+		}
+	}
+}

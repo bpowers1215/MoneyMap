@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import UserActions from '~/_data/users/actions';
+import { Field } from '~/_components/form';
 import './styles.scss';
 
 const mapDispatchToProps = dispatch => {
@@ -31,25 +32,31 @@ class ConnectedLoginForm extends Component {
 			<div className="container">
 
 				<form className="form-signin" onSubmit={this.handleSubmit}>
-					<div className="field">
-						<label className="label">Email Address</label>
-						<div className="control has-icons-left has-icons-right">
-							<input type="email" name="email" id="inputEmail" className="input" placeholder="Email address" required autoFocus onChange={this.handleChange} />
-							<span className="icon is-small is-left">
-								<i className="fas fa-envelope"></i>
-							</span>
-						</div>
-					</div>
+					<Field
+						type="email"
+						name="email"
+						fieldId="inputEmail"
+						label="Email"
+						controlClasses="control has-icons-left"
+						placeholder="Email Address"
+						onChangeHandler={this.handleChange}>
+						<span className="icon is-small is-left">
+							<i className="fas fa-envelope"></i>
+						</span>
+					</Field>
 
-					<div className="field">
-						<label className="label">Email</label>
-						<div className="control has-icons-left has-icons-right">
-							<input type="password" name="password" id="inputPassword" className="input" placeholder="Password" required onChange={this.handleChange} />
-							<span className="icon is-small is-left">
-								<i className="fas fa-lock"></i>
-							</span>
-						</div>
-					</div>
+					<Field
+						type="password"
+						name="password"
+						fieldId="inputPassword"
+						label="Password"
+						controlClasses="control has-icons-left"
+						placeholder="Password"
+						onChangeHandler={this.handleChange}>
+						<span className="icon is-small is-left">
+							<i className="fas fa-lock"></i>
+						</span>
+					</Field>
 
 					<div className="field is-grouped">
 						<div className="control">
