@@ -81,14 +81,14 @@ const getAccount = () => {
 	
 	function success(user) {
 		return batchActions([
-			{ type: userConstants.LOGIN_SUCCESS, user }
+			{ type: userConstants.GET_ACCOUNT_SUCCESS, user }
 		]);
 	}
 
 	function failure(user) {
 		return batchActions([
-			{ type: userConstants.LOGIN_FAILURE, user },
-			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_DANGER, message: 'Username or password did not match.'} }
+			{ type: userConstants.GET_ACCOUNT_FAILURE, user },
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_DANGER, message: 'Unable to get account details.'} }
 		]);
 	}
 }
