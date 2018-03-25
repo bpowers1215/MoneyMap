@@ -146,7 +146,18 @@ impl UsersController{
                             // Save User
                             match dao.update(user_id, &user){
                                 Ok(result) => {
-                                    if result.acknowledged && result.modified_count > 0 {
+                                    if result.acknowledged && result.matched_count > 0  && result.modified_count == 0 {
+                                        //Update found match, but no changes were needed to existing data
+                                        ApiResult::Success{
+                                            result:OutUserModel{ 
+                                                id: None,
+                                                first_name: None,
+                                                last_name: None,
+                                                email: None
+                                            }
+                                        }
+                                    } else if result.acknowledged && result.matched_count > 0 && result.modified_count > 0 {
+                                        //Update successful
                                         ApiResult::Success{result:OutUserModel::new(user)}
                                     }else{
                                         ApiResult::Failure{msg:"Update failed."}
