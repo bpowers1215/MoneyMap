@@ -40,8 +40,8 @@ class ConnectedAccountInfo extends Component {
 					value={this.props.lastName}>
 				</EditableField>
 				<StaticField
-					label="First Name"
-					value={this.props.firstName}>
+					label="Email"
+					value={this.props.email}>
 				</StaticField>
 			</React.Fragment>
 		);

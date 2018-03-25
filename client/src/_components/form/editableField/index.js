@@ -12,7 +12,7 @@ class EditableField extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			isEdit: true
+			isEdit: false
 		}
 
 		this.editField = this.editField.bind(this);
