@@ -22,27 +22,48 @@ class ConnectedAccountInfo extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			firstName: "",
-			lastName: ""
+			accountDetails: {
+				firstName: "",
+				lastName: ""
+			},
+			editEnabled: false
 		};
 		this.handleChange = this.handleChange.bind(this);
 		this.updateAccount = this.updateAccount.bind(this);
+		this.enableEdit = this.enableEdit.bind(this);
 	}
 	componentWillMount(){
 		this.props.getAccount();
 	}
 	componentWillReceiveProps(nextProps){
 		let { firstName, lastName } = nextProps;
-		this.setState({ firstName, lastName });
-
+		let newState = {
+			accountDetails: {
+				firstName,
+				lastName
+			}
+		}
+		console.log(newState)
+		this.setState(newState);
+	}
+	enableEdit(){
+		this.setState({ editEnabled: true });
+	}
+	disableEdit(){
+		console.log("disable edit");
+		this.setState({ editEnabled: false });
+		console.log("EDIT ENABLED? ",this.state.editEnabled)
 	}
 	handleChange(event){
-		let newState = {};
-		newState[event.target.name] = event.target.value;
+		let newState = Object.assign({}, this.state);
+		newState.accountDetails[event.target.name] = event.target.value;
 		this.setState(newState);
 	}
 	updateAccount(){
-		this.props.updateAccount(this.state);
+		this.props.updateAccount(this.state.accountDetails);
+		
+		//TODO Move this out - trigger upon updateAccount SUCCESS
+		this.disableEdit();
 	}
 	render() {
 		return (
@@ -54,8 +75,10 @@ class ConnectedAccountInfo extends Component {
 					fieldId="accountFirstName"
 					label="First Name"
 					placeholder="First Name"
+					editEnabled={this.state.editEnabled}
+					onEdit={this.enableEdit}
 					onChange={this.handleChange}
-					value={this.state.firstName}>
+					value={this.state.accountDetails.firstName}>
 				</EditableField>
 				<EditableField
 					type="input"
@@ -63,14 +86,18 @@ class ConnectedAccountInfo extends Component {
 					fieldId="accountLastName"
 					label="Last Name"
 					placeholder="Last Name"
+					editEnabled={this.state.editEnabled}
+					onEdit={this.enableEdit}
 					onChange={this.handleChange}
-					value={this.state.lastName}>
+					value={this.state.accountDetails.lastName}>
 				</EditableField>
 				<StaticField
 					label="Email"
 					value={this.props.email}>
 				</StaticField>
-				<a className="button is-primary" onClick={this.updateAccount}>Update</a>
+				{ this.state.editEnabled &&
+					<a className="button is-primary" onClick={this.updateAccount}>Update</a>
+				}
 			</React.Fragment>
 		);
 	}

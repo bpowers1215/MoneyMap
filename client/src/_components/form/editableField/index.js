@@ -18,10 +18,14 @@ class EditableField extends Component {
 		this.editField = this.editField.bind(this);
 	}
 	editField(){
+		this.props.onEdit();
 		this.setState({isEdit:true});
 	}
 	render() {
-		if (this.state.isEdit) {
+		console.log("RENDER")
+		console.log("isEdit",this.state.isEdit);
+		console.log("editEnabled",this.props.editEnabled);
+		if (this.state.isEdit && this.props.editEnabled) {
 			return (
 				<Field
 					type={this.props.type}
@@ -55,7 +59,9 @@ class EditableField extends Component {
 EditableField.defaultProps = {
 	controlClasses: 'control',
 	required: false,
-	autoFocus: false
+	autoFocus: false,
+	editEnabled: false,
+	onEdit: () => {}
 }
 
 EditableField.propTypes = {
@@ -67,8 +73,10 @@ EditableField.propTypes = {
 	controlClasses: PropTypes.string,
 	placeholder: PropTypes.string.isRequired,
 	onChange: PropTypes.func,
+	onEdit: PropTypes.func,
 	required: PropTypes.bool,
-	autoFocus: PropTypes.bool
+	autoFocus: PropTypes.bool,
+	editEnabled: PropTypes.bool
 }
 
 export { EditableField };
