@@ -39,7 +39,7 @@ class ConnectedLoginForm extends Component {
 						label="Email"
 						controlClasses="control has-icons-left"
 						placeholder="Email Address"
-						onChangeHandler={this.handleChange}>
+						onChange={this.handleChange}>
 						<span className="icon is-small is-left">
 							<i className="fas fa-envelope"></i>
 						</span>
@@ -52,7 +52,7 @@ class ConnectedLoginForm extends Component {
 						label="Password"
 						controlClasses="control has-icons-left"
 						placeholder="Password"
-						onChangeHandler={this.handleChange}>
+						onChange={this.handleChange}>
 						<span className="icon is-small is-left">
 							<i className="fas fa-lock"></i>
 						</span>

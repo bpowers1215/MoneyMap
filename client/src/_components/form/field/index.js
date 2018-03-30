@@ -19,7 +19,7 @@ class Field extends Component {
 						name={this.props.name}
 						id={this.props.fieldId}
 						placeholder={this.props.placeholder}
-						onChange={this.props.onChangeHandler}
+						onChange={this.props.onChange}
 						required={this.props.required}
 						value={this.props.value}
 						className="input"
@@ -45,7 +45,7 @@ Field.propTypes = {
 	value: PropTypes.string,
 	controlClasses: PropTypes.string,
 	placeholder: PropTypes.string.isRequired,
-	onChangeHandler: PropTypes.func,
+	onChange: PropTypes.func,
 	required: PropTypes.bool,
 	autoFocus: PropTypes.bool
 }

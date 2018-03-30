@@ -6,6 +6,7 @@ import { history } from '~/_helpers/history';
 
 /*
 * login
+*
 * Authenticate a user
 * On Success, set authentication cookie and redirect user
 * On Error, display error messaging
@@ -14,7 +15,7 @@ import { history } from '~/_helpers/history';
 */
 const login = (email, password) => {
 	return dispatch => {
-		dispatch(request({ email }));
+		dispatch(request());
 
 		UsersApi.login(email, password)
 			.then(res => {
@@ -63,6 +64,7 @@ const login = (email, password) => {
 
 /*
 * getAccount
+*
 * Get the account for the authenticated user 
 */
 
@@ -93,9 +95,51 @@ const getAccount = () => {
 	}
 }
 
+/*
+* updateAccount
+*
+* Update user account information
+* @param {string} accountDetails
+*/
+const updateAccount = (accountDetails) => {
+	return dispatch => {
+		dispatch(request());
+
+		UsersApi.updateAccount(accountDetails)
+			.then(res => {
+					if (res.status !== 'success')
+						throw(res);
+					dispatch(success(res.data));
+			}).catch(err => {
+				dispatch(failure(err.error));
+			});
+	};
+
+	function request() { 
+		return batchActions([
+			{ type: alertConstants.CLEAR_ALERTS }
+		]);
+	}
+	
+	function success(user) {
+		return batchActions([
+			{ type: userConstants.UPDATE_ACCOUNT_SUCCESS, user },
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_SUCCESS, message: 'Account Updated'} }
+		]);
+	}
+
+	function failure(user) {
+		return batchActions([
+			{ type: userConstants.UPDATE_ACCOUNT_FAILURE, user },
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_DANGER, message: 'Failed to update account.'} }
+		]);
+	}
+}
+
 const userActions = {
 	login,
-	getAccount
+	getAccount,
+	updateAccount
 }
 
 export default userActions;

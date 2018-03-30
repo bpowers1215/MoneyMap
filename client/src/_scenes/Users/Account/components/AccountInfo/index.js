@@ -3,6 +3,13 @@ import { connect } from 'react-redux';
 import { EditableField, StaticField } from '~/_components/form';
 import UserActions from '~/_data/users/actions';
 
+const mapDispatchToProps = dispatch => {
+	return {
+		getAccount: () => dispatch(UserActions.getAccount()),
+		updateAccount: (accountDetails) => dispatch(UserActions.updateAccount(accountDetails))
+	};
+};
+
 const mapStateToProps = state => ({
 		email: state.data.users.auth.email,
 		id: state.data.users.auth.id,
@@ -14,10 +21,28 @@ const mapStateToProps = state => ({
 class ConnectedAccountInfo extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {};
+		this.state = {
+			firstName: "",
+			lastName: ""
+		};
+		this.handleChange = this.handleChange.bind(this);
+		this.updateAccount = this.updateAccount.bind(this);
 	}
 	componentWillMount(){
-		this.props.dispatch(UserActions.getAccount());
+		this.props.getAccount();
+	}
+	componentWillReceiveProps(nextProps){
+		let { firstName, lastName } = nextProps;
+		this.setState({ firstName, lastName });
+
+	}
+	handleChange(event){
+		let newState = {};
+		newState[event.target.name] = event.target.value;
+		this.setState(newState);
+	}
+	updateAccount(){
+		this.props.updateAccount(this.state);
 	}
 	render() {
 		return (
@@ -29,7 +54,8 @@ class ConnectedAccountInfo extends Component {
 					fieldId="accountFirstName"
 					label="First Name"
 					placeholder="First Name"
-					value={this.props.firstName}>
+					onChange={this.handleChange}
+					value={this.state.firstName}>
 				</EditableField>
 				<EditableField
 					type="input"
@@ -37,16 +63,18 @@ class ConnectedAccountInfo extends Component {
 					fieldId="accountLastName"
 					label="Last Name"
 					placeholder="Last Name"
-					value={this.props.lastName}>
+					onChange={this.handleChange}
+					value={this.state.lastName}>
 				</EditableField>
 				<StaticField
 					label="Email"
 					value={this.props.email}>
 				</StaticField>
+				<a className="button is-primary" onClick={this.updateAccount}>Update</a>
 			</React.Fragment>
 		);
 	}
 }
 
-const AccountInfo = connect(mapStateToProps)(ConnectedAccountInfo);
+const AccountInfo = connect(mapStateToProps, mapDispatchToProps)(ConnectedAccountInfo);
 export default AccountInfo;

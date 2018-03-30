@@ -31,7 +31,7 @@ class EditableField extends Component {
 					value={this.props.value}
 					controlClasses={this.props.controlClasses}
 					placeholder={this.props.placeholder}
-					onChangeHandler={this.onChangeHandler}
+					onChange={this.props.onChange}
 					autoFocus>
 				</Field>
 			)
@@ -66,7 +66,7 @@ EditableField.propTypes = {
 	value: PropTypes.string,
 	controlClasses: PropTypes.string,
 	placeholder: PropTypes.string.isRequired,
-	onChangeHandler: PropTypes.func,
+	onChange: PropTypes.func,
 	required: PropTypes.bool,
 	autoFocus: PropTypes.bool
 }
