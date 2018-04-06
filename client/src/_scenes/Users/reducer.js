@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux'
-import dataReducer from './data/reducer'
+import account from './Account/reducer'
+import data from './data/reducer'
 
 export default combineReducers({
-	dataReducer
+	data,
+	account
 })

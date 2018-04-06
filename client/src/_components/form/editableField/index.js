@@ -21,10 +21,18 @@ class EditableField extends Component {
 		this.props.onEdit();
 		this.setState({isEdit:true});
 	}
+	componentWillReceiveProps(nextProps){
+		let { editEnabled } = nextProps;
+		
+		// If edit is disabled, reset isEdit state
+		if (!editEnabled) {
+			let newState = {
+				isEdit: false
+			}
+			this.setState(newState);
+		}
+	}
 	render() {
-		console.log("RENDER")
-		console.log("isEdit",this.state.isEdit);
-		console.log("editEnabled",this.props.editEnabled);
 		if (this.state.isEdit && this.props.editEnabled) {
 			return (
 				<Field

@@ -2,20 +2,23 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { EditableField, StaticField } from '~/_components/form';
 import UserActions from '~/_data/users/actions';
+import AccountInfoActions from './actions';
 
 const mapDispatchToProps = dispatch => {
 	return {
+		enableEditableForm: () => dispatch(AccountInfoActions.enableEditableForm()),
 		getAccount: () => dispatch(UserActions.getAccount()),
 		updateAccount: (accountDetails) => dispatch(UserActions.updateAccount(accountDetails))
 	};
 };
 
 const mapStateToProps = state => ({
-		email: state.data.users.auth.email,
-		id: state.data.users.auth.id,
-		firstName: state.data.users.auth.firstName,
-		lastName: state.data.users.auth.lastName,
-		token: state.data.users.auth.token
+	email: state.data.users.auth.email,
+	id: state.data.users.auth.id,
+	firstName: state.data.users.auth.firstName,
+	lastName: state.data.users.auth.lastName,
+	token: state.data.users.auth.token,
+	editEnabled: state.scenes.users.account.accountInfo.editEnabled
 });
 
 class ConnectedAccountInfo extends Component {
@@ -26,7 +29,7 @@ class ConnectedAccountInfo extends Component {
 				firstName: "",
 				lastName: ""
 			},
-			editEnabled: false
+			editEnabled: props.editEnabled
 		};
 		this.handleChange = this.handleChange.bind(this);
 		this.updateAccount = this.updateAccount.bind(this);
@@ -36,23 +39,18 @@ class ConnectedAccountInfo extends Component {
 		this.props.getAccount();
 	}
 	componentWillReceiveProps(nextProps){
-		let { firstName, lastName } = nextProps;
+		let { firstName, lastName, editEnabled } = nextProps;
 		let newState = {
 			accountDetails: {
 				firstName,
 				lastName
-			}
+			},
+			editEnabled: editEnabled
 		}
-		console.log(newState)
 		this.setState(newState);
 	}
 	enableEdit(){
-		this.setState({ editEnabled: true });
-	}
-	disableEdit(){
-		console.log("disable edit");
-		this.setState({ editEnabled: false });
-		console.log("EDIT ENABLED? ",this.state.editEnabled)
+		this.props.enableEditableForm();
 	}
 	handleChange(event){
 		let newState = Object.assign({}, this.state);
@@ -61,9 +59,6 @@ class ConnectedAccountInfo extends Component {
 	}
 	updateAccount(){
 		this.props.updateAccount(this.state.accountDetails);
-		
-		//TODO Move this out - trigger upon updateAccount SUCCESS
-		this.disableEdit();
 	}
 	render() {
 		return (
