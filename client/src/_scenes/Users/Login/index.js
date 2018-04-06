@@ -24,8 +24,10 @@ class ConnectedLogin extends Component {
 						</div>
 					</div>
 				</section>
-				<Alerts />
-				<LoginForm />
+				<div className="container page-content">
+					<Alerts />
+					<LoginForm />
+				</div>
 			</div>
 		);
 	}

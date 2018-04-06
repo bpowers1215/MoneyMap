@@ -68,7 +68,6 @@ class ConnectedAccountInfo extends Component {
 	render() {
 		return (
 			<React.Fragment>
-				<h4 className="subtitle is-5">Your Account Information</h4>
 				<EditableField
 					type="input"
 					name="firstName"

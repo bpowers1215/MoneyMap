@@ -24,8 +24,8 @@ class ConnectedAccount extends Component {
 						</div>
 					</div>
 				</div>
-				<Alerts />
-				<div className="container is-fluid container-content">
+				<div className="container is-fluid page-content">
+					<Alerts />
 					<AccountInfo />
 				</div>
 			</div>

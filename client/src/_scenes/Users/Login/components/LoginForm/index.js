@@ -29,42 +29,39 @@ class ConnectedLoginForm extends Component {
 	}
 	render() {
 		return (
-			<div className="container">
+			<form className="form-signin" onSubmit={this.handleSubmit}>
+				<Field
+					type="email"
+					name="email"
+					fieldId="inputEmail"
+					label="Email"
+					controlClasses="control has-icons-left"
+					placeholder="Email Address"
+					onChange={this.handleChange}>
+					<span className="icon is-small is-left">
+						<i className="fas fa-envelope"></i>
+					</span>
+				</Field>
 
-				<form className="form-signin" onSubmit={this.handleSubmit}>
-					<Field
-						type="email"
-						name="email"
-						fieldId="inputEmail"
-						label="Email"
-						controlClasses="control has-icons-left"
-						placeholder="Email Address"
-						onChange={this.handleChange}>
-						<span className="icon is-small is-left">
-							<i className="fas fa-envelope"></i>
-						</span>
-					</Field>
+				<Field
+					type="password"
+					name="password"
+					fieldId="inputPassword"
+					label="Password"
+					controlClasses="control has-icons-left"
+					placeholder="Password"
+					onChange={this.handleChange}>
+					<span className="icon is-small is-left">
+						<i className="fas fa-lock"></i>
+					</span>
+				</Field>
 
-					<Field
-						type="password"
-						name="password"
-						fieldId="inputPassword"
-						label="Password"
-						controlClasses="control has-icons-left"
-						placeholder="Password"
-						onChange={this.handleChange}>
-						<span className="icon is-small is-left">
-							<i className="fas fa-lock"></i>
-						</span>
-					</Field>
-
-					<div className="field is-grouped">
-						<div className="control">
-							<button className="button is-info" type="submit">Log in</button>
-						</div>
+				<div className="field is-grouped">
+					<div className="control">
+						<button className="button is-info" type="submit">Log in</button>
 					</div>
-				</form>
-			</div>
+				</div>
+			</form>
 		);
 	}
 }
