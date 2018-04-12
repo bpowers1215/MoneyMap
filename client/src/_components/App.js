@@ -5,6 +5,7 @@ import PrivateRoute from '~/_components/router/privateRoute'
 import Welcome from '~/_scenes/Welcome';
 import Login from '~/_scenes/Users/Login';
 import Account from '~/_scenes/Users/Account';
+import MoneyMaps from '~/_scenes/MoneyMaps';
 import './App.scss';
 
 class App extends Component {
@@ -44,6 +45,7 @@ class App extends Component {
 					<Route exact={true} path="/" component={Welcome} />
 					<Route exact={true} path="/login" component={Login} />
 					<PrivateRoute exact={true} path="/account" component={Account} />
+					<PrivateRoute exact={true} path="/money_maps" component={MoneyMaps} />
 				</Switch>
 
 				<footer className="footer">
