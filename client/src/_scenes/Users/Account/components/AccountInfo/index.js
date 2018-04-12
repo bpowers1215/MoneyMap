@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { EditableField, StaticField } from '~/_components/form';
+import { EditableField, StaticField, EditableForm } from '~/_components/form';
 import UserActions from '~/_data/users/actions';
 import AccountInfoActions from './actions';
 
@@ -62,7 +62,7 @@ class ConnectedAccountInfo extends Component {
 	}
 	render() {
 		return (
-			<React.Fragment>
+			<EditableForm submitFormAction={this.updateAccount} editEnabled={this.props.editEnabled} enableEditableForm={this.props.enableEditableForm}>
 				<EditableField
 					type="input"
 					name="firstName"
@@ -89,10 +89,7 @@ class ConnectedAccountInfo extends Component {
 					label="Email"
 					value={this.props.email}>
 				</StaticField>
-				{ this.state.editEnabled &&
-					<a className="button is-primary" onClick={this.updateAccount}>Update</a>
-				}
-			</React.Fragment>
+			</EditableForm>
 		);
 	}
 }

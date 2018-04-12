@@ -1,4 +1,4 @@
-import { globalConstants, userConstants } from '~/_constants';
+import { userConstants } from '~/_constants';
 
 const initialState = {
 	editEnabled: false
@@ -7,7 +7,7 @@ const initialState = {
 const accountInfoReducer = (state = initialState, action) => {
 	
 	switch (action.type) {
-		case globalConstants.ENABLE_EDITABLE_FORM: {
+		case userConstants.ACCOUNT_ENABLE_EDITABLE_FORM: {
 			return {
 				...state,
 				editEnabled: true

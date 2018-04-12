@@ -1,4 +1,4 @@
-import { globalConstants } from '~/_constants';
+import { userConstants } from '~/_constants';
 
 /*
 * enableEdit
@@ -6,7 +6,7 @@ import { globalConstants } from '~/_constants';
 * Enable edit of form
 */
 const enableEditableForm = () => ({
-	type: globalConstants.ENABLE_EDITABLE_FORM
+	type: userConstants.ACCOUNT_ENABLE_EDITABLE_FORM
 });
 
 const accountInfoActions = {

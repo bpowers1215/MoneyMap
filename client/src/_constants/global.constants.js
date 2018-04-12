@@ -7,6 +7,5 @@ export const globalConstants = {
 		'IS_SUCCESS': 'is-success',
 		'IS_WARNING': 'is-warning',
 		'IS_DANGER': 'is-danger'
-	},
-	ENABLE_EDITABLE_FORM: 'ENABLE_EDITABLE_FORM',
+	}
 }
