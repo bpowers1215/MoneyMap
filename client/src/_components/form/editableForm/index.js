@@ -33,9 +33,6 @@ class EditableForm extends Component {
 	}
 }
 
-EditableForm.defaultProps = {
-}
-
 EditableForm.propTypes = {
 	submitFormAction: PropTypes.func.isRequired,
 	editEnabled: PropTypes.bool.isRequired

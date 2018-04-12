@@ -62,7 +62,7 @@ class ConnectedAccountInfo extends Component {
 	}
 	render() {
 		return (
-			<EditableForm submitFormAction={this.updateAccount} editEnabled={this.props.editEnabled} enableEditableForm={this.props.enableEditableForm}>
+			<EditableForm submitFormAction={this.updateAccount} editEnabled={this.props.editEnabled}>
 				<EditableField
 					type="input"
 					name="firstName"
