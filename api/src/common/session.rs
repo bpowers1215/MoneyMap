@@ -33,7 +33,7 @@ pub fn authenticator<'mw>(request: &mut Request<ServerData>, response: Response<
     } else {
         match request.origin.uri.to_string().as_ref(){
             // Public routes don't require authentication
-            "/account/login" | "/account" => {
+            "/account/login" => {
                 response.next_middleware()
             },
             _ => {
