@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom'
 import './styles.scss';
 
 const mapDispatchToProps = dispatch => {
@@ -14,17 +15,14 @@ const mapStateToProps = state => {
 class ConnectedMoneyMapTile extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {};
 	}
 	render() {
 		return (
 			 <div className="moneyMapTile tile is-parent is-3">
-				<a className="tile is-child box">
-					<span class="icon is-large has-text-success">
-						<i class="fas fa-4x fa-dollar-sign"></i>
-					</span>
+			 	<Link className={"tile is-child box "+this.props.classModifiers} to={this.props.link}>
+					{this.props.children}
 					<div className="title is-6">{this.props.name}</div>
-				</a>
+				</Link>
 			</div>
 		);
 	}
@@ -33,10 +31,13 @@ class ConnectedMoneyMapTile extends Component {
 const MoneyMapTile = connect(mapStateToProps, mapDispatchToProps)(ConnectedMoneyMapTile);
 
 MoneyMapTile.defaultProps = {
+	classModifiers: ''
 }
 
 MoneyMapTile.propTypes = {
-	name: PropTypes.string.isRequired
+	name: PropTypes.string.isRequired,
+	link: PropTypes.string.isRequired,
+	classModifiers: PropTypes.string
 }
 
 export default MoneyMapTile;
