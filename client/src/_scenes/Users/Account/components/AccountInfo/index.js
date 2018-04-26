@@ -69,7 +69,7 @@ class ConnectedAccountInfo extends Component {
 					fieldId="accountFirstName"
 					label="First Name"
 					placeholder="First Name"
-					editEnabled={this.state.editEnabled}
+					editAllowed={this.state.editEnabled}
 					onEdit={this.enableEdit}
 					onChange={this.handleChange}
 					value={this.state.accountDetails.firstName}>
@@ -80,7 +80,7 @@ class ConnectedAccountInfo extends Component {
 					fieldId="accountLastName"
 					label="Last Name"
 					placeholder="Last Name"
-					editEnabled={this.state.editEnabled}
+					editAllowed={this.state.editEnabled}
 					onEdit={this.enableEdit}
 					onChange={this.handleChange}
 					value={this.state.accountDetails.lastName}>

@@ -28,13 +28,39 @@ class MoneyMapsApi {
 		});
 	}
 
-	static updateAccount({firstName, lastName}) {
+	static createMoneyMap({name}) {
 		let body = {
-			first_name: firstName,
-			last_name: lastName
+			name: name
 		}
 		return fetch(
-			'http://localhost:3000/account',
+			'http://localhost:3000/money_maps',
+			{
+				method: 'POST',
+				headers: {
+					'Authorization': Auth.getAuthHeader(),
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(body)
+			}
+		).then(response => {
+			switch (response.status) {
+				case 200:
+					return response.json();
+				default:
+					return new Error('request failed')
+			}
+		}).catch(error => {
+			return error;
+		});
+	}
+
+	static updateMoneyMap({id, name}) {
+		let body = {
+			id: id,
+			name: name
+		}
+		return fetch(
+			'http://localhost:3000/money_maps',
 			{
 				method: 'PATCH',
 				headers: {

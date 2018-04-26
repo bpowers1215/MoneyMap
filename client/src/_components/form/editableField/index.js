@@ -12,7 +12,7 @@ class EditableField extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			isEdit: false
+			isEdit: false || props.alwaysEditable
 		}
 
 		this.editField = this.editField.bind(this);
@@ -22,18 +22,18 @@ class EditableField extends Component {
 		this.setState({isEdit:true});
 	}
 	componentWillReceiveProps(nextProps){
-		let { editEnabled } = nextProps;
+		let { editAllowed, alwaysEditable } = nextProps;
 		
 		// If edit is disabled, reset isEdit state
-		if (!editEnabled) {
+		if (!editAllowed) {
 			let newState = {
-				isEdit: false
+				isEdit: false || alwaysEditable
 			}
 			this.setState(newState);
 		}
 	}
 	render() {
-		if (this.state.isEdit && this.props.editEnabled) {
+		if (this.state.isEdit && this.props.editAllowed) {
 			return (
 				<Field
 					type={this.props.type}
@@ -68,7 +68,8 @@ EditableField.defaultProps = {
 	controlClasses: 'control',
 	required: false,
 	autoFocus: false,
-	editEnabled: false,
+	editAllowed: false,
+	alwaysEditable: false,
 	onEdit: () => {}
 }
 
@@ -84,7 +85,8 @@ EditableField.propTypes = {
 	onEdit: PropTypes.func,
 	required: PropTypes.bool,
 	autoFocus: PropTypes.bool,
-	editEnabled: PropTypes.bool
+	editAllowed: PropTypes.bool,
+	alwaysEditable: PropTypes.bool
 }
 
 export { EditableField };

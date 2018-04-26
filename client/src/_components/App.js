@@ -6,6 +6,7 @@ import Welcome from '~/_scenes/Welcome';
 import Login from '~/_scenes/Users/Login';
 import Account from '~/_scenes/Users/Account';
 import MoneyMaps from '~/_scenes/MoneyMaps';
+import { AddMoneyMap, EditMoneyMap } from '~/_scenes/MoneyMaps/scenes';
 import './App.scss';
 
 class App extends Component {
@@ -46,6 +47,8 @@ class App extends Component {
 					<Route exact={true} path="/login" component={Login} />
 					<PrivateRoute exact={true} path="/account" component={Account} />
 					<PrivateRoute exact={true} path="/money_maps" component={MoneyMaps} />
+					<PrivateRoute exact={true} path="/money_maps/add" component={AddMoneyMap} />
+					<PrivateRoute exact={true} path="/money_maps/:id" component={EditMoneyMap} />
 				</Switch>
 
 				<footer className="footer">

@@ -18,14 +18,12 @@ class ConnectedMoneyMapsList extends Component {
 		super(props);
 		this.state = {};
 	}
-	componentWillReceiveProps(props) {
-		// console.log(props)
-	}
 	render() {
+		let moneyMaps = this.props.moneyMaps;
 		return (
 			<div className="moneyMapTileList tile is-ancestor">
-				{this.props.moneyMaps.map((moneyMap, i) =>
-					<MoneyMapTile key={moneyMap.id} name={moneyMap.name} link={`/money_maps/${moneyMap.id}`}>
+				{Object.keys(moneyMaps).map((id, index) => 
+					<MoneyMapTile key={id} name={moneyMaps[id].name} link={`/money_maps/${id}`}>
 						<Icon wrapperClassName="is-large has-text-success" className="fas fa-4x fa-dollar-sign"/>
 					</MoneyMapTile>
 				)}
@@ -43,7 +41,7 @@ MoneyMapsList.defaultProps = {
 }
 
 MoneyMapsList.propTypes = {
-	moneyMaps: PropTypes.array.isRequired
+	moneyMaps: PropTypes.object.isRequired
 }
 
 export default MoneyMapsList;

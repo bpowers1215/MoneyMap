@@ -13,9 +13,6 @@ const mapStateToProps = state => {
 }
 
 class ConnectedMoneyMapTile extends Component {
-	constructor(props) {
-		super(props);
-	}
 	render() {
 		return (
 			 <div className="moneyMapTile tile is-parent is-3">

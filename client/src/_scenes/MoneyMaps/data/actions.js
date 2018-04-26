@@ -1,15 +1,13 @@
 import { globalConstants, moneyMapsConstants, alertConstants } from '~/_constants';
 import { batchActions } from 'redux-batched-actions';
-import { setCookie } from 'redux-cookie';
 import MoneyMapsApi from './api';
 import { history } from '~/_helpers/history';
 
 /*
-* getgetMoneyMapsccount
+* getMoneyMaps
 *
 * Get the users money maps
 */
-
 const getMoneyMaps = () => {
 	return dispatch => {
 
@@ -38,48 +36,106 @@ const getMoneyMaps = () => {
 }
 
 /*
-* updateAccount
+* createMoneyMap
 *
-* Update user account information
+* Create a money map
 * @param {string} accountDetails
 */
-// const updateAccount = (accountDetails) => {
-// 	return dispatch => {
-// 		dispatch(request());
+const createMoneyMap = (moneyMap, redirectPath) => {
+	return dispatch => {
+		dispatch(request());
 
-// 		UsersApi.updateAccount(accountDetails)
-// 			.then(res => {
-// 					if (res.status !== 'success')
-// 						throw(res);
-// 					dispatch(success(res.data));
-// 			}).catch(err => {
-// 				dispatch(failure(err.error));
-// 			});
-// 	};
+		MoneyMapsApi.createMoneyMap(moneyMap)
+			.then(res => {
+				if (res.status !== 'success')
+					throw(res);
+				dispatch(success(res.data));
+				history.push(redirectPath);
+			}).catch(err => {
+				dispatch(failure(err.error));
+			});
+	};
 
-// 	function request() { 
-// 		return batchActions([
-// 			{ type: alertConstants.CLEAR_ALERTS }
-// 		]);
-// 	}
+	function request() { 
+		return batchActions([
+			{ type: moneyMapsConstants.CREATE_MONEY_MAP_REQUEST },
+			{ type: alertConstants.CLEAR_ALERTS }
+		]);
+	}
 	
-// 	function success(user) {
-// 		return batchActions([
-// 			{ type: userConstants.UPDATE_ACCOUNT_SUCCESS, user },
-// 			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_SUCCESS, message: 'Account Updated'} }
-// 		]);
-// 	}
+	function success(user) {
+		return batchActions([
+			{ type: moneyMapsConstants.CREATE_MONEY_MAP_SUCCESS, user },
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_SUCCESS, message: 'Money Map created successfully!'} }
+		]);
+	}
 
-// 	function failure(user) {
-// 		return batchActions([
-// 			{ type: userConstants.UPDATE_ACCOUNT_FAILURE, user },
-// 			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_DANGER, message: 'Failed to update account.'} }
-// 		]);
-// 	}
-// }
-
-const userActions = {
-	getMoneyMaps
+	function failure(user) {
+		return batchActions([
+			{ type: moneyMapsConstants.CREATE_MONEY_MAP_FAILURE, user },
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_DANGER, message: 'Failed to create Money Map.'} }
+		]);
+	}
 }
 
-export default userActions;
+/*
+* updateMoneyMap
+*
+* Update a money map
+* @param {string} accountDetails
+*/
+const updateMoneyMap = (moneyMap, redirectPath) => {
+	return dispatch => {
+		dispatch(request());
+
+		MoneyMapsApi.updateMoneyMap(moneyMap)
+			.then(res => {
+				if (res.status !== 'success')
+					throw(res);
+				dispatch(success(res.data));
+				history.push(redirectPath);
+			}).catch(err => {
+				dispatch(failure(err.error));
+			});
+	};
+
+	function request() { 
+		return batchActions([
+			{ type: moneyMapsConstants.UPDATE_MONEY_MAP_REQUEST },
+			{ type: alertConstants.CLEAR_ALERTS }
+		]);
+	}
+	
+	function success(user) {
+		return batchActions([
+			{ type: moneyMapsConstants.UPDATE_MONEY_MAP_SUCCESS, user },
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_SUCCESS, message: 'Money Map updated successfully!'} }
+		]);
+	}
+
+	function failure(user) {
+		return batchActions([
+			{ type: moneyMapsConstants.UPDATE_MONEY_MAP_FAILURE, user },
+			{ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_DANGER, message: 'Failed to update Money Map.'} }
+		]);
+	}
+}
+
+const cantFindMoneyMap = (redirectPath) => {
+	return dispatch => {
+		dispatch({ type: alertConstants.ADD_ALERT, alert: { className: globalConstants.STYLES.IS_DANGER, message: 'Failed to find Money Map.'} });
+
+		history.push(redirectPath);
+	};
+
+}
+
+
+const moneyMapActions = {
+	getMoneyMaps,
+	createMoneyMap,
+	updateMoneyMap,
+	cantFindMoneyMap
+}
+
+export default moneyMapActions;
