@@ -1,4 +1,5 @@
 export const alertConstants = {
 	ADD_ALERT: 'ADD_ALERT',
+	CLEAR_ALERTS: 'CLEAR_ALERTS',
 	REMOVE_ALERT: 'REMOVE_ALERT'
 }
