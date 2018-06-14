@@ -45,11 +45,17 @@ class ConnectedMoneyMap extends Component {
 	componentWillReceiveProps(nextProps){
 		let { match, moneyMaps } = nextProps;
 		let moneyMapId = match.params.id;
-
+		this.selectMoneyMap(moneyMaps, moneyMapId)
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		let { match, moneyMaps } = nextProps;
+		let moneyMapId = match.params.id;
+		
 		if ( !this.moneyMapPresent(moneyMaps, moneyMapId) ) {
 			this.props.cantFindMoneyMap();
+			return false;
 		}
-		this.selectMoneyMap(moneyMaps, moneyMapId)
+		return true;
 	}
 	moneyMapPresent(moneyMaps, moneyMapId) {
 		return moneyMaps && moneyMapId && moneyMapId in moneyMaps;

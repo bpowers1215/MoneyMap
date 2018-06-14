@@ -45,15 +45,21 @@ class ConnectedEditMoneyMapForm extends Component {
 	componentWillReceiveProps(nextProps){
 		let { moneyMapId, moneyMaps, editEnabled } = nextProps;
 
-		if ( !(moneyMapId in moneyMaps) ) {
-			this.props.cantFindMoneyMap();
-		}
-
 		let newState = {
 			moneyMap: moneyMaps[moneyMapId],
 			editEnabled: editEnabled
 		}
 		this.setState(newState);
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		let { moneyMapId, moneyMaps, editEnabled } = nextProps;
+		
+		if ( !(moneyMapId in moneyMaps) ) {
+			this.props.cantFindMoneyMap();
+			return false;
+		}
+
+		return true;
 	}
 	enableEdit(){
 		this.props.enableEditableForm();
