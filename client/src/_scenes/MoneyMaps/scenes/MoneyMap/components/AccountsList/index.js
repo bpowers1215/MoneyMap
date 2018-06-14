@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import AppLink from '~/_components/appLink';
-import Icon from '~/_components/icon';
 import './styles.scss';
 
 const mapDispatchToProps = dispatch => {
@@ -26,7 +25,7 @@ class ConnectedAccountsList extends Component {
 	render() {
 		let accounts = this.props.accounts;
 		return (
-			<table className="table is-fullwidth">
+			<table className="table is-fullwidth is-striped is-hoverable">
 				<thead>
 					<tr>
 						<th>Account Name</th>
@@ -54,6 +53,7 @@ class ConnectedAccountsList extends Component {
 							<td>
 								{accounts[index].account_type}
 							</td>
+							<td></td>
 						</tr>
 					)}
 				</tbody>

@@ -52,7 +52,7 @@ class ConnectedEditMoneyMapForm extends Component {
 		this.setState(newState);
 	}
 	shouldComponentUpdate(nextProps, nextState) {
-		let { moneyMapId, moneyMaps, editEnabled } = nextProps;
+		let { moneyMapId, moneyMaps } = nextProps;
 		
 		if ( !(moneyMapId in moneyMaps) ) {
 			this.props.cantFindMoneyMap();

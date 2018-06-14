@@ -1,7 +1,6 @@
 import { globalConstants, moneyMapsConstants, alertConstants } from '~/_constants';
 import { batchActions } from 'redux-batched-actions';
 import AccountsApi from './api';
-import { history } from '~/_helpers/history';
 
 /*
 * getAccounts
