@@ -50,7 +50,7 @@ class ConnectedMoneyMap extends Component {
 	shouldComponentUpdate(nextProps, nextState) {
 		let { match, moneyMaps } = nextProps;
 		let moneyMapId = match.params.id;
-		
+
 		if ( !this.moneyMapPresent(moneyMaps, moneyMapId) ) {
 			this.props.cantFindMoneyMap();
 			return false;
@@ -80,7 +80,7 @@ class ConnectedMoneyMap extends Component {
 				</div>
 				<div className="container is-fluid page-content">
 					<Alerts />
-					<AccountsList  />
+					<AccountsList moneyMapId={this.state.moneyMap.id} accounts={this.state.moneyMap.accounts} />
 				</div>
 			</div>
 		);
