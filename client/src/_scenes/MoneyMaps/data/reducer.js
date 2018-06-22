@@ -13,6 +13,13 @@ const moneyMapsReducer = (state = initialState, action) => {
 
 			//map money maps by money map ID for easy access
 			moneyMaps.forEach((moneyMap)=> {
+				let accountsById = {};
+				//map accounts by account ID for easy access
+				moneyMap.accounts.forEach((account)=> {
+					accountsById[account.id] = account;
+				});
+
+				moneyMap.accounts = accountsById;
 				moneyMapsById[moneyMap.id] = moneyMap;
 			});
 

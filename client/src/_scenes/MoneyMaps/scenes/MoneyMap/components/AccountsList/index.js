@@ -19,8 +19,8 @@ class ConnectedAccountsList extends Component {
 	}
 	componentWillReceiveProps(nextProps){
 	}
-	getAccountLink(account){
-		return "/money_maps/"+this.props.moneyMapId+"/account/"+account.id;
+	getAccountLink(accountId){
+		return "/money_maps/"+this.props.moneyMapId+"/accounts/"+accountId;
 	}
 	render() {
 		let accounts = this.props.accounts;
@@ -43,15 +43,15 @@ class ConnectedAccountsList extends Component {
 					</tfoot>
 				}
 				<tbody>
-					{Object.keys(accounts).map((id, index) => 
+					{Object.keys(accounts).map((id) => 
 						<tr key={id}>
 							<td>
-								<AppLink to={this.getAccountLink(accounts[index])}>
-									{accounts[index].name}
+								<AppLink to={this.getAccountLink(id)}>
+									{accounts[id].name}
 								</AppLink>
 							</td>
 							<td>
-								{accounts[index].account_type}
+								{accounts[id].account_type}
 							</td>
 							<td></td>
 						</tr>
@@ -65,11 +65,11 @@ class ConnectedAccountsList extends Component {
 const AccountsList = connect(mapStateToProps, mapDispatchToProps)(ConnectedAccountsList);
 
 AccountsList.defaultProps = {
-	accounts:[]
+	accounts:{}
 }
 
 AccountsList.propTypes = {
-	accounts: PropTypes.array.isRequired
+	accounts: PropTypes.object.isRequired
 }
 
 export default AccountsList;
