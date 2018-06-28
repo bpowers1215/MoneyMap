@@ -22,7 +22,7 @@ class Panel extends Component {
 	render() {
 		return (
 			<div className={"card " +this.props.className}>
-				<header className="card-header is-primary">
+				<header className="card-header has-background-white-ter">
 					<p className="card-header-title">
 						{this.props.name}
 					</p>
