@@ -10,7 +10,7 @@ class Panel extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
-			show: false
+			show: props.displayDefault
 		}
 
 		this.toggleContent = this.toggleContent.bind(this);
@@ -18,7 +18,6 @@ class Panel extends Component {
 	toggleContent() {
 		let state = { ...this.state, show: !this.state.show }
 		this.setState(state);
-		console.log(this.state);
 	}
 	render() {
 		return (
@@ -27,18 +26,20 @@ class Panel extends Component {
 					<p className="card-header-title">
 						{this.props.name}
 					</p>
-					<a className="card-header-icon" aria-label="more options" onClick={this.toggleContent}>
-						{this.state.show && (
-							<span className="icon">
-								<FontAwesomeIcon name='angle-up'/>
-							</span>
-						)}
-						{!this.state.show && (
-							<span className="icon">
-								<FontAwesomeIcon name='angle-down'/>
-							</span>
-						)}
-					</a>
+					{this.props.allowToggle && (
+						<a className="card-header-icon" aria-label="more options" onClick={this.toggleContent}>
+							{this.state.show && (
+								<span className="icon">
+									<FontAwesomeIcon name='angle-up'/>
+								</span>
+							)}
+							{!this.state.show && (
+								<span className="icon">
+									<FontAwesomeIcon name='angle-down'/>
+								</span>
+							)}
+						</a>
+					)}
 				</header>
 				<div className={"card-content " + (this.state.show ? 'is-active' : '')}>
 					<div className="content">
@@ -52,13 +53,17 @@ class Panel extends Component {
 
 Panel.defaultProps = {
 	className: '',
-	id: ''
+	id: '',
+	displayDefault: false,
+	allowToggle: true
 }
 
 Panel.propTypes = {
 	name: PropTypes.string,
 	className: PropTypes.string,
-	id: PropTypes.string
+	id: PropTypes.string,
+	displayDefault: PropTypes.bool,
+	allowToggle: PropTypes.bool
 }
 
 export default Panel;
