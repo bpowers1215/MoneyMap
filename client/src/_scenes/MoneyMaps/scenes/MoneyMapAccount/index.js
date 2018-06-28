@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Alerts from '~/_components/alerts';
-import AppLink from '~/_components/appLink';
-import Dropdown from '~/_components/buttons/dropdown';
 import MoneyMapActions from '~/_scenes/MoneyMaps/data/actions';
 import MoneyMapAccountActions from './data/actions';
 import AccountDetails from './components/AccountDetails';
@@ -89,19 +87,7 @@ class ConnectedMoneyMapAccount extends Component {
 				</div>
 				<div className="container is-fluid page-content">
 					<Alerts />
-					<div className="level is-mobile">
-						<div className="level-left"></div>
-						<div className="level-right">
-							<div className="level-item">
-								<Dropdown label="Actions">
-									<div className="dropdown-content">
-										<AppLink className="dropdown-item" to={"/money_maps/"+this.state.moneyMap.id+"/accounts/"+this.state.account.id+"/edit"}>Edit Account</AppLink>
-									</div>
-								</Dropdown>
-							</div>
-						</div>
-					</div>
-					<AccountDetails account={this.state.account} />
+					<AccountDetails account={this.state.account} moneyMap={this.state.moneyMap} />
 				</div>
 			</div>
 		);
