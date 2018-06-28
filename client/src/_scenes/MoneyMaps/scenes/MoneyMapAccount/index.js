@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import Alerts from '~/_components/alerts';
 import MoneyMapActions from '~/_scenes/MoneyMaps/data/actions';
+import Alerts from '~/_components/alerts';
+import AppLink from '~/_components/appLink';
+import Dropdown from '~/_components/buttons/dropdown';
+import { history } from '~/_helpers/history';
 import MoneyMapAccountActions from './data/actions';
 import AccountDetails from './components/AccountDetails';
-import { history } from '~/_helpers/history';
+import AccountTransactions from './components/AccountTransactions';
 import './styles.scss';
 
 const mapDispatchToProps = dispatch => {
@@ -87,7 +90,22 @@ class ConnectedMoneyMapAccount extends Component {
 				</div>
 				<div className="container is-fluid page-content">
 					<Alerts />
-					<AccountDetails account={this.state.account} moneyMap={this.state.moneyMap} />
+					<div className="level is-mobile">
+						<div className="level-left">
+							<h4 className="title is-4">{this.state.account.name}</h4>
+						</div>
+						<div className="level-right">
+							<div className="level-item">
+								<Dropdown label="Actions">
+									<div className="dropdown-content">
+										<AppLink className="dropdown-item" to={"/money_maps/"+this.state.moneyMap.id+"/accounts/"+this.state.account.id+"/edit"}>Edit Account</AppLink>
+									</div>
+								</Dropdown>
+							</div>
+						</div>
+					</div>
+					<AccountDetails account={this.state.account} />
+					<AccountTransactions account={this.state.account}/>
 				</div>
 			</div>
 		);
