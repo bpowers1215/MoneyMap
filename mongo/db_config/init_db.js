@@ -11,7 +11,7 @@ print("Getting admin DB...");
 adminDB = conn.getDB("admin");
 
 print("Creating admin user");
-db.createUser({user: MM_DB_ADMIN_USER, pwd: MM_DB_ADMIN_PASS, roles:['userAdminAnyDatabase', 'readWriteAnyDatabase']});
+adminDB.createUser({user: MM_DB_ADMIN_USER, pwd: MM_DB_ADMIN_PASS, roles:[ { role: "root", db: "admin" }, 'userAdminAnyDatabase', 'readWriteAnyDatabase']});
 
 print("Authenticating admin user...");
 adminDB.auth(MM_DB_ADMIN_USER, MM_DB_ADMIN_PASS);
