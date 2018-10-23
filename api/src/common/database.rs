@@ -25,6 +25,7 @@ pub struct DB{
     db_name: String,
     db_user: String,
     db_pass: String,
+    db_client: Option<mongodb::Client>,
     database: Option<mongodb::db::Database>
 }
 
@@ -76,9 +77,16 @@ impl DB{
             db_name: db_name,
             db_user: db_user,
             db_pass: db_pass,
+            db_client: None,
             database: None
         };
-        db.database = match db.initialize_db_connection(){
+        db.db_client = match db.initialize_db_connection(){
+            Ok(client) => {
+                Some(client)
+            },
+            Err(_) => None
+        };
+        db.database = match db.get_database_from_client(){
             Ok(database) => Some(database),
             Err(_) => None
         };
@@ -130,27 +138,33 @@ impl DB{
     /// * `self` - self DB struct
     ///
     /// # Returns
-    /// `MMResult<self::mongodb::db::Database>` - Mongo DB
-    fn initialize_db_connection(&self) -> MMResult<mongodb::db::Database>{
-        let mut client_wrapper = None;
+    /// `MMResult<self::mongodb::Client>` - MongoDB Client
+    fn initialize_db_connection(&self) -> MMResult<mongodb::Client>{
+        //let mut client_wrapper = None;
 
         // Connect to the mongo db instance
         match Client::connect(&self.db_host, self.db_port){
             Ok(db_client) => {
-                client_wrapper = Some(db_client);
+                debug!("DB Connection established");
+                Ok(db_client)
             },
-            Err(_) => {}
+            Err(_) => {
+                warn!("Error establishing database connection");
+                return Err(MMError::new("Error establishing database connection.", MMErrorKind::Database));
+            }
         }
+    }
 
-        match client_wrapper{
-            Some(client) => {
+    fn get_database_from_client(&self) -> MMResult<mongodb::db::Database> {
+        match self.db_client{
+            Some(ref client) => {
                 // Get database
                 Ok(client.db(&self.db_name))
             },
             None => {
                 //Database connection could not be established
-                warn!("Error establishing database connection");
-                return Err(MMError::new("Error establishing database connection.", MMErrorKind::Database));
+                warn!("Error - no connection established with database");
+                return Err(MMError::new("Error - no connection established with database.", MMErrorKind::Database));
             }
         }
     }
@@ -166,9 +180,11 @@ impl DB{
         match &self.database{
             &Some(ref db) => {
                 // Authenticate
+                debug!("AUTH DATABASE USER: {:?}", &self.db_user);
                 match db.auth(&self.db_user, &self.db_pass){
                     Ok(_) => Ok(()),
-                    Err(_) => {
+                    Err(e) => {
+                        error!("Failed to authorize database user: {}", e);
                         Err(MMError::new("Failed to authorize database user.", MMErrorKind::Database))
                     }
                 }
@@ -180,6 +196,15 @@ impl DB{
 
     }
 
+    fn auth_db(&self, db: &mongodb::db::Database) -> (){
+        match db.auth(&self.db_user, &self.db_pass){
+            Ok(_) => {},
+            Err(e) => {
+                error!("Failed to authorize database user: {}", e);
+            }
+        }
+    }
+
     /// Get a database client
     ///
     /// # Arguments
@@ -187,14 +212,17 @@ impl DB{
     ///
     /// # Returns
     /// `Option<mongodb::db::Database>` Cloned database client
-    pub fn get_database(&self) -> Option<mongodb::db::Database>{
-        match self.database{
-            Some(ref database) => Some(database.clone()),
-            None => None
+    pub fn get_database(self) -> Option<mongodb::db::Database>{
+        match self.get_database_from_client(){
+            Ok(database) => {
+                self.auth_db(&database);
+                Some(database)
+            },
+            Err(_) => None
         }
     }
 
-    pub fn get_count(&self) -> MMResult<i64>{
+    pub fn get_count(self) -> MMResult<i64>{
         match self.get_database(){
             Some(ref database) => {
                 let coll = database.collection("users");

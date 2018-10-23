@@ -3,6 +3,8 @@
 /// DAO Manager
 /// Hand out DAOs with database connections
 
+extern crate mongodb;
+
 // Import Modules
 use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::database::DB;
@@ -41,8 +43,19 @@ impl DAOManager{
     ///
     /// # Returns
     /// `MMResult<UserDAO>` MMResult wrapping the UserDAO
+    pub fn get_database(&self) -> Option<mongodb::db::Database>{
+        self.db.clone().get_database()
+    }
+
+    /// Get a UserDAO
+    ///
+    /// # Arguments
+    /// &self
+    ///
+    /// # Returns
+    /// `MMResult<UserDAO>` MMResult wrapping the UserDAO
     pub fn get_user_dao(&self) -> MMResult<UserDAO>{
-        match self.db.get_database(){
+        match self.db.clone().get_database(){
             Some(db) => Ok(UserDAO::new(db)),
             None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
@@ -56,7 +69,7 @@ impl DAOManager{
     /// # Returns
     /// `MMResult<MoneyMapDAO>` MMResult wrapping the MoneyMapDAO
     pub fn get_money_map_dao(&self) -> MMResult<MoneyMapDAO>{
-        match self.db.get_database(){
+        match self.db.clone().get_database(){
             Some(db) => Ok(MoneyMapDAO::new(db)),
             None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
@@ -70,7 +83,7 @@ impl DAOManager{
     /// # Returns
     /// `MMResult<MoneyMapUserDAO>` MMResult wrapping the MoneyMapUserDAO
     pub fn get_money_map_user_dao(&self) -> MMResult<MoneyMapUserDAO>{
-        match self.db.get_database(){
+        match self.db.clone().get_database(){
             Some(db) => Ok(MoneyMapUserDAO::new(db)),
             None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
@@ -84,7 +97,7 @@ impl DAOManager{
     /// # Returns
     /// `MMResult<AccountDAO>` MMResult wrapping the AccountDAO
     pub fn get_account_dao(&self) -> MMResult<AccountDAO>{
-        match self.db.get_database(){
+        match self.db.clone().get_database(){
             Some(db) => Ok(AccountDAO::new(db)),
             None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
@@ -98,7 +111,7 @@ impl DAOManager{
     /// # Returns
     /// `MMResult<AccountStatementDAO>` MMResult wrapping the AccountStatementDAO
     pub fn get_account_statement_dao(&self) -> MMResult<AccountStatementDAO>{
-        match self.db.get_database(){
+        match self.db.clone().get_database(){
             Some(db) => Ok(AccountStatementDAO::new(db)),
             None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
@@ -112,21 +125,9 @@ impl DAOManager{
     /// # Returns
     /// `MMResult<TransactionDAO>` MMResult wrapping the TransactionDAO
     pub fn get_transaction_dao(&self) -> MMResult<TransactionDAO>{
-        match self.db.get_database(){
+        match self.db.clone().get_database(){
             Some(db) => Ok(TransactionDAO::new(db)),
             None => Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
         }
     }
-
-    //Attempt to create a generic DAO returtning function
-    /*pub fn get_DAO(self, daoType: DAOType) -> MMResult<DAO>{
-        match self.db.get_database(){
-            Some(db) => {
-                match daoType{
-                    UserDAO => Ok(DAO::UserDAO(UserDAO::new(db)))
-                }
-            },
-            None => return Err(MMError::new("Error: database connection not established", MMErrorKind::Database))
-        }
-    }*/
 }

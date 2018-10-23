@@ -20,6 +20,7 @@ use ::models::money_map_model::{MoneyMapModel, PubMoneyMapModel};
 use ::models::money_map_user_model::{MoneyMapUserModel};
 // DAO
 use ::dao::dao_manager::DAOManager;
+use ::dao::money_map_dao::MoneyMapDAO;
 
 #[derive(Clone)]
 pub struct MoneyMapsController{
@@ -53,8 +54,9 @@ impl MoneyMapsController{
                 return ApiResult::Failure{msg:"Unable to retrieve session data."};
             }
         };
-        match self.dao_manager.get_money_map_dao(){
-            Ok(dao) => {
+        match self.dao_manager.get_database(){
+            Some(db) => {
+               let dao = MoneyMapDAO::new(db.clone());
 
                 match ObjectId::with_string(&user_id){
                     Ok(user_obj_id) => {
@@ -70,7 +72,7 @@ impl MoneyMapsController{
 
                         // Get list of user details for each money map
                         for i in 0..money_maps.len(){
-                            match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &money_maps[i]){
+                            match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &money_maps[i], db.clone()){
                                 Ok(users_list) => {
                                     // Add the new list of user details to the money map
                                     money_maps[i].set_users(Some(users_list));
@@ -91,8 +93,8 @@ impl MoneyMapsController{
                     }
                 }
             },
-            Err(e) => {
-                error!("{}",e.get_message().to_string());
+            None => {
+                error!("Unable to get database");
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
@@ -199,72 +201,81 @@ impl MoneyMapsController{
             }
         };
 
-        match self.dao_manager.get_money_map_dao(){
-            Ok(dao) => {
+        match self.dao_manager.get_database(){
+            Some(db) => {
 
-                match req.json_as::<PubMoneyMapModel>(){
-                    Ok(pub_edit_money_map) => {
-                        let edit_money_map = MoneyMapModel::new(&pub_edit_money_map);
+                match self.dao_manager.get_money_map_dao(){
+                    Ok(dao) => {
 
-                        match ObjectId::with_string(&user_id){
-                            Ok(user_obj_id) => {
-                                if let Some(mm_id) = edit_money_map.get_id(){
+                        match req.json_as::<PubMoneyMapModel>(){
+                            Ok(pub_edit_money_map) => {
+                                let edit_money_map = MoneyMapModel::new(&pub_edit_money_map);
 
-                                    // Get Money Map
-                                    let filter = doc!{
-                                        "_id" => mm_id,
-                                        "users.user_id" => user_obj_id
-                                    };
+                                match ObjectId::with_string(&user_id){
+                                    Ok(user_obj_id) => {
+                                        if let Some(mm_id) = edit_money_map.get_id(){
 
-                                    if let Some(_) = dao.find_one(Some(filter), None){
+                                            // Get Money Map
+                                            let filter = doc!{
+                                                "_id" => mm_id,
+                                                "users.user_id" => user_obj_id
+                                            };
 
-                                        // Validate
-                                        let validation_result = edit_money_map.validate();
-                                        if validation_result.is_valid(){
-                                            // Save
-                                            match dao.update(&edit_money_map){
-                                                Ok(mut updated_mm) => {
-                                                    match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &updated_mm){
-                                                        Ok(users_list) => {
-                                                            // Add the new list of user details to the money map
-                                                            updated_mm.set_users(Some(users_list));
-                                                            ApiResult::Success{result:PubMoneyMapModel::new(updated_mm)}
+                                            if let Some(_) = dao.find_one(Some(filter), None){
+
+                                                // Validate
+                                                let validation_result = edit_money_map.validate();
+                                                if validation_result.is_valid(){
+                                                    // Save
+                                                    match dao.update(&edit_money_map){
+                                                        Ok(mut updated_mm) => {
+                                                            match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &updated_mm, db){
+                                                                Ok(users_list) => {
+                                                                    // Add the new list of user details to the money map
+                                                                    updated_mm.set_users(Some(users_list));
+                                                                    ApiResult::Success{result:PubMoneyMapModel::new(updated_mm)}
+                                                                },
+                                                                Err(e) => {
+                                                                    warn!("{}",e);
+                                                                    ApiResult::Success{result:PubMoneyMapModel::new(updated_mm)}
+                                                                }
+                                                            }
                                                         },
                                                         Err(e) => {
-                                                            warn!("{}",e);
-                                                            ApiResult::Success{result:PubMoneyMapModel::new(updated_mm)}
+                                                            ApiResult::Failure{msg:e.get_message()}
                                                         }
                                                     }
-                                                },
-                                                Err(e) => {
-                                                    ApiResult::Failure{msg:e.get_message()}
+                                                }else{
+                                                    ApiResult::Invalid{validation:validation_result, request:pub_edit_money_map}
                                                 }
+
+                                            }else{
+                                                ApiResult::Failure{msg:"Unable to find Money Map"}
                                             }
                                         }else{
-                                            ApiResult::Invalid{validation:validation_result, request:pub_edit_money_map}
+                                            ApiResult::Failure{msg:"Unable to find Money Map. Invalid ID."}
                                         }
-
-                                    }else{
-                                        ApiResult::Failure{msg:"Unable to find Money Map"}
+                                    },
+                                    Err(e) => {
+                                        error!("{}",e);
+                                        ApiResult::Failure{msg:"Unable to find Money Map. Invalid user ID."}
                                     }
-                                }else{
-                                    ApiResult::Failure{msg:"Unable to find Money Map. Invalid ID."}
                                 }
                             },
                             Err(e) => {
                                 error!("{}",e);
-                                ApiResult::Failure{msg:"Unable to find Money Map. Invalid user ID."}
+                                ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
                             }
                         }
                     },
                     Err(e) => {
-                        error!("{}",e);
-                        ApiResult::Failure{msg:"Invalid format. Unable to parse data."}
+                        error!("{}",e.get_message().to_string());
+                        ApiResult::Failure{msg:"Unable to interact with database"}
                     }
                 }
             },
-            Err(e) => {
-                error!("{}",e.get_message().to_string());
+            None => {
+                error!("Unable to get database");
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }

@@ -203,8 +203,8 @@ impl UsersController{
                         // validate (require email and password)
                         let validation_result = in_user.login_validate();
                         if validation_result.is_valid() {
-                            let filter = doc!{
-                                "email" => { in_user.email.unwrap() }
+                            let filter = doc! {
+                                "email": in_user.email.unwrap()
                             };
 
                             if let Some(found_user) = dao.find_one(Some(filter), None){
@@ -270,7 +270,6 @@ impl UsersController{
                 return ApiResult::Failure{msg:"Unable to retrieve session data."};
             }
         };
-
         match self.dao_manager.get_user_dao(){
             Ok(dao) => {
                 match ObjectId::with_string(user_id.as_str()){

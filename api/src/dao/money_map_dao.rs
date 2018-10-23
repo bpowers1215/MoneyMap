@@ -134,7 +134,6 @@ impl MoneyMapDAO{
             Ok(cursor) => {
                 for result in cursor {
                     if let Ok(item) = result {
-                        debug!("ITEM: {}", item);
                         let money_map = document_to_model(item);
                         money_maps.push(money_map);
                     }

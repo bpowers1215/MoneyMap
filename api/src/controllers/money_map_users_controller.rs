@@ -2,6 +2,8 @@
 
 /// Money Map Users Controller
 
+extern crate mongodb;
+
 // Import
 // External
 use ::nickel::{JsonBody, Request};
@@ -15,6 +17,7 @@ use ::common::mm_result::{MMResult, MMError, MMErrorKind};
 use ::common::session as Session;
 // DAO
 use ::dao::dao_manager::DAOManager;
+use ::dao::user_dao::UserDAO;
 // Models
 use ::models::user_model::{OutUserModel};
 use ::models::money_map_model::{MoneyMapModel};
@@ -53,61 +56,69 @@ impl MoneyMapUsersController{
                 return ApiResult::Failure{msg:"Unable to retrieve session data."};
             }
         };
+        match self.dao_manager.get_database(){
+            Some(db) => {
 
-        match self.dao_manager.get_money_map_dao(){
-            Ok(dao) => {
+                match self.dao_manager.get_money_map_dao(){
+                    Ok(dao) => {
 
-                match ObjectId::with_string(mm_id){
-                    Ok(id) => {
-                        match ObjectId::with_string(&user_id){
-                            Ok(user_obj_id) => {
-                                //Get list of money maps for this user
-                                let filter = doc!{
-                                    "_id" => id,
-                                    "users.user_id" => user_obj_id,
-                                    "deleted" => {
-                                        "$ne" => true
-                                    }
-                                };
-                                match dao.find_one(Some(filter), None){
-                                    Some(mut money_map) => {
+                        match ObjectId::with_string(mm_id){
+                            Ok(id) => {
+                                match ObjectId::with_string(&user_id){
+                                    Ok(user_obj_id) => {
+                                        //Get list of money maps for this user
+                                        let filter = doc!{
+                                            "_id" => id,
+                                            "users.user_id" => user_obj_id,
+                                            "deleted" => {
+                                                "$ne" => true
+                                            }
+                                        };
+                                        match dao.find_one(Some(filter), None){
+                                            Some(mut money_map) => {
 
-                                        // Get list of user details for money map
-                                        match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &money_map){
-                                            Ok(users_list) => {
-                                                // Add the new list of user details to the money map
-                                                money_map.set_users(Some(users_list));
+                                                // Get list of user details for money map
+                                                match MoneyMapUsersController::get_users_for_mm(&self.dao_manager, &money_map, db){
+                                                    Ok(users_list) => {
+                                                        // Add the new list of user details to the money map
+                                                        money_map.set_users(Some(users_list));
+                                                    },
+                                                    Err(e) => {
+                                                        return ApiResult::Failure{msg:e.get_message()};
+                                                    }
+                                                }
+
+                                                // Return the list of money maps
+                                                match money_map.get_users(){
+                                                    Some(users) => ApiResult::Success{result:users},
+                                                    None => ApiResult::Failure{msg:"Unable to find user details for money map"}
+                                                }
                                             },
-                                            Err(e) => {
-                                                return ApiResult::Failure{msg:e.get_message()};
+                                            None => {
+                                                ApiResult::Failure{msg:"Unable to find money map."}
                                             }
                                         }
-
-                                        // Return the list of money maps
-                                        match money_map.get_users(){
-                                            Some(users) => ApiResult::Success{result:users},
-                                            None => ApiResult::Failure{msg:"Unable to find user details for money map"}
-                                        }
                                     },
-                                    None => {
-                                        ApiResult::Failure{msg:"Unable to find money map."}
+                                    Err(e) => {
+                                        error!("{}", e);
+                                        ApiResult::Failure{msg:"Failed to find money map. Invalid user ID."}
                                     }
                                 }
                             },
                             Err(e) => {
                                 error!("{}", e);
-                                ApiResult::Failure{msg:"Failed to find money map. Invalid user ID."}
+                                ApiResult::Failure{msg:"Failed to find money map. Invalid ID."}
                             }
                         }
                     },
                     Err(e) => {
-                        error!("{}", e);
-                        ApiResult::Failure{msg:"Failed to find money map. Invalid ID."}
+                        error!("{}",e.get_message().to_string());
+                        ApiResult::Failure{msg:"Unable to interact with database"}
                     }
                 }
             },
-            Err(e) => {
-                error!("{}",e.get_message().to_string());
+            None => {
+                error!("Unable to get database");
                 ApiResult::Failure{msg:"Unable to interact with database"}
             }
         }
@@ -380,33 +391,26 @@ impl MoneyMapUsersController{
     ///
     /// # Returns
     /// `ApiResult<Vec<MoneyMapUserModel>>` - MMResult including the list of money map users
-    pub fn get_users_for_mm(dao_manager: &DAOManager, money_map: &MoneyMapModel) -> MMResult<Vec<MoneyMapUserModel>>{
+    pub fn get_users_for_mm(dao_manager: &DAOManager, money_map: &MoneyMapModel, db: mongodb::db::Database) -> MMResult<Vec<MoneyMapUserModel>>{
         // Initialze a list of user details for this money map
         let mut users_list = Vec::new();
         if let Some(mm_users) = money_map.get_users(){
 
             // For each user associated with this money map
             for mm_user in mm_users{
-                match dao_manager.get_user_dao(){
-                    Ok(user_dao) => {
+                let user_dao = UserDAO::new(db.clone());
 
-                        // Fetch the user's details
-                        let user_id = mm_user.user.unwrap().id.unwrap();
-                        if let Ok(id) = ObjectId::with_string(&user_id){
-                            let found_user = user_dao.find_one(Some(doc!{
-                                "_id" => id
-                            }), None);
-                            if let Some(user) = found_user{
-                                // Add the user details to the list
-                                users_list.push(
-                                    MoneyMapUserModel::new(OutUserModel::new(user), mm_user.owner)
-                                );
-                            }
-                        }
-                    },
-                    Err(e) => {
-                        error!("{}",e.get_message().to_string());
-                        return Err(MMError::new("Unable to interact with database", MMErrorKind::Controller));
+                // Fetch the user's details
+                let user_id = mm_user.user.unwrap().id.unwrap();
+                if let Ok(id) = ObjectId::with_string(&user_id){
+                    let found_user = user_dao.find_one(Some(doc!{
+                        "_id" => id
+                    }), None);
+                    if let Some(user) = found_user{
+                        // Add the user details to the list
+                        users_list.push(
+                            MoneyMapUserModel::new(OutUserModel::new(user), mm_user.owner)
+                        );
                     }
                 }
             }

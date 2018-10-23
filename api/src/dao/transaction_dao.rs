@@ -94,8 +94,7 @@ impl TransactionDAO{
         if let Some(dq) = date_query{
             filter.insert_bson("datetime".to_string(), Bson::Document(dq));
         }
-
-        match coll.find(Some(filter), Some(find_options)){
+        match coll.find(None, None){//Some(find_options)){
             Ok(cursor) => {
                 for result in cursor {
                     if let Ok(item) = result {
@@ -340,7 +339,6 @@ impl TransactionDAO{
                 }
             }
         };
-        debug!("FILTER: {:?}", filter);
         match coll.find_one(Some(filter), None){
             Ok(result) => {
                 match result{
